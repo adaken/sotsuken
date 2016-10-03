@@ -1,8 +1,6 @@
 # coding: utf-8
 
 import openpyxl as px
-import numpy as np
-
 
 class ExcelWrapper(object):
     """
@@ -14,18 +12,17 @@ class ExcelWrapper(object):
             self.ws = self.wb[sheetname]
 
     def select_column(self,
-                      col_letter = None,
+                      col_letter,
                       begin_row = 1,
-                      end_row = None,
-                      # 30字以内の文字列
-                      datatype = 'S30'):
+                      end_row = None):
 
-        if end_row == None:
+        if end_row is None:
             # 最後の行
             end_row = self.ws.max_row
 
+        print "reading column '%s'..." % col_letter
         column = self.ws['%s%d:%s' % (col_letter, begin_row, end_row)]
-        return np.array([cell[0].value for cell in [cell for cell in column]], datatype)
+        return [data[0].value for data in [cell for cell in column]]
 
     def write_to_csv(self, columns, csv_path):
         import csv

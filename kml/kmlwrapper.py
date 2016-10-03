@@ -21,7 +21,7 @@ class KmlWrapper:
         """
 
         # リストのサイズが同じかチェック
-        if not times.size == longitudes.size == latitudes.size:
+        if not len(times) == len(longitudes) == len(latitudes):
             print "Error: times, longitude and latitudes must be same size ndarray"
             return
 
@@ -29,8 +29,9 @@ class KmlWrapper:
         if not self.__available_resorce(icon_res): return
 
         # タイムスタンプの形式を変更
+        print "changing timestamp format..."
         if format_time:
-            self.__format_time(times)
+            times = self.__format_time(times)
 
         # <IconStyle>
         icon = simk.Icon(href=icon_res)
@@ -42,8 +43,9 @@ class KmlWrapper:
         sharedstyle = simk.Style(iconstyle=iconstyle)
 
         # kml生成
+        print "generating kml..."
         kml = simk.Kml()
-        for i in xrange(0, times.size, sampling_interval + 1):
+        for i in xrange(0, len(times), sampling_interval + 1):
 
             # <Placemark> <Point> <coordinates>
             pnt = kml.newpoint(coords=[(longitudes[i], latitudes[i])])
@@ -53,6 +55,7 @@ class KmlWrapper:
             pnt.timestamp.when = times[i]
 
         # ファイルに出力
+        print "saving kml..."
         kml.save(save_path, True)
 
     def __available_resorce(self, res):
@@ -77,26 +80,13 @@ class KmlWrapper:
         """
         タイムスタンプの形式を整える
         yyyy/m/d hh:mm:ss.mmm -> yyyy-mm-dd"T"hh:mm:ss.mmm"Z"
+        "%Y-%m-%d %H:%M:%S.%f" # 元の形式
+        "%Y-%m-%d %H:%M:%S" # microsecondが0のときの形式
         """
-        print type(times)
-        print times.dtype
-        from datetime import datetime
-        format_before = "%Y-%m-%d %H:%M:%S.%f" # 元の形式
-        format_before_zero = "%Y-%m-%d %H:%M:%S" # microsecondが0のときの形式
-        format_after = "%Y-%m-%dT%H:%M:%S.%fZ" # 新しい形式
-        for i in xrange(times.size):
 
-            # 文字列型
-            old_time = times[i]
+        format_new = "%Y-%m-%dT%H:%M:%S.%fZ" # 新しい形式
 
-            # datetime型に変換
-            try:
-                old_time = datetime.strptime(old_time, format_before)
-            except ValueError:
-                old_time = datetime.strptime(old_time, format_before_zero)
-
-            # 形式を整える
-            times[i] = old_time.strftime(format_after)
+        return [t.strftime(format_new) for t in times]
 
 if __name__ == "__main__":
     pass
