@@ -78,21 +78,25 @@ class KmlWrapper:
         タイムスタンプの形式を整える
         yyyy/m/d hh:mm:ss.mmm -> yyyy-mm-dd"T"hh:mm:ss.mmm"Z"
         """
-
+        print type(times)
+        print times.dtype
         from datetime import datetime
         format_before = "%Y-%m-%d %H:%M:%S.%f" # 元の形式
         format_before_zero = "%Y-%m-%d %H:%M:%S" # microsecondが0のときの形式
         format_after = "%Y-%m-%dT%H:%M:%S.%fZ" # 新しい形式
         for i in xrange(times.size):
-            old_time = None
 
+            # 文字列型
+            old_time = times[i]
+
+            # datetime型に変換
             try:
-                old_time = datetime.strptime(times[i], format_before)
+                old_time = datetime.strptime(old_time, format_before)
             except ValueError:
-                old_time = datetime.strptime(times[i], format_before_zero)
+                old_time = datetime.strptime(old_time, format_before_zero)
 
+            # 形式を整える
             times[i] = old_time.strftime(format_after)
-            #print "change timestamp format: %s -> %s" % (old_time, times[i])
 
 if __name__ == "__main__":
     pass

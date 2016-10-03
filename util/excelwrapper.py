@@ -24,14 +24,8 @@ class ExcelWrapper(object):
             # 最後の行
             end_row = self.ws.max_row
 
-        col = self.ws['%s%d:%s' % (col_letter, begin_row, end_row)]
-        size = len(col)
-        arr = np.empty(size, datatype)
-
-        for i in xrange(0, size):
-            for cell in col[i]:
-                arr[i] = cell.value
-        return arr
+        column = self.ws['%s%d:%s' % (col_letter, begin_row, end_row)]
+        return np.array([cell[0].value for cell in [cell for cell in column]], datatype)
 
     def write_to_csv(self, columns, csv_path):
         import csv
