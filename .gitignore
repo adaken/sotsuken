@@ -1,0 +1,6 @@
+*.cpy
+.checkstyle
+.project
+.pydevproject
+.git/
+.settings/
