@@ -81,7 +81,6 @@ if __name__ == '__main__':
     plt.xlabel("time")
     plt.ylabel("amplitude")
 
-
     # X軸 - 周波数
     fftfreq = np.fft.fftfreq(n, ps)
     print "X軸:", fftfreq
