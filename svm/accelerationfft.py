@@ -6,14 +6,24 @@ from svm import *
 
 if __name__ == '__main__':
 
-    import util.excelwrapper as ew
     # 加速度の配列をxlsxから読み込む
-    ws = ew.ExcelWrapper(filename = r'E:\work\fft_testdata.xlsx',
-                         sheetname = 'Sheet1')
-    acc = ws.select_column(col_letter = 'A',
-                     n = 2,
-                     datatype = 'float')
+    from util.excelwrapper import ExcelWrapper
+    ws = ExcelWrapper(filename=r'E:\work\fft_testdata.xlsx',
+                       sheetname='Sheet1')
+    acc = ws.select_column('A', 2)
 
+    """
+    # xの値を生成
+    x = np.arange(-3.14, 3.14, 0.25)
+    y = np.arange(-3.14, 3.14, 0.25)
+    # 高さを計算
+    sin1 = np.sin(x)
+    sin2 = np.sin(5*y)
+    print sin1
+    print sin2
+
+    acc = sin1 + sin2 # sin(x)の計算
+    """
     # サンプリング周波数
     fs = 1024
 
