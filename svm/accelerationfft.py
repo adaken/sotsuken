@@ -12,6 +12,9 @@ if __name__ == '__main__':
                        sheetname='Sheet1')
     acc = ws.select_column('A', 2)
 
+    # DC成分を取り除く
+    acc = acc - np.mean(acc)
+
     """
     # xの値を生成
     x = np.arange(-3.14, 3.14, 0.25)
