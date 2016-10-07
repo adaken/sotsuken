@@ -5,14 +5,23 @@ import matplotlib.pyplot as plt
 from svm import *
 
 def apply_hunningwin(a, fs):
+    """
+    ハニング窓
+    """
     hanning_window = np.hanning(fs)
     return a * hanning_window
 
 def apply_hummingwin(a, fs):
+    """
+    ハミング窓
+    """
     hamming_window = np.hamming(fs)
     return a * hamming_window
 
 def apply_blackmanwin(a, fs):
+    """
+    ブラックマン窓
+    """
     blackman_window = np.blackman(fs)
     return a * blackman_window
 
@@ -57,7 +66,7 @@ if __name__ == '__main__':
 
     # 波形を描画（窓関数なし）
     plt.subplot(221)  # 2行2列のグラフの1番目の位置にプロット
-    plt.plot(range(0, fs), acc)
+    plt.plot(xrange(0, fs), acc)
     plt.axis([0, fs, -5.0, 5.0])
     plt.xlabel("time")
     plt.ylabel("amplitude")
@@ -76,7 +85,7 @@ if __name__ == '__main__':
 
     # 波形を描画（窓関数あり）
     plt.subplot(222)  # 2行2列のグラフの2番目の位置にプロット
-    plt.plot(range(0, fs), acc)
+    plt.plot(xrange(0, fs), acc)
     plt.axis([0, fs, -5.0, 5.0])
     plt.xlabel("time")
     plt.ylabel("amplitude")
@@ -92,20 +101,13 @@ if __name__ == '__main__':
     fftmag = np.abs(fftdata)
     print "Y軸:", fftmag
 
-    """
-    # 波形を描画（フーリエ変換）
+    # スペクトルを描画
     plt.subplot(223)  # 2行2列のグラフの3番目の位置にプロット
-    plt.plot(fftfreq, fftmag)
-    plt.axis([0, fftfreq.size, 0, np.max(fftmag)])
+    plt.plot(xrange(0, fftmag.size), fftmag)
+    plt.axis([0, fftmag.size, 0, np.max(fftmag)])
     plt.xlabel("freq")
     plt.ylabel("spectrum")
-    """
 
-    # 図の作成
-    fig, panel = plt.subplots(1, 1)
-    print fig, panel
-    panel.set_xlim(0, fftfreq[:len(fftmag)][-1])
-    panel.plot(fftfreq[:len(fftmag)], fftmag)
 
     # 図をグラフとして保存
     #fig.savefig(r"E:\work\fft_graph.png", dpi=200)
