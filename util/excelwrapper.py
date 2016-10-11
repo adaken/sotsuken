@@ -21,7 +21,7 @@ class ExcelWrapper(object):
             end_row = self.ws.max_row
 
         print "reading column '%s'..." % col_letter
-        column = self.ws['%s%d:%s' % (col_letter, begin_row, end_row)]
+        column = self.ws['%s%d:%s' % (col_letter, begin_row, end_row - 1)]
         return [data[0].value for data in [cell for cell in column]]
 
     def write_to_csv(self, columns, csv_path):

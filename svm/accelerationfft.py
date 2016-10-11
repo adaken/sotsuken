@@ -29,9 +29,9 @@ if __name__ == '__main__':
 
     # 加速度の配列をxlsxから読み込む
     from util.excelwrapper import ExcelWrapper
-    ws = ExcelWrapper(filename=r'E:\work\fft_testdata.xlsx',
-                       sheetname='Sheet1')
-    acc = ws.select_column('D', 2)
+    ws = ExcelWrapper(filename=r"E:\work\jump_run_acc_hirano.xlsx",
+                      sheetname='Sheet5')
+    acc = ws.select_column('F', begin_row=19800, end_row=20056)
 
     # リストを配列に変換
     acc = np.array(acc)
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     acc = acc - np.mean(acc)
 
     # サンプリング周波数
-    fs = 1024
+    fs = 256
 
     # サンプリング間隔(サンプリング周波数の逆数)
     ps = 1/float(fs)
@@ -94,10 +94,10 @@ if __name__ == '__main__':
     fftfreq = np.fft.fftfreq(n, ps)
     print "X軸:", fftfreq
 
-    # Y軸 - スペクトル
+    # FFT
     fftdata = np.fft.fft(acc)[0:n/2]
 
-    # スペクトルの絶対値
+    # Y軸 - スペクトルの絶対値
     fftmag = np.abs(fftdata)
     print "Y軸:", fftmag
 
