@@ -2,7 +2,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from svm import *
+import sklearn.svm as svm
 
 def apply_hunningwin(a, fs):
     """
@@ -29,9 +29,9 @@ if __name__ == '__main__':
 
     # 加速度の配列をxlsxから読み込む
     from util.excelwrapper import ExcelWrapper
-    ws = ExcelWrapper(filename=r"E:\work\jump_run_acc_hirano.xlsx",
-                      sheetname='Sheet5')
-    acc = ws.select_column('F', begin_row=19800, end_row=20056)
+    ws = ExcelWrapper(filename=r"E:\work\bicycle_acc_hirano.xlsx",
+                      sheetname='Sheet4')
+    acc = ws.select_column('F', begin_row=20200, end_row=20456)
 
     # リストを配列に変換
     acc = np.array(acc)
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     # DC成分を取り除く
     acc = acc - np.mean(acc)
 
-    # サンプリング周波数
+    # サンプリング周波数(FFTのポイント数)
     fs = 256
 
     # サンプリング間隔(サンプリング周波数の逆数)
@@ -114,4 +114,6 @@ if __name__ == '__main__':
 
     # 図を表示
     plt.show()
+
+
 

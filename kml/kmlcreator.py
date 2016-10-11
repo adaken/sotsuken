@@ -7,8 +7,8 @@ if __name__ == '__main__':
     time_start = timeutil.time()
 
     # リソース
-    xlsx_path = r"E:\work\sample_rowdata.xlsx"
-    kml_path = r"E:\work\out.kml"
+    xlsx_path = r"E:\work\bicycle_gps_hirano.xlsx"
+    kml_path = r"E:\work\out_bicycle.kml"
     icon_res = r"E:\work\circle_blue.png"
 
     # Excelを読み込む
