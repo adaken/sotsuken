@@ -31,7 +31,7 @@ if __name__ == '__main__':
     from util.excelwrapper import ExcelWrapper
     ws = ExcelWrapper(filename=r"E:\work\bicycle_acc_hirano.xlsx",
                       sheetname='Sheet4')
-    acc = ws.select_column('F', begin_row=20200, end_row=20456)
+    acc = ws.select_column('F', begin_row=20200, end_row=20455)
 
     # リストを配列に変換
     acc = np.array(acc)
