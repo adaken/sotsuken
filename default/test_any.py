@@ -1,3 +1,5 @@
+# coding: utf-8
+
 def csv_test():
     import csv
     with open('eggs.csv', 'wb') as csvfile:
@@ -43,5 +45,34 @@ def strop_test():
 def numpy_test():
     import numpy as np
 
+def rand_test():
+    import numpy as np
+    print np.random.rand(10, 3)
+
+def som_test():
+    from sompy import SOM
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    # 入力ベクトル
+    input_data = np.random.rand(1000, 3)
+
+    # 出力するマップのサイズ
+    output_shape = (40, 40)
+
+    # SOMインスタンス
+    som = SOM(output_shape, input_data)
+
+    # SOMのパラメータを設定
+    # neighborは近傍の比率:初期値0.25、learning_rateは学習率:初期値0.1
+    som.set_parameter(neighbor=0.26, learning_rate=0.22)
+
+    # 学習と出力マップの取得
+    # 引数は学習ループの回数
+    output_map = som.train(2000)
+
+    plt.imshow(output_map, interpolation='none')
+    plt.show()
+
 if __name__ == "__main__":
-    transpose_test()
+    som_test()

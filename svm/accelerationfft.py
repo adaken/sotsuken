@@ -2,11 +2,11 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import sklearn.svm as svm
+#import sklearn.svm as svm
 
 def apply_hunningwin(a, fs):
     """
-    ハニング窓
+    ハニンyグ窓
     """
     hanning_window = np.hanning(fs)
     return a * hanning_window
@@ -116,4 +116,6 @@ if __name__ == '__main__':
     plt.show()
 
 
-
+    """
+    ここからSOM処理
+    """
