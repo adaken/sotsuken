@@ -35,7 +35,7 @@ class ExcelWrapper(object):
             # 最後の行
             end_row = self.ws.max_row
 
-        print "reading column '%s'..." % col_letter
+        print "reading column '%s%d:%s%d'..." % (col_letter, begin_row, col_letter, end_row)
         column = self.ws['%s%d:%s' % (col_letter, begin_row, end_row)]
         return [data[0].value for data in [cell for cell in column]]
 

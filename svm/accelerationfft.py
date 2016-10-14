@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 def apply_hunningwin(a, fs):
     """
-    ハニンyグ窓
+    ハニング窓
     """
     hanning_window = np.hanning(fs)
     return a * hanning_window
@@ -26,7 +26,7 @@ def apply_blackmanwin(a, fs):
     return a * blackman_window
 
 def fft(sheet, col_letter, begin_row, end_row, fft_points):
-    
+
     # 加速度のリストをxlsxから読み込む
     acc = ws.select_column(col_letter=col_letter, begin_row=begin_row,
                            end_row=end_row)
@@ -89,7 +89,7 @@ def fft(sheet, col_letter, begin_row, end_row, fft_points):
     plt.subplot(223)  # 2行2列のグラフの3番目の位置にプロット
     plt.plot(xrange(0, fftmag.size), fftmag)
     #plt.axis([0, fftmag.size, 0, np.max(fftmag)])
-    plt.axis([0, fftmag.size, 0, 10])
+    plt.axis([0, fftmag.size, 0, 100])
     plt.xlabel("freq")
     plt.ylabel("spectrum")
 
@@ -103,16 +103,15 @@ def fft(sheet, col_letter, begin_row, end_row, fft_points):
 
 if __name__ == '__main__':
     from util.excelwrapper import ExcelWrapper
-    ws = ExcelWrapper(filename=r"E:\work\bicycle_acc_hirano.xlsx",
-                      sheetname='Sheet4')
+    ws = ExcelWrapper(filename=r"E:\work\jump_run_acc_hirano.xlsx",
+                      sheetname='Sheet5')
 
     col_letter = 'F'
     fft_points = 256
-    begin_row = 20200
+    begin_row = 7800
     end_row = begin_row + fft_points - 1
 
     for i in xrange(5):
-        print "read %s%d:%s%d" % (col_letter, begin_row, col_letter, end_row)
         fft(sheet=ws, col_letter=col_letter, begin_row=begin_row,
              end_row=end_row, fft_points=fft_points)
         begin_row += fft_points
