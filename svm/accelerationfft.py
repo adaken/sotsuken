@@ -27,7 +27,7 @@ def apply_blackmanwin(a, fs):
 
 if __name__ == '__main__':
 
-    # 加速度の配列をxlsxから読み込む
+    # 加速度のリストをxlsxから読み込む
     from util.excelwrapper import ExcelWrapper
     ws = ExcelWrapper(filename=r"E:\work\bicycle_acc_hirano.xlsx",
                       sheetname='Sheet4')
@@ -114,7 +114,6 @@ if __name__ == '__main__':
 
     # 図を表示
     plt.show()
-
 
     """
     ここからSOM処理
