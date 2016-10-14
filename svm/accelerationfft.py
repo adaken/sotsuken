@@ -26,7 +26,7 @@ def apply_blackmanwin(a, fs):
     return a * blackman_window
 
 def fft(sheet, col_letter, begin_row, end_row, fft_points):
-
+    
     # 加速度のリストをxlsxから読み込む
     acc = ws.select_column(col_letter=col_letter, begin_row=begin_row,
                            end_row=end_row)
