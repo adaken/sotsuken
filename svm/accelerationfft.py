@@ -116,8 +116,12 @@ if __name__ == '__main__':
              end_row=end_row, fft_points=fft_points)
         begin_row += fft_points
         end_row = begin_row + fft_points - 1
+        
+        # 図を保存
         plt.savefig(r"E:\work\fig\fig%03d.png" % i, dpi=200)
 
     """
     ここからSOM処理
     """
+
+    
