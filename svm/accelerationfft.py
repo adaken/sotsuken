@@ -25,14 +25,13 @@ def apply_blackmanwin(a, fs):
     blackman_window = np.blackman(fs)
     return a * blackman_window
 
-def fft(sheet, col_letter, begin_row, end_row, fft_points):
-
-    # 加速度のリストをxlsxから読み込む
-    acc = ws.select_column(col_letter=col_letter, begin_row=begin_row,
-                           end_row=end_row)
-
-    # リストを配列に変換
-    acc = np.array(acc)
+def fft(acc, fft_points):
+    """
+    Parameters
+    -----------
+    acc : ndarray
+    fft_points : int
+    """
 
     # DC成分を取り除く
     acc = acc - np.mean(acc)
@@ -93,12 +92,6 @@ def fft(sheet, col_letter, begin_row, end_row, fft_points):
     plt.xlabel("freq")
     plt.ylabel("spectrum")
 
-    # 図をグラフとして保存
-    #plt.savefig(r"E:\work\fig.png", dpi=200)
-
-    # 図を表示
-    #plt.show()
-
     return fftmag
 
 if __name__ == '__main__':
@@ -112,16 +105,26 @@ if __name__ == '__main__':
     end_row = begin_row + fft_points - 1
 
     for i in xrange(5):
-        fft(sheet=ws, col_letter=col_letter, begin_row=begin_row,
-             end_row=end_row, fft_points=fft_points)
+        # 加速度のリストをxlsxから読み込む
+        acc = ws.select_column(col_letter=col_letter,
+                               begin_row=begin_row,
+                               end_row=end_row)
+
+        # リストを配列に変換
+        acc = np.array(acc)
+
+        # FFT
+        fft(acc, fft_points)
+
         begin_row += fft_points
         end_row = begin_row + fft_points - 1
-        
+
         # 図を保存
         plt.savefig(r"E:\work\fig\fig%03d.png" % i, dpi=200)
+
+    print "finish"
 
     """
     ここからSOM処理
     """
 
-    

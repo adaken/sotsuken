@@ -75,4 +75,4 @@ def som_test():
     plt.show()
 
 if __name__ == "__main__":
-    som_test()
+    rand_test()
