@@ -72,7 +72,7 @@ def som_test():
     # 引数は学習ループの回数
     output_map = som.train(2000)
 
-    print output_map
+    print "output_shape:", output_map.shape
 
     plt.imshow(output_map, interpolation='none')
     plt.show()
