@@ -79,7 +79,7 @@ def som_test():
 
 def som_test2():
     import numpy as np
-    
+
     from sompy import SOM
     import matplotlib.pyplot as plt
     import matplotlib.animation as animation
