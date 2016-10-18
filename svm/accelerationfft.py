@@ -95,6 +95,8 @@ def fft(acc, fft_points):
     return fftmag
 
 if __name__ == '__main__':
+
+    # Excelシート読み込み
     from util.excelwrapper import ExcelWrapper
     ws = ExcelWrapper(filename=r"E:\work\jump_run_acc_hirano.xlsx",
                       sheetname='Sheet5')
