@@ -136,7 +136,7 @@ if __name__ == '__main__':
     N = 256
     x = np.linspace(0, 1, N)
     f = 20
-    y = 5 * np.sin(2*np.pi * x * 20) + 3 * np.sin(2*np.pi * x * 50)
+    y = 5 * np.sin(2*np.pi * x * 20) + 3 * np.sin(2*np.pi * x * 50) + 10 * np.sin(2*np.pi * x * 100)
     print x
     plt.plot(y)
     #plt.show()
