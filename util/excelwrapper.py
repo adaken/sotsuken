@@ -29,6 +29,10 @@ class ExcelWrapper(object):
             読み込みを終了する行
             初期値はNone
             Noneを指定すると最後の行まで読み込む
+
+        Returns
+        -------
+        values : list
         """
 
         if end_row is None:

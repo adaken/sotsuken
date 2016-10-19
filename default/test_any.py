@@ -99,4 +99,4 @@ def som_test2():
     plt.show()
 
 if __name__ == "__main__":
-    som_test()
+    pass
