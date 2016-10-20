@@ -3,21 +3,21 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def apply_hunningwin(a, fs):
+def __apply_hunningwin(a, fs):
     """
     ハニング窓
     """
     hanning_window = np.hanning(fs)
     return a * hanning_window
 
-def apply_hummingwin(a, fs):
+def __apply_hummingwin(a, fs):
     """
     ハミング窓
     """
     hamming_window = np.hamming(fs)
     return a * hamming_window
 
-def apply_blackmanwin(a, fs):
+def __apply_blackmanwin(a, fs):
     """
     ブラックマン窓
     """
@@ -54,25 +54,19 @@ def fft(arr, fft_points, out_fig=False):
     # サンプリング周波数(FFTのポイント数)
     fs = fft_points
 
-    if fs != arr.size:
-        print "size of arr and fftpoints must be same value"
-        return
-
     # fsとの差を0で埋める
     #arr = np.hstack((arr, np.zeros(fs - arr.size)))
-    print "arr_size:", arr.size
-    print "arr:", arr
+
+    assert fs is arr.size, "size of arr and fft_points must be same value. fft_points:%d, arr_size:%d" % (fft_points, arr.size)
 
     # ハニング窓を適用
-    wind_arr = apply_hunningwin(arr, fs)
+    wind_arr = __apply_hunningwin(arr, fs)
 
     # ハミング窓を適用
     #wind_arr = apply_hummingwin(arr, fs)
 
     # ブラックマン窓を適用
     #wind_arr = apply_blackmanwin(arr, fs)
-
-    print "wind_arr:", wind_arr
 
     # サンプリング間隔(サンプリング周波数の逆数)
     ps = 1/float(fs)
@@ -85,13 +79,9 @@ def fft(arr, fft_points, out_fig=False):
 
     # X軸 - 周波数
     fftfreq = np.fft.fftfreq(fs, ps)[0:fs/2]
-    print "fftfreq_size:", fftfreq.size
-    print "fftfreq:", fftfreq
 
     # Y軸 - スペクトルの絶対値
     fftmag = np.abs(fftdata[0:fs/2])
-
-    print "fftmag:", fftmag
 
     if out_fig:
 

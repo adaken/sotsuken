@@ -98,5 +98,21 @@ def som_test2():
     ani = animation.ArtistAnimation(fig, ims, interval=100, blit=True, repeat_delay=1000)
     plt.show()
 
+def timedecolater(func):
+    def wrapper():
+        import time
+        start = time.time()
+        func()
+        elapsed = time.time() - start
+        print "elapsed time: %fsec" % elapsed
+    return wrapper
+
 if __name__ == "__main__":
-    pass
+    import numpy as np
+
+    @timedecolater
+    def func():
+        n = 100000
+        a = range(n)
+
+    func()

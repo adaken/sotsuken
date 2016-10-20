@@ -1,5 +1,10 @@
 # coding: utf-8
 
+from util.excelwrapper import ExcelWrapper
+from fft import fft
+import numpy as np
+import matplotlib.pyplot as plt
+
 if __name__ == '__main__':
 
     """
@@ -35,8 +40,7 @@ if __name__ == '__main__':
     """
 
     """
-    ここからSOM処理
-    """
+    # ここからSOM処理
 
     from util.excelwrapper import ExcelWrapper
     from fft import fft
@@ -110,3 +114,63 @@ if __name__ == '__main__':
 
     plt.imshow(output_map, interpolation='none')
     plt.show()
+    """
+
+    def som_test():
+
+        # xlsxの辞書
+        xls = {'run':r'E:\work\data\run.xlsx',
+               'walk':r'E:\work\data\walk.xlsx',
+               'skip':r'E:\work\data\skip.xlsx'}
+        sheet_name = 'Sheet4'
+
+        fft_points = 256
+        column_letter = 'F'
+        begin_row = 2
+        end_row = lambda begin : begin + fft_points - 1
+        overlap = 150
+
+        # ファイル1つにつき何回読み込むか
+        read_count = 20
+
+        # 入力ベクトルのサイズ
+        input_row_size = read_count * len(xls)
+
+        # 入力ベクトル
+        input_vec = [None] * input_row_size
+
+        # 空いている挿入インデックスを保持
+        vacant_i = range(input_row_size)
+
+        for xl in xls.values():
+
+            # Excelシートを読み込む
+            ws = ExcelWrapper(xl, sheet_name)
+
+            # 読み込む行
+            begin = begin_row
+            end = end_row(begin)
+
+            for i in xrange(read_count):
+
+                # 列を読み込む
+                acc = ws.select_column(column_letter, begin, end)
+
+                # FFTしてランダムな位置に挿入
+                r = int(np.random.rand() * len(vacant_i))
+                input_vec[vacant_i[r]] = fft(acc, fft_points)
+                del vacant_i[r]
+
+                # 読み込む行を更新
+                begin += fft_points - overlap
+                end = end_row(begin)
+
+                a = ["%03d" % (j+1) if v is None else " # " for j, v in enumerate(input_vec)]
+                a = [a[j:j+read_count/2] for j in xrange(0, len(a), read_count/2)]
+                for row in a:
+                    print row
+
+        input_vec = np.array(input_vec)
+        print "input_vector_shape:", input_vec.shape
+
+    som_test()
