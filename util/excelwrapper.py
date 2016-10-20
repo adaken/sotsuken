@@ -8,17 +8,18 @@ class ExcelWrapper(object):
     """
 
     def __init__(self, filename, sheetname):
-            self.wb = px.load_workbook(filename=filename, read_only=True)
-            self.ws = self.wb[sheetname]
+        self.filename = filename
+        self.wb = px.load_workbook(filename=filename, read_only=True)
+        self.ws = self.wb[sheetname]
 
     def select_column(self,
-                      col_letter,
+                      column_letter,
                       begin_row = 1,
                       end_row = None):
         """
         Parameters
         ----------
-        col_leter : char
+        column_leter : char
             読み込む列のレター
 
         begin_row : int or None, optional
@@ -39,8 +40,9 @@ class ExcelWrapper(object):
             # 最後の行
             end_row = self.ws.max_row
 
-        print "reading column '%s%d:%s%d'..." % (col_letter, begin_row, col_letter, end_row)
-        column = self.ws['%s%d:%s' % (col_letter, begin_row, end_row)]
+        print "read", self.filename
+        print "reading column '%s%d:%s%d'..." % (column_letter, begin_row, column_letter, end_row)
+        column = self.ws['%s%d:%s' % (column_letter, begin_row, end_row)]
         return [data[0].value for data in [cell for cell in column]]
 
     def write_to_csv(self, columns, csv_path):

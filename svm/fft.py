@@ -57,7 +57,9 @@ def fft(arr, fft_points, out_fig=False):
     # fsとの差を0で埋める
     #arr = np.hstack((arr, np.zeros(fs - arr.size)))
 
-    assert fs is arr.size, "size of arr and fft_points must be same value. fft_points:%d, arr_size:%d" % (fft_points, arr.size)
+    assert fs is arr.size, """
+    size of arr and fft_points must be same value.
+    fft_points:%d, arr_size:%d""" % (fft_points, arr.size)
 
     # ハニング窓を適用
     wind_arr = __apply_hunningwin(arr, fs)
@@ -132,4 +134,6 @@ if __name__ == '__main__':
     #plt.show()
 
     fftmag, fig = fft(arr=y, fft_points=N, out_fig=True)
+    print fftmag
     fig.savefig(r"E:\work\fig\sin\sin.png")
+    fig.show()

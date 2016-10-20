@@ -4,6 +4,7 @@ from util.excelwrapper import ExcelWrapper
 from fft import fft
 import numpy as np
 import matplotlib.pyplot as plt
+from sompy import SOM
 
 if __name__ == '__main__':
 
@@ -128,7 +129,7 @@ if __name__ == '__main__':
         column_letter = 'F'
         begin_row = 2
         end_row = lambda begin : begin + fft_points - 1
-        overlap = 150
+        overlap = 128
 
         # ファイル1つにつき何回読み込むか
         read_count = 20
