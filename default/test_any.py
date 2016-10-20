@@ -109,10 +109,9 @@ def timedecolater(func):
 
 if __name__ == "__main__":
     import numpy as np
+    import matplotlib.pyplot as plt
+    import numpy as np
 
-    @timedecolater
-    def func():
-        n = 100000
-        a = range(n)
-
-    func()
+    u, v = (1, 1)
+    plt.quiver(u, v)
+    plt.show()
