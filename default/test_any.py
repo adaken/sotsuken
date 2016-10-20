@@ -1,4 +1,5 @@
 # coding: utf-8
+from numpy.core.multiarray import arange
 
 def csv_test():
     import csv
@@ -73,6 +74,7 @@ def som_test():
     output_map = som.train(2000)
 
     print "output_shape:", output_map.shape
+    print output_map
 
     plt.imshow(output_map, interpolation='none')
     plt.show()
@@ -110,8 +112,5 @@ def timedecolater(func):
 if __name__ == "__main__":
     import numpy as np
     import matplotlib.pyplot as plt
-    import numpy as np
 
-    u, v = (1, 1)
-    plt.quiver(u, v)
-    plt.show()
+    som_test()
