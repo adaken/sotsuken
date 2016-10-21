@@ -53,9 +53,10 @@ if __name__ == '__main__':
                 # 列を読み込む
                 acc = ws.select_column(column_letter, begin, end)
 
-                # FFTしてランダムな位置に挿入
+                # ランダムな挿入インデックス
                 r = int(np.random.rand() * len(vacant_i))
-                # FFTしたデータに色情報を連結
+
+                # FFTしてデータに色情報を連結し、入力ベクトルに追加
                 input_vector[vacant_i[r]] = np.r_[som_colors[act], fft(acc, fft_points)]
                 del vacant_i[r]
 
@@ -96,7 +97,7 @@ if __name__ == '__main__':
 
         # 学習と出力マップの取得
         # 引数は学習ループの回数
-        output_map = som.train(5000)
+        output_map = som.train(4000)
 
         # 色のベクトルだけ取り出す
         output_map = output_map[:, :, 0:3]
