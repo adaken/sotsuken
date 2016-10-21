@@ -113,4 +113,27 @@ if __name__ == "__main__":
     import numpy as np
     import matplotlib.pyplot as plt
 
-    som_test()
+    from sompy import SOM
+    colors = [ [1, 0, 0], [0, 1, 0], [0, 0, 1] ]
+    input_data = np.array([colors[i] for i in (np.random.rand(1000) * 3).astype(np.int8)])
+    print "input_shape:", input_data.shape
+
+    # 出力するマップのサイズ
+    output_shape = (40, 40)
+
+    # SOMインスタンス
+    som = SOM(output_shape, input_data)
+
+    # SOMのパラメータを設定
+    # neighborは近傍の比率:初期値0.25、learning_rateは学習率:初期値0.1
+    som.set_parameter(neighbor=0.5, learning_rate=0.22)
+
+    # 学習と出力マップの取得
+    # 引数は学習ループの回数
+    output_map = som.train(3000)
+
+    print "output_shape:", output_map.shape
+    print output_map
+
+    plt.imshow(output_map, interpolation='none')
+    plt.show()

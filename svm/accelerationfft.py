@@ -16,22 +16,22 @@ if __name__ == '__main__':
                'skip':r'E:\work\data\skip.xlsx'}
         sheet_name = 'Sheet4'
 
-        # SOMで使う色
-        som_colors = {'run':[255, 0, 0],    # 赤
-                      'walk':[0, 0, 255],   # 青
-                      'skip':[0, 255, 0]}   # 緑
-
         fft_points = 256
         column_letter = 'F'
         begin_row = 2
         end_row = lambda begin : begin + fft_points - 1
-        overlap = 200
 
-        # ファイル1つにつき何回読み込むか
-        read_count = 40
+        # xlsx1つを読み込む回数
+        read_count = 5
+
+        # xlsx1つのサンプリング回数
+        sample_count = 10
+
+        # xlsxの重複サンプリングを許容する行数
+        overlap = 0
 
         # 入力ベクトルのサイズ
-        input_row_size = read_count * len(xls)
+        input_row_size = sample_count * read_count * len(xls)
 
         # 入力ベクトル
         input_vector = [None] * input_row_size
@@ -44,46 +44,50 @@ if __name__ == '__main__':
             # Excelシートを読み込む
             ws = ExcelWrapper(xl, sheet_name)
 
-            # 読み込む行
-            begin = begin_row
-            end = end_row(begin)
-
             for i in xrange(read_count):
 
-                # 列を読み込む
-                acc = ws.select_column(column_letter, begin, end)
-
-                # ランダムな挿入インデックス
-                r = int(np.random.rand() * len(vacant_i))
-
-                # FFTしてデータに色情報を連結し、入力ベクトルに追加
-                input_vector[vacant_i[r]] = np.r_[som_colors[act], fft(acc, fft_points)]
-                del vacant_i[r]
-
-                # 読み込む行を更新
-                begin += fft_points - overlap
+                # 読み込む行
+                begin = begin_row
                 end = end_row(begin)
 
-                # 視覚的にテスト
-                a = ["%03d" % (j+1) if v is None else " # " for j, v in enumerate(input_vector)]
-                a = [a[j:j+read_count/2] for j in xrange(0, len(a), read_count/2)]
-                for row in a:
-                    print row
+                for i2 in xrange(sample_count):
+
+                    # 列を読み込む
+                    acc = ws.select_column(column_letter, begin, end)
+
+                    # ランダムな挿入インデックス
+                    r = int(np.random.rand() * len(vacant_i))
+
+                    # FFTして力ベクトルに追加
+                    input_vector[vacant_i[r]] = fft(acc, fft_points)
+                    del vacant_i[r]
+
+                    # 読み込む行を更新
+                    begin += fft_points - overlap
+                    end = end_row(begin)
+
+                    # 視覚的にテスト
+                    if (i2 is sample_count - 1):
+                        a = ["%03d" % (j+1) if v is None else " # " for j, v in enumerate(input_vector)]
+                        a = [a[j:j+sample_count] for j in xrange(0, len(a), sample_count)]
+                        for row in a: print row
 
         # 配列に変換
         input_vector = np.array(input_vector, np.float32)
         print "input_vector_shape:", input_vector.shape
-        print "input_data_type:", input_vector.dtype
+        print "input_vector_data_type:", input_vector.dtype
 
-        # データを正規化
+        # 正規化方法1
         # (Xi - "Xの平均") / "Xの標準偏差" で平均0分散1にする
-        #input_vector = (input_vector - np.mean(input_vector)) / np.std(input_vector)
+        normalize_ = lambda vec : (vec - np.mean(vec)) / np.std(vec)
 
         # 正規化方法2
         # (Xi - Xmin) / (Xmax - Xmin) で0<Xi<1にする
-        vector_min = np.min(input_vector)
-        vector_max = np.max(input_vector)
-        input_vector = (input_vector - vector_min) / (vector_max - vector_min)
+        normalize2_ = lambda vec : (vec - np.min(vec)) / (np.max(vec) - np.min(vec))
+
+        # 正規化
+        input_vector = normalize_(input_vector)
+        print "normalized_input_vector_element:\n", input_vector
 
         # 出力するマップのサイズ
         output_shape = (40, 40)
@@ -97,12 +101,9 @@ if __name__ == '__main__':
 
         # 学習と出力マップの取得
         # 引数は学習ループの回数
-        output_map = som.train(4000)
-
-        # 色のベクトルだけ取り出す
-        output_map = output_map[:, :, 0:3]
+        output_map = som.train(3000)
         print "output_map_shape:", output_map.shape
-        print output_map
+        print "output_map__elements:\n", output_map
 
         plt.imshow(output_map, interpolation='none')
         plt.show()
