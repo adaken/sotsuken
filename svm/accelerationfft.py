@@ -67,10 +67,11 @@ if __name__ == '__main__':
                     end = end_row(begin)
 
                     # 視覚的にテスト
-                    if (i2 is sample_count - 1):
+                    if ((i2 + 1) % 5 is 0):
                         a = ["%03d" % (j+1) if v is None else " # " for j, v in enumerate(input_vector)]
                         a = [a[j:j+sample_count] for j in xrange(0, len(a), sample_count)]
                         for row in a: print row
+                        print ""
 
         # 配列に変換
         input_vector = np.array(input_vector, np.float32)

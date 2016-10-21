@@ -15,33 +15,35 @@ class ExcelWrapper(object):
     def select_column(self,
                       column_letter,
                       begin_row = 1,
-                      end_row = None):
+                      end_row = None,
+                      log = False):
         """
         Parameters
         ----------
         column_leter : char
             読み込む列のレター
 
-        begin_row : int or None, optional
+        begin_row : int, default: 1, optional
             読み込みを開始する行
-            初期値は1
 
-        end_row : int or None, optional
+        end_row : int or None, default: None, optional
             読み込みを終了する行
-            初期値はNone
             Noneを指定すると最後の行まで読み込む
+
+        log : bool, default: False, optional
+            ログを出力するかどうか
 
         Returns
         -------
-        values : list
+        column : list
         """
 
         if end_row is None:
             # 最後の行
             end_row = self.ws.max_row
-
-        print "read", self.filename
-        print "reading column '%s%d:%s%d'..." % (column_letter, begin_row, column_letter, end_row)
+        if log:
+            print "read", self.filename
+            print "reading column '%s%d:%s%d'..." % (column_letter, begin_row, column_letter, end_row)
         column = self.ws['%s%d:%s' % (column_letter, begin_row, end_row)]
         return [data[0].value for data in [cell for cell in column]]
 
