@@ -100,16 +100,7 @@ def som_test2():
     ani = animation.ArtistAnimation(fig, ims, interval=100, blit=True, repeat_delay=1000)
     plt.show()
 
-def timedecolater(func):
-    def wrapper():
-        import time
-        start = time.time()
-        func()
-        elapsed = time.time() - start
-        print "elapsed time: %fsec" % elapsed
-    return wrapper
-
-if __name__ == "__main__":
+def som_test3():
     import numpy as np
     import matplotlib.pyplot as plt
 
@@ -137,3 +128,20 @@ if __name__ == "__main__":
 
     plt.imshow(output_map, interpolation='none')
     plt.show()
+
+def timedecolater(func):
+    def wrapper():
+        import time
+        start = time.time()
+        func()
+        elapsed = time.time() - start
+        print "elapsed time: %fsec" % elapsed
+    return wrapper
+
+if __name__ == "__main__":
+    import numpy as np
+
+    t = (40 , 40)
+
+    def f(x):
+        print x

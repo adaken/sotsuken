@@ -22,7 +22,7 @@ if __name__ == '__main__':
         end_row = lambda begin : begin + fft_points - 1
 
         # xlsx1つを読み込む回数
-        read_count = 5
+        read_count = 3
 
         # xlsx1つのサンプリング回数
         sample_count = 10
@@ -104,9 +104,24 @@ if __name__ == '__main__':
         # 引数は学習ループの回数
         output_map = som.train(3000)
         print "output_map_shape:", output_map.shape
-        print "output_map__elements:\n", output_map
 
-        plt.imshow(output_map, interpolation='none')
+        # 画像として表示するためにマップを変換
+        color_dim = 3 # 4だとデータを切り捨てない
+        map_x, map_y = output_shape
+        color_map = np.empty(map_x * map_y * color_dim).reshape(map_x, map_y, color_dim)
+        shapes = {'x':output_map.shape[0],
+                  'y':output_map.shape[1],
+                  'z':output_map.shape[2]}
+        for x in np.arange(shapes['x']):
+            for y in np.arange(shapes['y']):
+                for z in np.arange(0, shapes['z'], shapes['z'] / color_dim):
+                    color_map[x, y, color_dim * z / shapes['z']] = \
+                    np.mean(output_map[x, y, z:z+shapes['z'] / color_dim])
+
+        print "color_map_shape:", color_map.shape
+        print "color_map_elements:\n", color_map
+
+        plt.imshow(color_map[:, :, :], interpolation='none')
         plt.show()
 
     som_test()
