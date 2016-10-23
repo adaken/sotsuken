@@ -57,7 +57,7 @@ def fft(arr, fft_points, out_fig=False):
     # fsとの差を0で埋める
     #arr = np.hstack((arr, np.zeros(fs - arr.size)))
 
-    assert fs is arr.size, """
+    assert fs == arr.size, """
     size of arr and fft_points must be same value.
     fft_points:%d, arr_size:%d""" % (fft_points, arr.size)
 

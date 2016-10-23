@@ -1,5 +1,4 @@
 # coding: utf-8
-from numpy.core.multiarray import arange
 
 def csv_test():
     import csv
@@ -140,8 +139,4 @@ def timedecolater(func):
 
 if __name__ == "__main__":
     import numpy as np
-
-    t = (40 , 40)
-
-    def f(x):
-        print x
+    print np.random.randint(4)
