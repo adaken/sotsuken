@@ -139,4 +139,12 @@ def timedecolater(func):
 
 if __name__ == "__main__":
     import numpy as np
-    print np.random.randint(4)
+    import matplotlib.pyplot as plt
+
+    a = np.ones((3, 3, 10))
+    print a.shape
+    neighbors_idx = lambda x, y : [[x-1, y+1], [x, y+1], [x+1, y+1], [x+1, y],
+                                   [x+1, y-1], [x, y-1], [x-1, y-1], [x-1, y]]
+    print a
+    for i, j in neighbors_idx(1, 1):
+        print i, j
