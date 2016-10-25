@@ -96,11 +96,11 @@ def make_grayscaled_map(som_map):
     # 近傍のノードとのユークリッド距離の平均値
     eu_dis_mean = lambda n_nodes, node : np.mean(np.linalg.norm(n_nodes - node))
     # 0<x<1にスケーリング
+    normalize_ = lambda vec : (vec - np.mean(vec)) / np.std(vec)
     normalize2_ = lambda vec : (vec - np.min(vec)) / (np.max(vec) - np.min(vec))
     # 各ノードに対して計算
     max_shape = np.max(som_map.shape[0])
     gray_scaled_map = np.zeros(map_x * map_y * 4).reshape(map_x, map_y, 4)
-    print "max_shape", max_shape
     for i, j in nodes_idx:
         n_nodes = []
         for n_i, n_j in n_node_idx(i, j):
@@ -108,8 +108,9 @@ def make_grayscaled_map(som_map):
                 n_nodes.append(som_map[n_i, n_j])
         dis_mean = eu_dis_mean(n_nodes, som_map[i, j])
         gray_scaled_map[i, j, 3] = dis_mean
-    normalized = normalize2_(gray_scaled_map)
+    normalized = normalize_(gray_scaled_map)
     return normalized
+    #return gray_scaled_map
 
 def insert_at_random(input_gen, output_list, log=False):
     vacant_i = range(len(output_list)) # 空いている挿入位置のリスト
@@ -132,7 +133,7 @@ def main():
     xls = {
         'run':(r'E:\work\data\run.xlsx', sheet_name),
         'walk':(r'E:\work\data\walk.xlsx', sheet_name),
-        #'skip':(r'E:\work\data\skip.xlsx', sheet_name)
+        'skip':(r'E:\work\data\skip.xlsx', sheet_name)
     }
 
     fft_points = 256
@@ -140,7 +141,7 @@ def main():
     begin_row = 2
     end_row = lambda begin : begin + fft_points - 1
 
-    read_count = 5     # xlsx1つを読み込む回数
+    read_count = 1     # xlsx1つを読み込む回数
     sample_count = 12   # xlsx1つのサンプリング回数
     overlap = 56         # 重複サンプリングを許容する行数
 
@@ -178,19 +179,19 @@ def main():
     plt.show()
 
 def som_test():
-    vec_size = 500
+    vec_size = 1000
     vec_dim = 128
-    data_type_count = 5
-    patterns =  [np.random.randint(0, 2,vec_dim) for i in xrange(data_type_count)]
+    data_type_count = 3
+    patterns =  [np.random.randint(0, 2, vec_dim) for i in xrange(data_type_count)]
     for i, v in enumerate(patterns): print "pattern:%d\n" % (i+1), v
     vec_gen = (patterns[np.random.randint(data_type_count)] for i in xrange(vec_size))
     input_vec = [None] * vec_size
     insert_at_random(vec_gen, input_vec)
-    som_map = run_som(input_vec)
+    som_map = run_som(input_vec, train_itr=2000)
     gray_map = make_grayscaled_map(som_map)
     print "gray_map_shape", gray_map.shape
-    print gray_map
-    plt.imshow(gray_map, vmax=1, vmin=0)
+    print "gray_map:\n", gray_map
+    plt.imshow(gray_map)
     plt.show()
 
 def hirakawa_test():
@@ -216,7 +217,7 @@ def hirakawa_test():
         print "add to input_vector"
         print "input_vector_size", len(in_vector)
 
-    som_map = run_som(in_vector, map_size=(40, 40), train_itr=2000)
+    som_map = run_som(in_vector, map_size=(40, 40), train_itr=20000)
     gray_map = make_grayscaled_map(som_map)
     plt.imshow(gray_map)
     plt.show()
@@ -226,7 +227,7 @@ def rgb_test():
     colors = {'red':[1, 0, 0],
               'green':[0, 1, 0],
               'blue':[0, 0, 1]}
-    vec_size = 100
+    vec_size = 1000
     input_vec = [None] * vec_size
     def color_gen():
         for i in xrange(vec_size):
@@ -234,13 +235,14 @@ def rgb_test():
             key = colors.keys()[r]
             yield colors[key]
     insert_at_random(color_gen(), input_vec)
-    som_map = run_som(input_vec, train_itr=2000)
+    som_map = run_som(input_vec, train_itr=10000)
     gm = make_grayscaled_map(som_map)
     plt.imshow(gm)
     plt.show()
 
 if __name__ == '__main__':
-    #main()
+
+    main()
     #som_test()
     #rgb_test()
-    hirakawa_test()
+    #hirakawa_test()

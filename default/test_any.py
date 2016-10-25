@@ -141,10 +141,8 @@ if __name__ == "__main__":
     import numpy as np
     import matplotlib.pyplot as plt
 
-    a = np.ones((3, 3, 10))
-    print a.shape
-    neighbors_idx = lambda x, y : [[x-1, y+1], [x, y+1], [x+1, y+1], [x+1, y],
-                                   [x+1, y-1], [x, y-1], [x-1, y-1], [x-1, y]]
+    normalize2_ = lambda vec : (vec - np.min(vec)) / (np.max(vec) - np.min(vec))
+    a = np.array([0., 1., 2., 3., 4., 5.])
+    n = normalize2_(a)
     print a
-    for i, j in neighbors_idx(1, 1):
-        print i, j
+    print n

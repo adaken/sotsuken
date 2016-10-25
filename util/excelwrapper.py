@@ -9,7 +9,7 @@ class ExcelWrapper(object):
 
     def __init__(self, filename, sheetname):
         self.filename = filename
-        self.wb = px.load_workbook(filename=filename, read_only=True)
+        self.wb = px.load_workbook(filename=filename, read_only=False)
         self.ws = self.wb[sheetname]
 
     def select_column(self,
