@@ -88,7 +88,7 @@ class SOM:
         return self._param_learning_rate * np.exp(-t/self._life)
 
     def _learning_radius(self, t, d):
-        
+        """勝者ノードとの距離に従いガウス関数で減衰する係数"""
         s = self._neighbourhood(t)
         return np.exp(-d**2/(2*s**2))
 
