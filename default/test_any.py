@@ -145,4 +145,3 @@ if __name__ == "__main__":
     a = np.array([0., 1., 2., 3., 4., 5.])
     n = normalize2_(a)
     print a
-    print n
