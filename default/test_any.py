@@ -141,7 +141,5 @@ if __name__ == "__main__":
     import numpy as np
     import matplotlib.pyplot as plt
 
-    normalize2_ = lambda vec : (vec - np.min(vec)) / (np.max(vec) - np.min(vec))
-    a = np.array([0., 1., 2., 3., 4., 5.])
-    n = normalize2_(a)
-    print a
+    a = np.array([1, 2, 3, 4])
+    print np.c_[( a.flatten()[:, np.newaxis], a.flatten()[:, np.newaxis])]

@@ -108,7 +108,9 @@ def make_grayscaled_map(som_map):
                 n_nodes.append(som_map[n_i, n_j])
         dis_mean = eu_dis_mean(n_nodes, som_map[i, j])
         gray_scaled_map[i, j, 3] = dis_mean
-    normalized = normalize_(gray_scaled_map)
+    #normalized = normalize_(gray_scaled_map)
+    normalized = normalize_(normalize2_(gray_scaled_map))
+
     return normalized
     #return gray_scaled_map
 
@@ -120,8 +122,8 @@ def insert_at_random(input_gen, output_list, log=False):
         del vacant_i[r] # 挿入したインデックスをリストから削除
 
         # 視覚的にテスト
-        if (log and (i + 1) % 5 is 0):
-            a = ["%03d" % (j+1) if v is None else " # " for j, v in enumerate(output_list)]
+        if (log and (i + 1) % 10 is 0):
+            a = ["%04d" % (j+1) if v is None else " # " for j, v in enumerate(output_list)]
             a = [a[j:j+15] for j in xrange(0, len(a), 15)]
             for row in a: print row
             print ""
@@ -131,7 +133,7 @@ def main():
     # xlsxの辞書
     sheet_name = 'Sheet4'
     xls = {
-        'run':(r'E:\work\data\run.xlsx', sheet_name),
+        #'run':(r'E:\work\data\run.xlsx', sheet_name),
         'walk':(r'E:\work\data\walk.xlsx', sheet_name),
         'skip':(r'E:\work\data\skip.xlsx', sheet_name)
     }
@@ -141,9 +143,9 @@ def main():
     begin_row = 2
     end_row = lambda begin : begin + fft_points - 1
 
-    read_count = 1     # xlsx1つを読み込む回数
-    sample_count = 12   # xlsx1つのサンプリング回数
-    overlap = 56         # 重複サンプリングを許容する行数
+    read_count = 100     # xlsx1つを読み込む回数
+    sample_count = 10   # xlsx1つのサンプリング回数
+    overlap = 0         # 重複サンプリングを許容する行数
 
     # 入力ベクトルのサイズ
     input_row_size = read_count * sample_count * len(xls)
@@ -173,7 +175,7 @@ def main():
     # FFTしたデータをランダムな位置に挿入
     insert_at_random(read_xlsx(), input_vector, log=True)
 
-    som_map = run_som(input_vector, train_itr=2000)
+    som_map = run_som(input_vector, train_itr=10000, map_size=(70, 70))
     gray_map = make_grayscaled_map(som_map)
     plt.imshow(gray_map)
     plt.show()
@@ -181,13 +183,14 @@ def main():
 def som_test():
     vec_size = 1000
     vec_dim = 128
-    data_type_count = 3
+    data_type_count = 10
+    map_size = (40, 40)
     patterns =  [np.random.randint(0, 2, vec_dim) for i in xrange(data_type_count)]
     for i, v in enumerate(patterns): print "pattern:%d\n" % (i+1), v
     vec_gen = (patterns[np.random.randint(data_type_count)] for i in xrange(vec_size))
     input_vec = [None] * vec_size
     insert_at_random(vec_gen, input_vec)
-    som_map = run_som(input_vec, train_itr=2000)
+    som_map = run_som(input_vec, train_itr=5000, map_size=map_size)
     gray_map = make_grayscaled_map(som_map)
     print "gray_map_shape", gray_map.shape
     print "gray_map:\n", gray_map
@@ -216,8 +219,8 @@ def hirakawa_test():
         in_vector.append(fft(arr=rows, fft_points=N))
         print "add to input_vector"
         print "input_vector_size", len(in_vector)
-
-    som_map = run_som(in_vector, map_size=(40, 40), train_itr=20000)
+    print "learning map"
+    som_map = run_som(in_vector, map_size=(40, 40), train_itr=10000)
     gray_map = make_grayscaled_map(som_map)
     plt.imshow(gray_map)
     plt.show()
@@ -242,7 +245,7 @@ def rgb_test():
 
 if __name__ == '__main__':
 
-    main()
-    #som_test()
+    #main()
+    som_test()
     #rgb_test()
     #hirakawa_test()
