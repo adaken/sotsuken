@@ -78,15 +78,17 @@ class SOM:
         return np.unravel_index(bmu, self.shape)
 
     def _update(self, bmu, data, i):
+        """ノードを更新"""
         dis = np.linalg.norm(self.index_map - bmu, axis=1)
-        L = self._learning_rate(i)
-        S = self._learning_radius(i, dis)
+        L = self._learning_rate(i) # 学習率係数
+        S = self._learning_radius(i, dis) # 学習半径
         self.output_layer += L * S[:, np.newaxis] * (data - self.output_layer)
 
     def _learning_rate(self, t):
         return self._param_learning_rate * np.exp(-t/self._life)
 
     def _learning_radius(self, t, d):
+        
         s = self._neighbourhood(t)
         return np.exp(-d**2/(2*s**2))
 
@@ -95,7 +97,7 @@ class SOM:
         return initial * np.exp(-t/self._life)
 
     def _random_input_gen(self, n):
-        """要素が0からnまでの重複のないランダムな値を持つリストを作成"""
+        """要素が0からnまでの重複のないランダム値を返すジェネレータ"""
         vacant_idx = range(n)
         for i in xrange(n):
             r = rand.randint(0, len(vacant_idx))
@@ -103,9 +105,11 @@ class SOM:
             del vacant_idx[r]
 
     def train(self, n):
+        print "ループ回数:", self.input_num * n
         for i in range(n):
+            print "学習%d回目" % (i + 1)
             for j in self._random_input_gen(self.input_num):
-                data = self.input_layer[j] # 参照ベクトル
+                data = self.input_layer[j] # 入力ベクトル
                 win_idx = self._get_winner_node(data)
                 self._update(win_idx, data, i)
         #return self.output_layer.reshape(self.shape + (self.input_dim,))

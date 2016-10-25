@@ -191,7 +191,7 @@ def som_test():
     vec_gen = (patterns[np.random.randint(data_type_count)] for i in xrange(vec_size))
     input_vec = [None] * vec_size
     insert_at_random(vec_gen, input_vec)
-    som_map = run_som(input_vec, train_itr=3000, map_size=map_size)
+    som_map = run_som(input_vec, train_itr=10, map_size=map_size)
     gray_map = make_grayscaled_map(som_map)
     print "gray_map_shape", gray_map.shape
     print "gray_map:\n", gray_map
