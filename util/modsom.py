@@ -48,6 +48,7 @@ class SOM:
         self.index_map = np.hstack((y.flatten()[:, np.newaxis],
                                     x.flatten()[:, np.newaxis]))
         self._param_input_length_ratio = 0.25
+
         self._life = self.input_num * self._param_input_length_ratio
         self._param_neighbor = 0.25
         self._param_learning_rate = 0.1
@@ -72,8 +73,8 @@ class SOM:
 
     def _get_winner_node(self, data):
         sub = self.output_layer - data
-        dis = np.linalg.norm(sub, axis=1)
-        bmu = np.argmin(dis)
+        dis = np.linalg.norm(sub, axis=1) # ユークリッド距離を計算
+        bmu = np.argmin(dis) # 最も距離が近いノードのインデックス
         return np.unravel_index(bmu, self.shape)
 
     def _update(self, bmu, data, i):
@@ -91,13 +92,31 @@ class SOM:
 
     def _neighbourhood(self, t):
         initial = max(self.shape) * self._param_neighbor
-        return initial*np.exp(-t/self._life)
+        return initial * np.exp(-t/self._life)
+
+    def _random_input_gen(self, n):
+        """要素が0からnまでの重複のないランダムな値を持つリストを作成"""
+        vacant_idx = range(n)
+        for i in xrange(n):
+            r = rand.randint(0, len(vacant_idx))
+            yield vacant_idx[r]
+            del vacant_idx[r]
 
     def train(self, n):
         for i in range(n):
-            r = rand.randint(0, self.input_num)
-            data = self.input_layer[r]
-            win_idx = self._get_winner_node(data)
-            self._update(win_idx, data, i)
+            for j in self._random_input_gen(self.input_num):
+                data = self.input_layer[j] # 参照ベクトル
+                win_idx = self._get_winner_node(data)
+                self._update(win_idx, data, i)
         #return self.output_layer.reshape(self.shape + (self.input_dim,))
         return self.output_layer.reshape((self.shape[1], self.shape[0], self.input_dim))
+
+if __name__ == '__main__':
+    def _random_input_gen(n):
+        vacant_idx = range(n)
+        for i in xrange(n):
+            r = rand.randint(0, len(vacant_idx))
+            yield vacant_idx[r]
+            del vacant_idx[r]
+    for i in _random_input_gen(10):
+        print i

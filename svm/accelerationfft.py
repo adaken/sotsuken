@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pylab as pylab
 import matplotlib.pyplot as plt
 from sompy import SOM
+import util.modsom as mos
 from numpy.lib.function_base import meshgrid
 
 def run_som(input_vector, map_size=(40, 40), neighbor=0.26,
@@ -33,7 +34,7 @@ def run_som(input_vector, map_size=(40, 40), neighbor=0.26,
     output_shape = map_size
 
     # SOMインスタンス
-    som = SOM(output_shape, input_vector)
+    som = mos.SOM(output_shape, input_vector)
 
     # SOMのパラメータを設定
     # neighborは近傍の比率:初期値0.25、learning_rateは学習率:初期値0.1
@@ -183,14 +184,14 @@ def main():
 def som_test():
     vec_size = 1000
     vec_dim = 128
-    data_type_count = 10
+    data_type_count = 3
     map_size = (40, 40)
     patterns =  [np.random.randint(0, 2, vec_dim) for i in xrange(data_type_count)]
     for i, v in enumerate(patterns): print "pattern:%d\n" % (i+1), v
     vec_gen = (patterns[np.random.randint(data_type_count)] for i in xrange(vec_size))
     input_vec = [None] * vec_size
     insert_at_random(vec_gen, input_vec)
-    som_map = run_som(input_vec, train_itr=5000, map_size=map_size)
+    som_map = run_som(input_vec, train_itr=3000, map_size=map_size)
     gray_map = make_grayscaled_map(som_map)
     print "gray_map_shape", gray_map.shape
     print "gray_map:\n", gray_map

@@ -141,5 +141,7 @@ if __name__ == "__main__":
     import numpy as np
     import matplotlib.pyplot as plt
 
-    a = np.array([1, 2, 3, 4])
-    print np.c_[( a.flatten()[:, np.newaxis], a.flatten()[:, np.newaxis])]
+    arr = np.array([[1,2,3,4], [5,6,7,8], [9,10,11,12]])
+    print arr
+    arr_deleted = np.delete(arr, 1, 1)
+    print arr_deleted
