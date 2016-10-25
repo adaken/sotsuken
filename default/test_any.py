@@ -148,3 +148,5 @@ if __name__ == "__main__":
     print a
     for i, j in neighbors_idx(1, 1):
         print i, j
+
+        #test
