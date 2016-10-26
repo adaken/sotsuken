@@ -72,14 +72,17 @@ class SOM:
             self._life = self.input_num * self._param_input_length_ratio
 
     def _get_winner_node(self, data):
+        """勝者ノードを決定"""
         sub = self.output_layer - data
         dis = np.linalg.norm(sub, axis=1) # ユークリッド距離を計算
         bmu = np.argmin(dis) # 最も距離が近いノードのインデックス
         return np.unravel_index(bmu, self.shape)
 
     def _update(self, bmu, data, i):
-        """ノードを更新"""
-        dis = np.linalg.norm(self.index_map - bmu, axis=1)
+        """
+        ノードを更新
+        """
+        dis = np.linalg.norm(self.index_map - bmu, axis=1) # 勝者ノードとの距離
         L = self._learning_rate(i) # 学習率係数
         S = self._learning_radius(i, dis) # 学習半径
         self.output_layer += L * S[:, np.newaxis] * (data - self.output_layer)

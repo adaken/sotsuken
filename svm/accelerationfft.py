@@ -184,14 +184,14 @@ def main():
 def som_test():
     vec_size = 1000
     vec_dim = 128
-    data_type_count = 3
+    data_type_count = 5
     map_size = (40, 40)
     patterns =  [np.random.randint(0, 2, vec_dim) for i in xrange(data_type_count)]
     for i, v in enumerate(patterns): print "pattern:%d\n" % (i+1), v
     vec_gen = (patterns[np.random.randint(data_type_count)] for i in xrange(vec_size))
     input_vec = [None] * vec_size
     insert_at_random(vec_gen, input_vec)
-    som_map = run_som(input_vec, train_itr=10, map_size=map_size)
+    som_map = run_som(input_vec, train_itr=2, map_size=map_size)
     gray_map = make_grayscaled_map(som_map)
     print "gray_map_shape", gray_map.shape
     print "gray_map:\n", gray_map
@@ -239,7 +239,7 @@ def rgb_test():
             key = colors.keys()[r]
             yield colors[key]
     insert_at_random(color_gen(), input_vec)
-    som_map = run_som(input_vec, train_itr=10000)
+    som_map = run_som(input_vec, train_itr=4)
     gm = make_grayscaled_map(som_map)
     plt.imshow(gm)
     plt.show()
@@ -247,6 +247,6 @@ def rgb_test():
 if __name__ == '__main__':
 
     #main()
-    som_test()
-    #rgb_test()
+    #som_test()
+    rgb_test()
     #hirakawa_test()
