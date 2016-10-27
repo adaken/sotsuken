@@ -26,32 +26,42 @@ SOFTWARE.
 
 import numpy as np
 from numpy import random as rand
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
 
 class SOM:
     def __init__(self, shape, input_data):
         assert isinstance(shape, (int, list, tuple))
         assert isinstance(input_data, (list, np.ndarray))
-        if isinstance(input_data, list):
-            input_data = np.array(input_data, dtype=np.float32)
-        input_shape = tuple(input_data.shape)
-        assert 2 == len(input_shape)
-        self.shape = tuple(shape) # 入力層のサイズ
-        self.input_layer = input_data # 入力層
+        if len(input_data[0]) == 2: # ラベルあり
+            print "ラベルあり"
+            self.with_label = True
+            l, v = self._split_input(input_data)
+            self.input_labels = np.array(l) if isinstance(l, list) else l
+            self.input_layer = np.array(v, np.float32) if isinstance(v, list) else v
+        else:                       # ラベルなし
+            print "ラベルなし"
+            self.with_label = False
+            self.input_layer = np.array(input_data, dtype=np.float32) \
+            if isinstance(input_data, list) else input_data
+        input_shape = tuple(self.input_layer.shape)
+        assert len(input_shape) == 2
+        self.shape = tuple(shape) # 入力層のサイズ(X x Y)
         self.input_num = input_shape[0] # 入力ベクトルの総数
         self.input_dim = input_shape[1] # 入力ベクトルの次元
         # 出力層、平均0分散1のランダム値で初期化
-        self.output_layer = rand.standard_normal((self.shape[0]*self.shape[1], self.input_dim))
+        self.output_layer = rand.standard_normal((self.shape[0] * self.shape[1], self.input_dim))
         x, y = np.meshgrid(range(self.shape[0]), range(self.shape[1]))
         # 出力層のインデックスの配列[ [x1, y1], [x2, y2] ]
         self.index_map = np.hstack((y.flatten()[:, np.newaxis],
                                     x.flatten()[:, np.newaxis]))
         self._param_input_length_ratio = 0.25
-
         self._life = self.input_num * self._param_input_length_ratio
         self._param_neighbor = 0.25
         self._param_learning_rate = 0.1
+
+    def _split_input(self, input_data):
+        labels = [i[0] for i in input_data]
+        vectors = [i[1] for i in input_data]
+        return labels, vectors
 
     def set_parameter(self, neighbor=None, learning_rate=None, input_length_ratio=None):
         if neighbor:
@@ -79,9 +89,7 @@ class SOM:
         return np.unravel_index(bmu, self.shape)
 
     def _update(self, bmu, data, i):
-        """
-        ノードを更新
-        """
+        """ノードを更新"""
         dis = np.linalg.norm(self.index_map - bmu, axis=1) # 勝者ノードとの距離
         L = self._learning_rate(i) # 学習率係数
         S = self._learning_radius(i, dis) # 学習半径
@@ -99,7 +107,7 @@ class SOM:
         initial = max(self.shape) * self._param_neighbor
         return initial * np.exp(-t/self._life)
 
-    def _random_input_gen(self, n):
+    def _random_idx_gen(self, n):
         """要素が0からnまでの重複のないランダム値を返すジェネレータ"""
         vacant_idx = range(n)
         for i in xrange(n):
@@ -107,23 +115,42 @@ class SOM:
             yield vacant_idx[r]
             del vacant_idx[r]
 
+    def _label(self):
+        """出力層のノードをラベリング"""
+        x, y = self.shape
+        rabeled_map = np.ones(x * y * 3).reshape(x, y, 3)
+        for i in xrange(self.input_num):
+            label = self.input_labels[i]
+            data = self.input_layer[i]
+            win_idx = self._get_winner_node(data)
+            rabeled_map[win_idx] = label
+        return rabeled_map
+
+        """
+        x, y = self.shape
+        labeled_map = [[[0, 0, 0] for i in xrange(y)] for j in xrange(x)]
+        for i in xrange(self.input_num):
+            label = self.input_labels[i]
+            data = self.input_layer[i]
+            win_i, win_j = self._get_winner_node(data)
+            labeled_map[win_i][win_j] = label
+            self.output_layer[win_idx] = label
+        return labeled_map
+        """
+
     def train(self, n):
         print "ループ回数:", self.input_num * n
         for i in range(n):
             print "学習%d回目" % (i + 1)
-            for j in self._random_input_gen(self.input_num):
+            for j in self._random_idx_gen(self.input_num):
                 data = self.input_layer[j] # 入力ベクトル
                 win_idx = self._get_winner_node(data)
                 self._update(win_idx, data, i)
         #return self.output_layer.reshape(self.shape + (self.input_dim,))
-        return self.output_layer.reshape((self.shape[1], self.shape[0], self.input_dim))
+        if self.with_label:
+            return self._label()
+        else:
+            return self.output_layer.reshape((self.shape[1], self.shape[0], self.input_dim))
 
 if __name__ == '__main__':
-    def _random_input_gen(n):
-        vacant_idx = range(n)
-        for i in xrange(n):
-            r = rand.randint(0, len(vacant_idx))
-            yield vacant_idx[r]
-            del vacant_idx[r]
-    for i in _random_input_gen(10):
-        print i
+    pass

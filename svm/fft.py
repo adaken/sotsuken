@@ -49,7 +49,7 @@ def fft(arr, fft_points, out_fig=False):
         arr = np.array(arr)
 
     # DC成分を除去
-    arr -= np.mean(arr)
+    #arr -= np.mean(arr)
 
     # サンプリング周波数(FFTのポイント数)
     fs = fft_points
