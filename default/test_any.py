@@ -44,6 +44,15 @@ def strop_test():
 
 def numpy_test():
     import numpy as np
+    a = np.array([
+    [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]],
+    [[13, 14, 15, 16], [17, 18, 19, 20], [21, 22, 23, 24]],
+    [[25, 26, 27, 28], [29, 30, 31, 32], [33, 34, 35, 36]]
+    ])
+    print a.shape
+    print a
+    print a - [1, 2, 3, 4]
+    print a - [[1, 2, 3, 4]]
 
 def rand_test():
     import numpy as np
@@ -70,7 +79,7 @@ def som_test():
 
     # 学習と出力マップの取得
     # 引数は学習ループの回数
-    output_map = som.train(2000)
+    output_map = som.train(10000)
 
     print "output_shape:", output_map.shape
     print output_map
@@ -140,8 +149,6 @@ def timedecolater(func):
 if __name__ == "__main__":
     import numpy as np
     import matplotlib.pyplot as plt
-
-    arr = np.array([[1,2], [3, 4], [5, 6]])
-    print arr
-    arr = arr - (1, 2)
-    print arr
+    import sys
+    for i in xrange(100):
+        print "aa\b"
