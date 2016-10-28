@@ -43,8 +43,8 @@ def main():
     read_count = 1      # xlsx1つを読み込む回数
     sample_count = 10   # xlsx1つのサンプリング回数
     overlap = 0         # 重複サンプリングを許容する行数
-    map_size = (50, 50) # 表示するマップの大きさ
-    train_itr = 1000     # 学習ループの回数
+    map_size = (40, 40) # 表示するマップの大きさ
+    train_itr = 1000    # 学習ループの回数
     input_vector = []   # 入力ベクトル
 
     for act, v in xls.items():
@@ -88,9 +88,9 @@ def som_gray_with_label():
     vec_size = 500
     vec_dim = 128
     data_type_count = 8
-    map_size = (40, 40)
-    train_itr = 100
-    # ラベル付き特徴ベクトルのリスト
+    map_size = (30, 40)
+    train_itr = 2
+    # ラベル付き特徴ベクトルのリストを生成
     patterns =  [("pattern%d" % (i+1), np.random.randint(0, 2, vec_dim))
                  for i in xrange(data_type_count)]
     for i, v in enumerate(patterns): print "pattern:%d\n" % (i+1), v
@@ -108,7 +108,7 @@ def som_gray_with_label():
 
 def som_color_test():
     vec_size = 1000
-    vec_dim = 128
+    vec_dim = 64
     data_type_count = 5
     map_size = (40, 40)
     train_itr = 2
@@ -154,8 +154,8 @@ def hirakawa_test():
 
 if __name__ == '__main__':
 
-    main()
-    #som_gray_with_label()
+    #main()
+    som_gray_with_label()
     #som_gray_without_label()
     #som_color_test()
     #hirakawa_test()

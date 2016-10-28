@@ -81,11 +81,11 @@ class SOM:
             self._param_learning_rate = learning_rate
         if input_length_ratio:
             self._param_input_length_ratio = input_length_ratio
-            self._life = self.input_num * self._param_input_length_ratio
+            self._life = self.input_num * self._param_input_length_ratio # 残りの学習回数
 
     def _get_winner_node(self, data):
         """勝者ノードを決定"""
-        sub = self.output_layer - data
+        sub = self.output_layer - data    # (X x Y)の出力層 - (Y,)の入力ベクトル
         dis = np.linalg.norm(sub, axis=1) # ユークリッド距離を計算
         bmu = np.argmin(dis)              # 最も距離が近いノードのインデックス
         return np.unravel_index(bmu, self.shape)
@@ -101,11 +101,15 @@ class SOM:
         return self._param_learning_rate * np.exp(-t/self._life)
 
     def _learning_radius(self, t, d):
-        """勝者ノードとの距離に従いガウス関数で減衰する係数"""
+        """
+        近傍関数
+        勝者ノードとの距離に従いガウス関数で減衰する係数
+        """
         s = self._neighbourhood(t)
         return np.exp(-d**2/(2*s**2))
 
     def _neighbourhood(self, t):
+        """学習が進むに連れ減衰する係数"""
         initial = max(self.shape) * self._param_neighbor
         return initial * np.exp(-t/self._life)
 
@@ -113,11 +117,11 @@ class SOM:
         print "合計ループ回数:", n * self.input_num
         print "学習状況: 0%",
         for i in xrange(n):
-            if (i+1)/float(n)*100%10==0: print "%d%%"%((i+1)/float(n)*100),
             for j in self._random_idx_gen(self.input_num):
                 data = self.input_layer[j] # 入力ベクトル
                 win_idx = self._get_winner_node(data)
                 self._update(win_idx, data, i)
+            if (i+1)/float(n)*100%10==0: print "%d%%"%((i+1)/float(n)*100),
         print ""
         return self._return_map()
 
@@ -188,20 +192,6 @@ class SOM:
             rgb_map[win_idx] = rgb
         return rgb_map
 
-    def _normalize_standard(self, arr):
-        """
-        正規化方法1
-        (Xi - "Xの平均") / "Xの標準偏差" で平均0分散1にする
-        """
-        return (arr - np.mean(arr)) / np.std(arr)
-
-    def _normalize_scale(self, arr):
-        """
-        正規化方法2
-        (Xi - Xmin) / (Xmax - Xmin) で0<Xi<1にする
-        """
-        return (arr - np.min(arr)) / (np.max(arr) - np.min(arr))
-
     def _make_gray_scale_map(self, map_):
 
         # すべてのノードに対して近傍ノードとの平均ユークリッド距離を計算
@@ -230,6 +220,20 @@ class SOM:
         #normalized = normalize_standard(gray_scaled_map)
         normalized = self._normalize_scale(gray_map)
         return normalized
+
+    def _normalize_standard(self, arr):
+        """
+        正規化方法1
+        (Xi - "Xの平均") / "Xの標準偏差" で平均0分散1にする
+        """
+        return (arr - np.mean(arr)) / np.std(arr)
+
+    def _normalize_scale(self, arr):
+        """
+        正規化方法2
+        (Xi - Xmin) / (Xmax - Xmin) で0<Xi<1にする
+        """
+        return (arr - np.min(arr)) / (np.max(arr) - np.min(arr))
 
 if __name__ == '__main__':
     pass
