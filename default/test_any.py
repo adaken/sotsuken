@@ -1,5 +1,6 @@
 # coding: utf-8
 from fileinput import close
+from _struct import unpack
 
 def csv_test():
     import csv
@@ -157,5 +158,6 @@ if __name__ == "__main__":
     #np.seterr(all='warn')
     warnings.filterwarnings('error')
 
-    plt.text(0, 0, 'T')
-    plt.show()
+    t = (1, 2)
+    x, y, z = 1, t
+    print x, y, z

@@ -1,12 +1,13 @@
 # coding: utf-8
 
 from util.excelwrapper import ExcelWrapper
-from fft import fft
 import numpy as np
 import matplotlib.pylab as pylab
 from sompy import SOM
 import matplotlib.pyplot as plt
 import util.modsom as modsom
+from collections import namedtuple
+from fft import fft
 
 def normalize_standard(arr):
     """
@@ -23,61 +24,56 @@ def normalize_scale(arr):
     return (arr - np.min(arr)) / (np.max(arr) - np.min(arr))
 
 def main():
+    Xls = namedtuple('Xls', 'label, path, sheet, rgb')
+    xls = [Xls('1', r'E:\work\data\run.xlsx', 'Sheet4', [1, 0, 0]),
+           Xls('2', r'E:\work\data\walk.xlsx', 'Sheet4', [0, 0, 1]),
+           Xls('3', r'E:\work\data\skip.xlsx', 'Sheet4', [0, 1, 0])]
+    COLUMN_LETTER = 'F'
+    FFT_POINTS = 256
+    SAMPLE_CNT = 100    # xlsx1つのサンプリング回数
+    MAP_SIZE = (40, 40) # 表示するマップの大きさ
+    TRAIN_CNT = 100     # 学習ループの回数
 
-    # xlsxの辞書
-    sheet_name = 'Sheet4'
-    xls = {
-        'run':(r'E:\work\data\run.xlsx', sheet_name),
-        'walk':(r'E:\work\data\walk.xlsx', sheet_name),
-        'skip':(r'E:\work\data\skip.xlsx', sheet_name)
-    }
-    colors = {
-        'run':(1, 0, 0),
-        'walk':(0, 1, 0),
-        'skip':(0, 0, 1)
-    }
-    fft_points = 256
-    column_letter = 'F'
-    begin_row = 2
-    end_row = lambda begin : begin + fft_points - 1
-    read_count = 5      # xlsx1つを読み込む回数
-    sample_count = 10   # xlsx1つのサンプリング回数
-    overlap = 0         # 重複サンプリングを許容する行数
-    map_size = (40, 40) # 表示するマップの大きさ
-    train_itr = 200    # 学習ループの回数
-    input_vector = []   # 入力ベクトル
+    def sample_at_random(ws, c, N):
+        r = np.random.randint(1, ws.ws.max_row - N)
+        end_ = r + N - 1
+        return  ws.select_column(column_letter=c, begin_row=r, end_row=end_, log=True)
 
-    for act, v in xls.items():
-        path, sheet = v
-        ws = ExcelWrapper(path, sheet)
-        for i in xrange(read_count):
-            begin = begin_row # 読み込み開始位置
-            end = end_row(begin) # 終了位置
-            for j in xrange(sample_count):
-                rows = ws.select_column(column_letter, begin, end, log=True)
-                fftdata = fft(rows, fft_points, out_fig=False) # FFT
-                fftdata = normalize_scale(fftdata) # 0～1に正規化
-                #input_vector.append([act, fftdata])
-                input_vector.append([act, colors[act], fftdata])
-                begin += fft_points - overlap # 読み込む範囲を更新
-                end = end_row(begin)
+    def ws_gen():
+        for x in xls:
+            yield x, ExcelWrapper(filename=x.path, sheetname=x.sheet)
 
-    som = modsom.SOM(map_size, input_vector, display='gray_scale')
+    def sample_gen():
+        for x, ws in ws_gen():
+            for i in xrange(SAMPLE_CNT):
+                yield x, sample_at_random(ws, COLUMN_LETTER, FFT_POINTS)
+
+    def fft_gen():
+        for x, sample_data in sample_gen():
+            yield x, normalize_scale(fft(sample_data, FFT_POINTS))
+
+    def input_vec_gen():
+        for x, fftdata in fft_gen():
+            yield x.label, x.rgb, fftdata
+
+    input_vecs = [input_vec for input_vec in input_vec_gen()]
+
+    som = modsom.SOM(MAP_SIZE, input_vecs)
     som.set_parameter(neighbor=0.2, learning_rate=0.3, input_length_ratio=0.25)
-    map_, label_coord = som.train(train_itr)
+    map_, label_coord = som.train(TRAIN_CNT)
     plt.imshow(map_, interpolation='nearest')
     for label, coord in label_coord:
         x, y = coord
         #plt.text(x, y, label, color=colors[label])
-        plt.text(x, y, label, color='black')
+        plt.text(x, y, label, color='white')
     plt.show()
 
 def som_gray_with_label():
     vec_size = 100
     vec_dim = 128
-    data_type_count = 8
+    data_type_count = 12
     map_size = (40, 40)
-    train_itr = 50
+    train_itr = 100
     # ラベル付き特徴ベクトルのリストを生成
     patterns =  [("pattern%d" % (i+1), np.random.randint(0, 2, vec_dim))
                  for i in xrange(data_type_count)]
@@ -212,10 +208,10 @@ def hirakawa_test():
 
 if __name__ == '__main__':
 
-    main()
+    #main()
     #som_rgb_test()
     #som_r_rgb_test()
-    #som_gray_with_label()
+    som_gray_with_label()
     #som_gray_without_label()
     #som_color_with_label()
     #som_color_without_label()
