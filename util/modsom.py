@@ -29,20 +29,46 @@ from numpy import random as rand
 
 class SOM:
     def __init__(self, shape, input_data, display=None):
+        """
+        Parameter
+        ---------
+        shape : tuple
+            tuple of map size (x, y)
+
+        input_data : list, tuple, ndarray
+            list of input vector
+            format1: [[vector]...]
+            format2: [[label, vector]...]
+            format3: [[rgb, vector]...]
+            format4: [[label, rgb, vector]...]
+
+        display : str
+            indicate 'gray-scale' to build gray-scale map
+        """
+        #np.seterr(all='warn')
+        import warnings
+        warnings.filterwarnings('error')
+
         assert isinstance(shape, (int, list, tuple))
         assert isinstance(input_data, (list, np.ndarray))
         if self._has_label(input_data): # ラベルあり
             print "ラベルあり"
             self.with_label = True
-            l, v = self._split_input(input_data)
-            l_type = self._check_label_type(l)
-            if l_type is 'str':
-                self.input_label_type = l_type
-                self.input_labels = l
-            elif l_type is 'rgb':
-                self.input_label_type = l_type
-                self.input_labels = np.array(l) if isinstance(l, list) else l
-            self.input_layer = np.array(v, np.float32) if isinstance(v, list) else v
+            s, r, v = self._split_input(input_data)
+            if s is not None and r is not None:
+                print "label_type:", 'sr'
+                self.input_label_type = 'sr'
+                self.input_str = s
+                self.input_rgb = r
+            elif s is not None:
+                print "label_type:", 's'
+                self.input_label_type = 's'
+                self.input_str = s
+            elif r is not None:
+                print "label_type:", 'r'
+                self.input_label_type = 'r'
+                self.input_rgb = r
+            self.input_layer = v
         else:                           # ラベルなし
             print "ラベルなし"
             self.with_label = False
@@ -85,10 +111,10 @@ class SOM:
 
     def _get_winner_node(self, data):
         """勝者ノードを決定"""
-        sub = self.output_layer - data    # (X x Y)の出力層 - (Y,)の入力ベクトル
+        sub = self.output_layer - data    # ((X x Y) x Z)の出力層 - (Z,)の入力ベクトル
         dis = np.linalg.norm(sub, axis=1) # ユークリッド距離を計算
         bmu = np.argmin(dis)              # 最も距離が近いノードのインデックス
-        return np.unravel_index(bmu, self.shape)
+        return np.unravel_index(bmu, self.shape) # 出力層上でのインデックスに変換
 
     def _update(self, bmu, data, i):
         """ノードを更新"""
@@ -106,7 +132,9 @@ class SOM:
         勝者ノードとの距離に従いガウス関数で減衰する係数
         """
         s = self._neighbourhood(t)
-        return np.exp(-d**2/(2*s**2))
+        tmp = np.exp(-d**2/(2*s**2))
+        return tmp
+        #return np.exp(-d**2/(2*s**2)) # 頻繁にオーバーフローする
 
     def _neighbourhood(self, t):
         """学習が進むに連れ減衰する係数"""
@@ -114,6 +142,25 @@ class SOM:
         return initial * np.exp(-t/self._life)
 
     def train(self, n):
+        """
+        Parameters
+        ----------
+        n : int
+            学習ループの回数
+            入力データ数とnの差が大きいとオーバーフローする
+
+        Return
+        ------
+        map : ndarray
+            shape(マップの大きさ)はコンストラクタに指定した値
+            コンストラクタのinput_dataにRGBを付加した場合、mapはRGBのndarray
+            displayを設定した場合、mapはそれに応じたndarray
+            それ以外の場合、mapはinput_dataのndarray
+
+        label_coord : list of tuple(label, tuple(x, y) of coord), optional
+            コンストラクタにラベルを指定した場合、ラベルの最終的な座標も戻り値になる
+
+        """
         print "合計ループ回数:", n * self.input_num
         print "学習状況: 0%",
         for i in xrange(n):
@@ -123,40 +170,77 @@ class SOM:
                 self._update(win_idx, data, i)
             if (i+1)/float(n)*100%10==0: print "%d%%"%((i+1)/float(n)*100),
         print ""
+
+        """
+        data = self.input_layer
+        input_len = n * self.input_num
+        for i in xrange(n - 1):
+            data = np.r_[data, self.input_layer]
+        for i, r in zip(xrange(input_len), self._random_idx_gen(input_len)):
+            win_idx = self._get_winner_node(data[r])
+            self._update(win_idx, data[r], i)
+            if (i+1)/float(input_len)*100%10==0: print "%d%%"%((i+1)/float(input_len)*100),
+        print ""
+        """
+
         return self._return_map()
 
     def _return_map(self):
         map_ = self.output_layer.reshape((self.shape[1], self.shape[0], self.input_dim))
         if self.with_label:
             if self.display is None:
-                return map_, self._get_str_label()
+                if self.input_label_type is 'sr':
+                    return self._get_rgb_map(map_), self._get_str_label(map_)
+                if self.input_label_type is 's':
+                    return map_,                    self._get_str_label(map_)
+                if self.input_label_type is 'r':
+                    return self._get_rgb_map(map_)
             elif self.display is 'gray_scale':
-                return self._make_gray_scale_map(map_), self._get_str_label()
+                if self.input_label_type is 'sr':
+                    return self._get_rgb_map(map_), self._get_str_label(map_)
+                if self.input_label_type is 's':
+                    return self._make_gray_scale_map(map_), self._get_str_label(map_)
+                if self.input_label_type is 'r':
+                    return self._get_rgb_map(map_)
         else:
             if self.display is None:
                 return map_
-            elif self.display is 'gray_scale':
+            if self.display is 'gray_scale':
                 return self._make_gray_scale_map(map_)
 
     def _has_label(self, input_data):
-        if len(input_data[0]) == 2 \
-        and isinstance(input_data[0][0], (str, list, np.ndarray)):
-            return True
+        row = input_data[0]
+        # 入力ベクトルをチェック
+        check_ = lambda: False not in [True if isinstance(i, (int, float)) else False
+                                         for i in row]
+        if len(row) == 2:
+            if (isinstance(row[0], (str, list, tuple, np.ndarray))
+                and isinstance(row[1], (list, tuple, np.ndarray))):
+                return True
+            assert check_(), "invalid labeled data. [str, rgb, input_vector] or [str, input_vector] or [rgb, input_vector]."
+        elif len(row) == 3:
+            if (isinstance(row[0], str) and isinstance(row[1], (list, tuple, np.ndarray))
+                and isinstance(row[2], (list, tuple, np.ndarray))):
+                return True
+            assert check_(), "invalid labeled data. [str, rgb, input_vector] or [str, input_vector] or [rgb, input_vector]."
         return False
 
     def _split_input(self, input_data):
-        labels = [i[0] for i in input_data]
-        vectors = [i[1] for i in input_data]
-        return labels, vectors
-
-    def _check_label_type(self, labels):
-        label = labels[0]
-        assert isinstance(label, (list, np.ndarray, str))
-        if isinstance(label, str):
-            return 'str'
-        elif isinstance(label, (list, np.ndarray)):
-            assert len(label) == 3
-            return 'rgb'
+        split_s = lambda idx : [i[idx] for i in input_data]
+        split_rv = lambda idx : np.array([np.array(i[idx]) if isinstance(i, (list, tuple))
+                                          else i for i in input_data])
+        row = input_data[0]
+        len_ = len(row)
+        if len_ == 2:
+            if isinstance(row[0], str):
+                # str, none, vector
+                return split_s(0), None, split_rv(1)
+            else:
+                # none, rgb, vector
+                return None, split_rv(0), split_rv(1)
+        elif len_ == 3:
+                # str, rgb, vector
+            return split_s(0), split_rv(1), split_rv(2)
 
     def _random_idx_gen(self, n):
         """要素が0からnまでの重複のないランダム値を返すジェネレータ"""
@@ -166,37 +250,39 @@ class SOM:
             yield vacant_idx[r]
             del vacant_idx[r]
 
-    def _get_str_label(self):
+    def _get_str_label(self, map_):
         """
         出力層のノードとラベルを関連付ける
 
         Return
         ------
-        label_cood : tuple(str, ndarray)
+        label_cood : list of tuple(str, ndarray)
             input vector's label with the coord
         """
         label_coord = []
         for i, data in enumerate(self.input_layer):
-            label = self.input_labels[i]
+            label = self.input_str[i]
             win_idx = self._get_winner_node(data)
-            label_coord.append((label, win_idx))
+            x, y = win_idx # 出力画像に合わせるため相対座標に変換
+            label_coord.append((label, (y, x)))
         return label_coord
 
-    def _get_rgb_label(self):
+    def _get_rgb_map(self, map_):
         """出力層のノードをRGBでラベリング"""
-        # 未完成です
         x, y = self.shape
         rgb_map = np.ones(x * y * 3).reshape(x, y, 3)
-        for rgb, data in zip(self.input_labels, self.input_layer):
-            win_idx = self._get_winner_node(data)
-            rgb_map[win_idx] = rgb
+        for i, j in self.index_map:
+            #dis = np.linalg.norm(self.input_layer - map_[i, j], axis=1)
+            dis = np.linalg.norm(self.input_layer - map_[i, j], axis=1)
+            min_i = np.argmin(dis)
+            rgb_map[i, j] = self.input_rgb[min_i]
         return rgb_map
 
     def _make_gray_scale_map(self, map_):
 
         # すべてのノードに対して近傍ノードとの平均ユークリッド距離を計算
 
-        map_x, map_y, z = map_.shape
+        map_x, map_y, _ = map_.shape
         x, y = np.meshgrid(np.arange(map_x), np.arange(map_y)) # 全ノードのインデックス
         nodes_idx = np.c_[x.ravel(), y.ravel()]
         # ノード[x,y]の近傍ノードの位置
