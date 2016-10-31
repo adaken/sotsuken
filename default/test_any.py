@@ -158,6 +158,6 @@ if __name__ == "__main__":
     #np.seterr(all='warn')
     warnings.filterwarnings('error')
 
-    t = (1, 2)
-    x, y, z = 1, t
-    print x, y, z
+    l = (1, 2, 3, 4)
+    for i, j in l:
+        print i, j

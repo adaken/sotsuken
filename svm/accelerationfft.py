@@ -30,8 +30,8 @@ def main():
            Xls('3', r'E:\work\data\skip.xlsx', 'Sheet4', [0, 1, 0])]
     COLUMN_LETTER = 'F'
     FFT_POINTS = 256
-    SAMPLE_CNT = 100    # xlsx1つのサンプリング回数
-    MAP_SIZE = (40, 40) # 表示するマップの大きさ
+    SAMPLE_CNT = 200    # xlsx1つのサンプリング回数
+    MAP_SIZE = (40, 60) # 表示するマップの大きさ
     TRAIN_CNT = 100     # 学習ループの回数
 
     def sample_at_random(ws, c, N):
@@ -72,7 +72,7 @@ def som_gray_with_label():
     vec_size = 100
     vec_dim = 128
     data_type_count = 12
-    map_size = (40, 40)
+    map_size = (40, 60)
     train_itr = 100
     # ラベル付き特徴ベクトルのリストを生成
     patterns =  [("pattern%d" % (i+1), np.random.randint(0, 2, vec_dim))
@@ -86,7 +86,7 @@ def som_gray_with_label():
     print "label_coord:\n", label_coord
     for label, coord in label_coord:
         x, y = coord
-        plt.text(x, y, label, ha='center', va='center', color='red')
+        plt.text(x, y, label, ha='center', va='center', withdash=True,  color='red')
     plt.imshow(map_, interpolation='nearest')
     plt.show()
 
@@ -110,21 +110,23 @@ def som_color_with_label():
     vec_size = 100
     vec_dim = 128
     data_type_count = 10
-    map_size = (40, 40)
-    train_itr = 700
+    map_size = (40, 60)
+    train_itr = 70
     vec_patterns = [["pattern%d" % (i+1), # ラベル
                      np.random.randint(0, 255, 3), # 色
                      np.random.randint(0, 2, vec_dim)] # 入力ベクトル
                     for i in xrange(data_type_count)]
     for i, v in enumerate(vec_patterns):
         print "pattern:%d\n" % (i+1), v[2]
-        print "label:", v[0], v[1]
+        print "label:", v[0]
+        print "color:", v[1]
     input_vec = [vec_patterns[np.random.randint(data_type_count)] for i in xrange(vec_size)]
     som = modsom.SOM(map_size, input_vec)
     som.set_parameter(neighbor=0.2, learning_rate=0.3, input_length_ratio=0.25)
     map_, labels = som.train(train_itr)
     print "map_shape:", map_.shape
-    print "map:", map_
+    print "map:\n", map_
+    print "label_coord:\n", labels
     for l, c in labels:
         x, y = c
         plt.text(x, y, l)
@@ -135,8 +137,8 @@ def som_color_without_label():
     vec_size = 100
     vec_dim = 28
     data_type_count = 20
-    map_size = (400, 400)
-    train_itr = 500
+    map_size = (40, 40)
+    train_itr = 50
     vec_patterns = [[np.random.randint(0, 255, 3), np.random.randint(0, 2, vec_dim)]
                     for i in xrange(data_type_count)]
     for i, v in enumerate(vec_patterns):
@@ -172,8 +174,8 @@ def som_rgb_test():
     plt.show()
 
 def som_r_rgb_test():
-    rgb = np.random.rand(300, 3)
-    som = modsom.SOM((40, 40), rgb)
+    rgb = np.random.rand(2000, 3)
+    som = modsom.SOM((60, 40), rgb)
     som.set_parameter(neighbor=0.2, learning_rate=0.3, input_length_ratio=0.25)
     map_ = som.train(100)
     plt.imshow(map_, interpolation='nearest')
@@ -210,8 +212,8 @@ if __name__ == '__main__':
 
     #main()
     #som_rgb_test()
-    #som_r_rgb_test()
-    som_gray_with_label()
+    som_r_rgb_test()
+    #som_gray_with_label()
     #som_gray_without_label()
     #som_color_with_label()
     #som_color_without_label()

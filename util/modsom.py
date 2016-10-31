@@ -76,15 +76,14 @@ class SOM:
             if isinstance(input_data, list) else input_data
         input_shape = tuple(self.input_layer.shape)
         assert len(input_shape) == 2
-        self.shape = tuple(shape)       # 入力層のサイズ(X x Y)
+        self.shape = tuple(shape)       # 入力層のサイズ(m x n)
         self.input_num = input_shape[0] # 入力ベクトルの総数
         self.input_dim = input_shape[1] # 入力ベクトルの次元
         # 出力層、平均0分散1のランダム値で初期化
         self.output_layer = rand.standard_normal((self.shape[0] * self.shape[1], self.input_dim))
-        x, y = np.meshgrid(range(self.shape[0]), range(self.shape[1]))
-        # 出力層のインデックスの配列[ [x1, y1], [x2, y2] ]
-        self.index_map = np.hstack((y.flatten()[:, np.newaxis],
-                                    x.flatten()[:, np.newaxis]))
+        c, r = np.meshgrid(range(self.shape[1]), range(self.shape[0]))
+        # 出力層のインデックスの配列[[0行, 0列], [0行, 1列]...]
+        self.index_map = np.c_[r.ravel(), c.ravel()]
         self._param_input_length_ratio = 0.25
         self._life = self.input_num * self._param_input_length_ratio
         self._param_neighbor = 0.25
@@ -186,7 +185,7 @@ class SOM:
         return self._return_map()
 
     def _return_map(self):
-        map_ = self.output_layer.reshape((self.shape[1], self.shape[0], self.input_dim))
+        map_ = self.output_layer.reshape((self.shape[0], self.shape[1], self.input_dim))
         if self.with_label:
             if self.display is None:
                 if self.input_label_type is 'sr':
@@ -217,12 +216,12 @@ class SOM:
             if (isinstance(row[0], (str, list, tuple, np.ndarray))
                 and isinstance(row[1], (list, tuple, np.ndarray))):
                 return True
-            assert check_(), "invalid labeled data. [str, rgb, input_vector] or [str, input_vector] or [rgb, input_vector]."
+            assert check_(), "invalid labeled data. see doc of __init__."
         elif len(row) == 3:
             if (isinstance(row[0], str) and isinstance(row[1], (list, tuple, np.ndarray))
                 and isinstance(row[2], (list, tuple, np.ndarray))):
                 return True
-            assert check_(), "invalid labeled data. [str, rgb, input_vector] or [str, input_vector] or [rgb, input_vector]."
+            assert check_(), "invalid labeled data. see doc of __init__."
         return False
 
     def _split_input(self, input_data):
@@ -269,13 +268,12 @@ class SOM:
 
     def _get_rgb_map(self, map_):
         """出力層のノードをRGBでラベリング"""
-        x, y = self.shape
-        rgb_map = np.ones(x * y * 3).reshape(x, y, 3)
+        m, n = self.shape
+        rgb_map = np.ones(m * n * 3).reshape(m, n, 3)
         for i, j in self.index_map:
-            #dis = np.linalg.norm(self.input_layer - map_[i, j], axis=1)
             dis = np.linalg.norm(self.input_layer - map_[i, j], axis=1)
-            min_i = np.argmin(dis)
-            rgb_map[i, j] = self.input_rgb[min_i]
+            min_idx = np.argmin(dis)
+            rgb_map[i, j] = self.input_rgb[min_idx]
         return rgb_map
 
     def _make_gray_scale_map(self, map_):
