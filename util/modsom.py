@@ -160,14 +160,19 @@ class SOM:
             コンストラクタにラベルを指定した場合、ラベルの最終的な座標も戻り値になる
 
         """
-        print "合計ループ回数:", n * self.input_num
+        roop_ = float(n * self.input_num)
+        roop_p = 0
+        print "合計ループ回数:", int(roop_)
         print "学習状況: 0%",
         for i in xrange(n):
             for j in self._random_idx_gen(self.input_num):
                 data = self.input_layer[j] # 入力ベクトル
                 win_idx = self._get_winner_node(data)
                 self._update(win_idx, data, i)
-            if (i+1)/float(n)*100%10==0: print "%d%%"%((i+1)/float(n)*100),
+                roop_p += 1
+                #if roop_p/roop_*100%10==0: print "%d%%"%(roop_p/roop_*100)
+                if roop_p/roop_*100%10==0: print "%d%%"%(roop_p/roop_*100),
+                #print "%.5f%%" % (roop_p/roop_*100)
         print ""
 
         """
@@ -196,11 +201,11 @@ class SOM:
                     return self._get_rgb_map(map_)
             elif self.display is 'gray_scale':
                 if self.input_label_type is 'sr':
-                    return self._get_rgb_map(map_), self._get_str_label(map_)
+                    return self._make_gray_scale_map(map_), self._get_str_label(map_)
                 if self.input_label_type is 's':
                     return self._make_gray_scale_map(map_), self._get_str_label(map_)
                 if self.input_label_type is 'r':
-                    return self._get_rgb_map(map_)
+                    return self._make_gray_scale_map(map_)
         else:
             if self.display is None:
                 return map_
@@ -216,12 +221,12 @@ class SOM:
             if (isinstance(row[0], (str, list, tuple, np.ndarray))
                 and isinstance(row[1], (list, tuple, np.ndarray))):
                 return True
-            assert check_(), "invalid labeled data. see doc of __init__."
+            assert check_(), "invalid labeled data. see the doc of __init__."
         elif len(row) == 3:
             if (isinstance(row[0], str) and isinstance(row[1], (list, tuple, np.ndarray))
                 and isinstance(row[2], (list, tuple, np.ndarray))):
                 return True
-            assert check_(), "invalid labeled data. see doc of __init__."
+            assert check_(), "invalid labeled data. see the doc of __init__."
         return False
 
     def _split_input(self, input_data):

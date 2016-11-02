@@ -25,17 +25,20 @@ def normalize_scale(arr):
 
 def main():
     Xls = namedtuple('Xls', 'label, path, sheet, rgb')
-    xls = [Xls('1', r'E:\work\data\run.xlsx', 'Sheet4', [1, 0, 0]),
-           Xls('2', r'E:\work\data\walk.xlsx', 'Sheet4', [0, 0, 1]),
-           Xls('3', r'E:\work\data\skip.xlsx', 'Sheet4', [0, 1, 0])]
+    xls = [Xls('r', r'E:\work\data\run.xlsx', 'Sheet4', [1, 0, 0]),
+           Xls('w', r'E:\work\data\walk.xlsx', 'Sheet4', [0, 0, 1]),
+           Xls('s', r'E:\work\data\skip.xlsx', 'Sheet4', [0, 1, 0])]
+    font_colors = {'r':'red',
+                   'w':'blue',
+                   's':'green'}
     COLUMN_LETTER = 'F'
     FFT_POINTS = 256
-    SAMPLE_CNT = 200    # xlsx1つのサンプリング回数
+    SAMPLE_CNT = 100    # xlsx1つのサンプリング回数
     MAP_SIZE = (40, 60) # 表示するマップの大きさ
-    TRAIN_CNT = 100     # 学習ループの回数
+    TRAIN_CNT = 50     # 学習ループの回数
 
     def sample_at_random(ws, c, N):
-        r = np.random.randint(1, ws.ws.max_row - N)
+        r = np.random.randint(2, ws.ws.max_row - N)
         end_ = r + N - 1
         return  ws.select_column(column_letter=c, begin_row=r, end_row=end_, log=True)
 
@@ -58,6 +61,7 @@ def main():
 
     input_vecs = [input_vec for input_vec in input_vec_gen()]
 
+    #som = modsom.SOM(MAP_SIZE, input_vecs, display='gray_scale')
     som = modsom.SOM(MAP_SIZE, input_vecs)
     som.set_parameter(neighbor=0.2, learning_rate=0.3, input_length_ratio=0.25)
     map_, label_coord = som.train(TRAIN_CNT)
@@ -65,8 +69,67 @@ def main():
     for label, coord in label_coord:
         x, y = coord
         #plt.text(x, y, label, color=colors[label])
-        plt.text(x, y, label, color='white')
+        plt.text(x, y, label, color=font_colors[label])
     plt.show()
+
+def test1():
+    Xls = namedtuple('Xls', 'label, path, sheet, rgb')
+    xls = [Xls('r', r'E:\work\data\run.xlsx', 'Sheet4', [1, 0, 0]),
+           Xls('w', r'E:\work\data\walk.xlsx', 'Sheet4', [0, 0, 1]),
+           Xls('s', r'E:\work\data\skip.xlsx', 'Sheet4', [0, 1, 0])]
+    font_colors = {'r':'red',
+                   'w':'blue',
+                   's':'green'}
+    COLUMN_LETTER = 'F'
+    SAMPLE_CNT = 100    # xlsx1つのサンプリング回数
+    MAP_SIZE = (40, 60) # 表示するマップの大きさ
+    TRAIN_CNT = 100     # 学習ループの回数
+
+    def sample_at_random(ws, c, N):
+        r = np.random.randint(2, ws.ws.max_row - N)
+        end_ = r + N - 1
+        return  ws.select_column(column_letter=c, begin_row=r, end_row=end_, log=False)
+
+    def ws_gen():
+        for x in xls:
+            yield x, ExcelWrapper(filename=x.path, sheetname=x.sheet)
+
+    def sample_gen(N):
+        for x, ws in ws_gen():
+            for i in xrange(SAMPLE_CNT):
+                yield x, sample_at_random(ws, COLUMN_LETTER, N)
+
+    def fft_gen(N, scale):
+        for x, sample_data in sample_gen(N):
+            if scale == "0-1":
+                yield x, normalize_scale(fft(sample_data, N))
+            elif scale == "std":
+                yield x, normalize_standard(fft(sample_data, N))
+
+    def input_vec_gen(N, scale):
+        for x, fftdata in fft_gen(N, scale):
+            yield x.label, fftdata
+
+    fftps = (128,256)
+    scales = ("0-1", "std")
+    for i in xrange(2):
+        print "%d回目" % (i+1)
+        for N in fftps:
+            print "%d_FFT_SOM" % N
+            for sc in scales:
+                print "scale: %s" % sc
+                input_vecs = [input_vec for input_vec in input_vec_gen(N, sc)]
+                som = modsom.SOM(MAP_SIZE, input_vecs, display='gray_scale')
+                som.set_parameter(neighbor=0.2, learning_rate=0.3, input_length_ratio=0.25)
+                map_, label_coord = som.train(TRAIN_CNT)
+                fig = plt.figure()
+                ax = fig.add_subplot(111)
+                ax.set_title("%dPointFFT" % N)
+                ax.imshow(map_, interpolation='nearest')
+                for label, coord in label_coord:
+                    x, y = coord
+                    ax.text(x=x, y=y, s=label, color=font_colors[label])
+                fig.savefig(r"E:\work\fig\fft_point_test\%d_fft%d_%s_100roop" % ((i+1), N, sc))
 
 def som_gray_with_label():
     vec_size = 100
@@ -99,7 +162,6 @@ def som_gray_without_label():
     patterns = [np.random.random(vec_dim) for i in xrange(data_type_count)]
     input_vec = [patterns[np.random.randint(data_type_count)] for i in xrange(vec_size)]
     som = modsom.SOM(map_size, input_vec, display='gray_scale')
-    #som = modsom.SOM(map_size, patterns, display='gray_scale')
     som.set_parameter(neighbor=0.2, learning_rate=0.3, input_length_ratio=0.25)
     map_ = som.train(train_itr)
     print "map_shape", map_.shape
@@ -134,10 +196,10 @@ def som_color_with_label():
     plt.show()
 
 def som_color_without_label():
-    vec_size = 100
-    vec_dim = 28
-    data_type_count = 20
-    map_size = (40, 40)
+    vec_size = 1000
+    vec_dim = 10
+    data_type_count = 10
+    map_size = (50, 70)
     train_itr = 50
     vec_patterns = [[np.random.randint(0, 255, 3), np.random.randint(0, 2, vec_dim)]
                     for i in xrange(data_type_count)]
@@ -210,9 +272,10 @@ def hirakawa_test():
 
 if __name__ == '__main__':
 
+    test1()
     #main()
     #som_rgb_test()
-    som_r_rgb_test()
+    #som_r_rgb_test()
     #som_gray_with_label()
     #som_gray_without_label()
     #som_color_with_label()
