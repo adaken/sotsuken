@@ -32,10 +32,10 @@ def main():
                    'w':'blue',
                    's':'green'}
     COLUMN_LETTER = 'F'
-    FFT_POINTS = 256
+    FFT_POINTS = 128
     SAMPLE_CNT = 100    # xlsx1つのサンプリング回数
     MAP_SIZE = (40, 60) # 表示するマップの大きさ
-    TRAIN_CNT = 50     # 学習ループの回数
+    TRAIN_CNT = 150     # 学習ループの回数
 
     def sample_at_random(ws, c, N):
         r = np.random.randint(2, ws.ws.max_row - N)
@@ -61,8 +61,8 @@ def main():
 
     input_vecs = [input_vec for input_vec in input_vec_gen()]
 
-    #som = modsom.SOM(MAP_SIZE, input_vecs, display='gray_scale')
-    som = modsom.SOM(MAP_SIZE, input_vecs)
+    som = modsom.SOM(MAP_SIZE, input_vecs, display='gray_scale')
+    #som = modsom.SOM(MAP_SIZE, input_vecs)
     som.set_parameter(neighbor=0.2, learning_rate=0.3, input_length_ratio=0.25)
     map_, label_coord = som.train(TRAIN_CNT)
     plt.imshow(map_, interpolation='nearest')
@@ -70,8 +70,11 @@ def main():
         x, y = coord
         #plt.text(x, y, label, color=colors[label])
         plt.text(x, y, label, color=font_colors[label])
-    plt.show()
-
+    plt.savefig(r"E:\work\128pointFFT01scale150roopSOM.png")
+    #plt.show()
+    from libsvm.svm import *
+    
+    
 def test1():
     Xls = namedtuple('Xls', 'label, path, sheet, rgb')
     xls = [Xls('r', r'E:\work\data\run.xlsx', 'Sheet4', [1, 0, 0]),
@@ -272,11 +275,11 @@ def hirakawa_test():
 
 if __name__ == '__main__':
 
-    test1()
+    #test1()
     #main()
     #som_rgb_test()
     #som_r_rgb_test()
-    #som_gray_with_label()
+    som_gray_with_label()
     #som_gray_without_label()
     #som_color_with_label()
     #som_color_without_label()
