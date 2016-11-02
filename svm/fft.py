@@ -47,46 +47,28 @@ def fft(arr, fft_points, out_fig=False):
     # リストなら配列に変換
     if isinstance(arr, list):
         arr = np.array(arr)
+        
+    #arr -= np.mean(arr) # DC成分を除去
+    
+    fs = fft_points # サンプリング周波数(FFTのポイント数)
 
-    # DC成分を除去
-    #arr -= np.mean(arr)
-
-    # サンプリング周波数(FFTのポイント数)
-    fs = fft_points
-
-    # fsとの差を0で埋める
-    #arr = np.hstack((arr, np.zeros(fs - arr.size)))
+    #arr = np.hstack((arr, np.zeros(fs - arr.size))) # fsとの差を0で埋める
 
     assert fs == arr.size, """
     size of arr and fft_points must be same value.
     fft_points:%d, arr_size:%d""" % (fft_points, arr.size)
 
-    # ハニング窓を適用
-    wind_arr = __apply_hunningwin(arr, fs)
+    wind_arr = __apply_hunningwin(arr, fs) # ハニング窓を適用   
+    #wind_arr = apply_hummingwin(arr, fs) # ハミング窓を適用   
+    #wind_arr = apply_blackmanwin(arr, fs) # ブラックマン窓を適用
 
-    # ハミング窓を適用
-    #wind_arr = apply_hummingwin(arr, fs)
-
-    # ブラックマン窓を適用
-    #wind_arr = apply_blackmanwin(arr, fs)
-
-    # サンプリング間隔(サンプリング周波数の逆数)
-    ps = 1/float(fs)
-
-    # FFT
-    fftdata = np.fft.fft(wind_arr)
-
-    # 正規化
-    fftdata /= fs / 2
-
-    # X軸 - 周波数
-    fftfreq = np.fft.fftfreq(fs, ps)[0:fs/2]
-
-    # Y軸 - スペクトルの絶対値
-    fftmag = np.abs(fftdata[0:fs/2])
+    ps = 1/float(fs) # サンプリング間隔(サンプリング周波数の逆数)
+    fftdata = np.fft.fft(wind_arr) # FFT
+    fftdata /= fs / 2 # 正規化
+    fftfreq = np.fft.fftfreq(fs, ps)[0:fs/2] # X軸 - 周波数
+    fftmag = np.abs(fftdata[0:fs/2]) # Y軸 - スペクトルの絶対値
 
     if out_fig:
-
         # グラフ
         x = np.arange(0, fs)
         fig = plt.figure()
@@ -116,9 +98,7 @@ def fft(arr, fft_points, out_fig=False):
         #ax3.set_ylim(fftmag.min(), fftmag.max())
 
         fig.tight_layout()
-
         return fftmag, fig
-
     return fftmag
 
 if __name__ == '__main__':

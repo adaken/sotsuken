@@ -1,4 +1,6 @@
 # coding: utf-8
+from fileinput import close
+from _struct import unpack
 
 def csv_test():
     import csv
@@ -82,7 +84,6 @@ def som_test():
     output_map = som.train(10000)
 
     print "output_shape:", output_map.shape
-    print output_map
 
     plt.imshow(output_map, interpolation='none')
     plt.show()
@@ -149,6 +150,14 @@ def timedecolater(func):
 if __name__ == "__main__":
     import numpy as np
     import matplotlib.pyplot as plt
-    import sys
-    for i in xrange(100):
-        print "aa\b"
+    from sompy import SOM
+    np.set_printoptions(threshold=np.inf)
+
+    #som_test()
+    import warnings
+    #np.seterr(all='warn')
+    warnings.filterwarnings('error')
+
+    l = (1, 2, 3, 4)
+    for i, j in l:
+        print i,
