@@ -33,9 +33,9 @@ def main():
                    's':'green'}
     COLUMN_LETTER = 'F'
     FFT_POINTS = 128
-    SAMPLE_CNT = 100    # xlsx1つのサンプリング回数
+    SAMPLE_CNT =100    # xlsx1つのサンプリング回数
     MAP_SIZE = (40, 60) # 表示するマップの大きさ
-    TRAIN_CNT = 150     # 学習ループの回数
+    TRAIN_CNT = 100     # 学習ループの回数
 
     def sample_at_random(ws, c, N):
         r = np.random.randint(2, ws.ws.max_row - N)
@@ -61,19 +61,19 @@ def main():
 
     input_vecs = [input_vec for input_vec in input_vec_gen()]
 
-    som = modsom.SOM(MAP_SIZE, input_vecs, display='gray_scale')
-    #som = modsom.SOM(MAP_SIZE, input_vecs)
-    som.set_parameter(neighbor=0.2, learning_rate=0.3, input_length_ratio=0.25)
-    map_, label_coord = som.train(TRAIN_CNT)
-    plt.imshow(map_, interpolation='nearest')
-    for label, coord in label_coord:
-        x, y = coord
-        #plt.text(x, y, label, color=colors[label])
-        plt.text(x, y, label, color=font_colors[label])
-    plt.savefig(r"E:\work\128pointFFT01scale150roopSOM.png")
-    #plt.show()
-    from libsvm.svm import *
-    
+    for i in xrange(15):
+        print "%d回目" % (i+1)
+        som = modsom.SOM(MAP_SIZE, input_vecs, display='gray_scale')
+        #som = modsom.SOM(MAP_SIZE, input_vecs)
+        som.set_parameter(neighbor=0.2, learning_rate=0.3, input_length_ratio=0.25)
+        map_, label_coord = som.train(TRAIN_CNT)
+        plt.imshow(map_, interpolation='nearest')
+        for label, coord in label_coord:
+            x, y = coord
+            #plt.text(x, y, label, color=colors[label])
+            plt.text(x, y, label, color=font_colors[label])
+        plt.savefig(r"E:\work\128fft\900data128pFFT01scale100roopSOM_%d.png" % (i+1))
+        #plt.show()    
     
 def test1():
     Xls = namedtuple('Xls', 'label, path, sheet, rgb')
@@ -276,10 +276,10 @@ def hirakawa_test():
 if __name__ == '__main__':
 
     #test1()
-    #main()
+    main()
     #som_rgb_test()
     #som_r_rgb_test()
-    som_gray_with_label()
+    #som_gray_with_label()
     #som_gray_without_label()
     #som_color_with_label()
     #som_color_without_label()

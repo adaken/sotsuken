@@ -47,26 +47,12 @@ class ExcelWrapper(object):
         column = self.ws['%s%d:%s' % (column_letter, begin_row, end_row)]
         return [data[0].value for data in [cell for cell in column]]
 
-    def write_to_csv(self, columns, csv_path):
-        import csv
+if __name__ == '__main__':
+    filepath = r'E:\work\data\run.xlsx'
+    letter = 'F'
+    begin = 2
+    end = 100
+    sheet = "Sheet4"
+    excel = ExcelWrapper(filepath,sheet)
+    print excel.select_column(column_letter = letter, begin_row = begin, end_row = end, log = True)
 
-        # 行のリストに転置
-        rows = self.__transpose(columns)
-
-        # csvに書き出す
-        with open(csv_path, 'wb') as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerows(rows)
-
-    def __transpose(self, list2):
-        """
-        2次元リストを転置します
-        """
-        row_size = len(list2)
-        col_size = len(list2[0])
-        # 行と列のサイズを入れ替える
-        nlist2 = [[None for i in xrange(row_size)] for j in xrange(col_size)]
-        for i in range(row_size):
-            for j in range(col_size):
-                nlist2[j][i] = list2[i][j]
-        return nlist2
