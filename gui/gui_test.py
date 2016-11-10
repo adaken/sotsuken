@@ -9,16 +9,24 @@ if __name__ == '__main__':
     root.title("test")
     root.geometry("400x300")
 
-    path_name = ""
 
-    buffer = tk.StringVar()
-    buffer.set("")
+# フレームの生成
+f0 = Frame(root)
+f1 = Frame(root)
 
-    def load_text():
-        if buffer.get():
-            value = eval(buffer.get())
-            buffer.set(str(value))
+# f0 にボタンを配置する
+Button(f0, text = 'button 00').pack(side = LEFT)
+Button(f0, text = 'button 01').pack(side = LEFT)
+Button(f0, text = 'button 02').pack(side = LEFT)
 
+# f1 にボタンを配置する
+Button(root, text = 'button 10').pack(in_ = f1, fill = BOTH)
+Button(root, text = 'button 11').pack(in_ = f1, fill = BOTH)
+Button(root, text = 'button 12').pack(in_ = f1, fill = BOTH)
+
+# フレームの配置
+f0.pack()
+f1.pack(fill = BOTH)
     #エントリー
     #editbox = tk.Entry(root, textvariable = buffer, width = 50)
     #editbox.pack()
@@ -26,17 +34,29 @@ if __name__ == '__main__':
 
     label = tk.Label()
     label.pack()
+
+    fTyp = ['Excelファイル', '*.csv']
+
+    iDir = 'c:/'
+
+    dirname = tkfd.askdirectory(initialdir=iDir)
+
     #ファイル選択
     def load_file():
         global path_name
-        filename = tkfd.askopenfilename()
+        filename = tkfd.askopenfilename(filetypes=fTyp, initialdir=iDir)
         label.set(os.path.dirname(filename))
 
     button1 = tk.Button(root, text = '参照', width = 10, command = load_file)
     button1.pack()
+
+
+    def 
     #button2 = tk.Button(root, text = '', width = 10, command = )
     #button2.pack
 
-    #button.place()
+    #button.place() ボタン配置
+    #数値を変更・入力できるエントリー
+    #FFT,SOM,SVM
 
     root.mainloop()
