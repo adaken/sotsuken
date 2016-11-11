@@ -43,7 +43,7 @@ class SOM:
             format4: [[label, rgb, vector]...]
 
         display : str
-            indicate 'gray-scale' to build gray-scale map
+            indicate 'gray_scale' to build gray-scale map
         """
         #np.seterr(all='warn')
         import warnings

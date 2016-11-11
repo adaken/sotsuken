@@ -148,16 +148,15 @@ def timedecolater(func):
     return wrapper
 
 if __name__ == "__main__":
-    import numpy as np
+    from util.excelwrapper import ExcelWrapper
     import matplotlib.pyplot as plt
-    from sompy import SOM
-    np.set_printoptions(threshold=np.inf)
-
-    #som_test()
-    import warnings
-    #np.seterr(all='warn')
-    warnings.filterwarnings('error')
-
-    l = (1, 2, 3, 4)
-    for i, j in l:
-        print i,
+    ws = ExcelWrapper(r"E:\work\data\jump.xlsx", 'Sheet4')
+    time = ws.select_column(column_letter='A', begin_row=2, end_row=None, log=False)
+    acc =  ws.select_column(column_letter='F', begin_row=2, end_row=None, log=False)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(acc)
+    ax.set_xticks(range(0, len(time), 50))
+    ax.set_xticklabels([time[i] for i in range(0, len(time), 50)], rotation=75)
+    fig.tight_layout()
+    plt.show()
