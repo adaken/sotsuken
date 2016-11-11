@@ -94,6 +94,13 @@ def make_input_from_xlsx(filename,
         'std': ベクトルの成分を平均0、分散1で正規化
         '01' : ベクトルの成分を0<Xi<1で正規化
 
+    label : any
+        入力ベクトルに対するラベル
+        文字列以外でもよい
+
+    log : bool, default: False
+        標準出力にログを出力するかどうか
+
     Return
     ------
     vectors : list
