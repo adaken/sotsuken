@@ -97,7 +97,7 @@ def make_input_from_xlsx(filename,
     ------
     vectors : 2Dndarray
         入力ベクトル(ndarray)のndarray(2次元ndarray)
-        入力ベクトルの次元はfft_Nの値の半分になる
+        ベクトルの次元はfft_Nの値の半分になる
     """
 
     assert sampling in ('std', 'rand')
@@ -108,6 +108,7 @@ def make_input_from_xlsx(filename,
     return np.array([normalize(fftdata) for fftdata in (fft(data, fft_N) for data in sample_gen(*args))])
 
 if __name__ == '__main__':
+    # こんな感じで使う
     xls = r"E:\work\data\jump.xlsx"
     input_vec = make_input_from_xlsx(filename=xls, sheetname='Sheet4', col='F', read_range=(2, None),
                                      sampling='std', sample_cnt=10, overlap=10,
