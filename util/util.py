@@ -51,6 +51,7 @@ def make_input_from_xlsx(filename,
                          overlap=0,
                          fft_N=128,
                          normalizing='01',
+                         label=None,
                          log=False):
     """
     Excelファイルから入力ベクトル列を作成
@@ -95,9 +96,10 @@ def make_input_from_xlsx(filename,
 
     Return
     ------
-    vectors : 2Dndarray
-        入力ベクトル(ndarray)のndarray(2次元ndarray)
+    vectors : list
+        入力ベクトルのリスト
         ベクトルの次元はfft_Nの値の半分になる
+        ラベルを指定した場合は[[label, vector]...]
     """
 
     assert sampling in ('std', 'rand')
@@ -105,13 +107,24 @@ def make_input_from_xlsx(filename,
     sample_gen = xlsx_sample_gen if sampling == 'std' else xlsx_random_sample_gen
     normalize = normalize_standard if normalizing == 'std' else normalize_scale
     args = (ExcelWrapper(filename, sheetname), col, read_range, fft_N, overlap, sample_cnt, log)
-    return np.array([normalize(fftdata) for fftdata in (fft(data, fft_N) for data in sample_gen(*args))])
+    if label is not None:
+        return [[label, normalize(fftdata)] for fftdata in (fft(data, fft_N) for data in sample_gen(*args))]
+    else:
+        return [normalize(fftdata) for fftdata in (fft(data, fft_N) for data in sample_gen(*args))]
 
 if __name__ == '__main__':
     # こんな感じで使う
-    xls = r"E:\work\data\jump.xlsx"
+    label, xls = 1, r"E:\work\data\jump.xlsx"
     input_vec = make_input_from_xlsx(filename=xls, sheetname='Sheet4', col='F', read_range=(2, None),
-                                     sampling='std', sample_cnt=10, overlap=10,
-                                     fft_N=128, normalizing='01', log=True)
+                                     sampling='std', sample_cnt=20, overlap=0,
+                                     fft_N=128, normalizing='01', label=label, log=True)
     print >> file(r'D:\home\desk\log.txt', 'w'), input_vec
     print "finish"
+    from modsom import SOM
+    som = SOM(shape=(30, 45), input_data=input_vec, display='gray_scale')
+    map_, label_coord = som.train(30)
+    import matplotlib.pyplot as plt
+    plt.imshow(map_, interpolation='nearest')
+    for l, c in label_coord:
+        plt.text(c[0], c[1], l, color='red')
+    plt.show()
