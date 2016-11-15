@@ -239,7 +239,8 @@ class SOM:
         row = input_data[0]
         len_ = len(row)
         if len_ == 2:
-            if isinstance(row[0], (int, str)):
+            if isinstance(row[0], (int, str)
+                          ):
                 # str, none, vector
                 return split_s(0), None, split_rv(1)
             else:

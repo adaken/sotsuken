@@ -104,7 +104,7 @@ def make_input_from_xlsx(filename,
     Return
     ------
     vectors : list
-        入力ベクトルのリスト
+        入力ベクトル(list)のリスト
         ベクトルの次元はfft_Nの値の半分になる
         ラベルを指定した場合は[[label, vector]...]
     """
@@ -115,9 +115,9 @@ def make_input_from_xlsx(filename,
     normalize = normalize_standard if normalizing == 'std' else normalize_scale
     args = (ExcelWrapper(filename, sheetname), col, read_range, fft_N, overlap, sample_cnt, log)
     if label is not None:
-        return [[label, normalize(fftdata)] for fftdata in (fft(data, fft_N) for data in sample_gen(*args))]
+        return [[label, list(normalize(fftdata))] for fftdata in (fft(data, fft_N) for data in sample_gen(*args))]
     else:
-        return [normalize(fftdata) for fftdata in (fft(data, fft_N) for data in sample_gen(*args))]
+        return [list(normalize(fftdata)) for fftdata in (fft(data, fft_N) for data in sample_gen(*args))]
 
 if __name__ == '__main__':
     # こんな感じで使う
@@ -125,7 +125,7 @@ if __name__ == '__main__':
     input_vec = make_input_from_xlsx(filename=xls, sheetname='Sheet4', col='F', read_range=(2, None),
                                      sampling='std', sample_cnt=20, overlap=0,
                                      fft_N=128, normalizing='01', label=label, log=True)
-    print >> file(r'D:\home\desk\log.txt', 'w'), input_vec
+    print >> file(r'E:\log.txt', 'w'), input_vec
     print "finish"
     from modsom import SOM
     som = SOM(shape=(30, 45), input_data=input_vec, display='gray_scale')
