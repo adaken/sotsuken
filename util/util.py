@@ -2,7 +2,7 @@
 
 import numpy as np
 from excelwrapper import ExcelWrapper
-from util import fft.fft
+from fft import fft
 
 def normalize_standard(arr):
     """

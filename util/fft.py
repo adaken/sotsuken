@@ -24,13 +24,19 @@ def __apply_blackmanwin(a, fs):
     blackman_window = np.blackman(fs)
     return a * blackman_window
 
-def fft(arr, fft_points, out_fig=False):
+def fft(arr, fft_points, window='haning', out_fig=False):
     """
     Parameters
     ----------
     arr : ndarray or list
 
     fft_points : int
+
+    window : str
+        窓関数を指定
+        'hunning'
+        'humming'
+        'blackman'
 
     out_fig : bool, optional, default: False
         グラフを出力するかどうか
@@ -47,9 +53,9 @@ def fft(arr, fft_points, out_fig=False):
     # リストなら配列に変換
     if isinstance(arr, list):
         arr = np.array(arr)
-        
+
     #arr -= np.mean(arr) # DC成分を除去
-    
+
     fs = fft_points # サンプリング周波数(FFTのポイント数)
 
     #arr = np.hstack((arr, np.zeros(fs - arr.size))) # fsとの差を0で埋める
@@ -58,9 +64,16 @@ def fft(arr, fft_points, out_fig=False):
     size of arr and fft_points must be same value.
     fft_points:%d, arr_size:%d""" % (fft_points, arr.size)
 
-    wind_arr = __apply_hunningwin(arr, fs) # ハニング窓を適用   
-    #wind_arr = apply_hummingwin(arr, fs) # ハミング窓を適用   
-    #wind_arr = apply_blackmanwin(arr, fs) # ブラックマン窓を適用
+    wind_arr = None
+    if window == 'hunning':
+        wind_arr = __apply_hunningwin(arr, fs) # ハニング窓を適用
+    elif window == 'humming':
+        wind_arr = __apply_hummingwin(arr, fs) # ハミング窓を適用
+    elif window == 'blackman':
+        wind_arr = __apply_blackmanwin(arr, fs) # ブラックマン窓を適用
+    else:
+        raise ValueError("windowの値が不正です")
+
 
     ps = 1/float(fs) # サンプリング間隔(サンプリング周波数の逆数)
     fftdata = np.fft.fft(wind_arr) # FFT
@@ -85,7 +98,7 @@ def fft(arr, fft_points, out_fig=False):
 
         # 窓関数を適用した波形
         ax2.plot(x, wind_arr)
-        ax2.set_title("window_func")
+        ax2.set_title("%s_window" % window)
         ax2.set_xlabel("x")
         ax2.set_ylabel("y")
         #ax2.set_ylim(wind_arr.min(), wind_arr.max())
@@ -113,6 +126,7 @@ if __name__ == '__main__':
     plt.plot(y)
     #plt.show()
 
-    fftmag, fig = fft(arr=y, fft_points=N, out_fig=True)
+    w = 'hunning'
+    fftmag, fig = fft(arr=y, fft_points=N, out_fig=True, window=w)
     print fftmag
-    fig.savefig(r"E:\work\fig\sin\sin.png")
+    fig.savefig(r"E:\work\fig\sin\sin_{}.png".format(w))
