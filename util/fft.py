@@ -24,7 +24,7 @@ def __apply_blackmanwin(a, fs):
     blackman_window = np.blackman(fs)
     return a * blackman_window
 
-def fft(arr, fft_points, window='haning', out_fig=False):
+def fft(arr, fft_points, window='hanning', out_fig=False):
     """
     Parameters
     ----------
