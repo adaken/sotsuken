@@ -37,13 +37,16 @@ class SOM:
 
         input_data : list, tuple, ndarray
             list of input vector
+            label : int or str
+            rgb : list like of 3 or 4 ints
+            vector : list like of ints or floats
             format1: [[vector]...]
             format2: [[label, vector]...]
             format3: [[rgb, vector]...]
             format4: [[label, rgb, vector]...]
 
         display : str
-            indicate 'gray-scale' to build gray-scale map
+            indicate 'gray_scale' to build gray-scale map
         """
         #np.seterr(all='warn')
         import warnings
@@ -218,12 +221,12 @@ class SOM:
         check_ = lambda: False not in [True if isinstance(i, (int, float)) else False
                                          for i in row]
         if len(row) == 2:
-            if (isinstance(row[0], (str, list, tuple, np.ndarray))
+            if (isinstance(row[0], (int, str, list, tuple, np.ndarray))
                 and isinstance(row[1], (list, tuple, np.ndarray))):
                 return True
             assert check_(), "invalid labeled data. see the doc of __init__."
         elif len(row) == 3:
-            if (isinstance(row[0], str) and isinstance(row[1], (list, tuple, np.ndarray))
+            if (isinstance(row[0], int, str) and isinstance(row[1], (list, tuple, np.ndarray))
                 and isinstance(row[2], (list, tuple, np.ndarray))):
                 return True
             assert check_(), "invalid labeled data. see the doc of __init__."
@@ -236,7 +239,7 @@ class SOM:
         row = input_data[0]
         len_ = len(row)
         if len_ == 2:
-            if isinstance(row[0], str):
+            if isinstance(row[0], (int, str)):
                 # str, none, vector
                 return split_s(0), None, split_rv(1)
             else:
