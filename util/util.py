@@ -2,7 +2,7 @@
 
 import numpy as np
 from excelwrapper import ExcelWrapper
-from svm.fft import fft
+from fft import fft
 
 def normalize_standard(arr):
     """
@@ -127,7 +127,7 @@ if __name__ == '__main__':
                                      fft_N=128, normalizing='01', label=label, log=True)
     print >> file(r'E:\log.txt', 'w'), input_vec
     print "finish"
-    from modsom import SOM
+    from som.modsom import SOM
     som = SOM(shape=(30, 45), input_data=input_vec, display='gray_scale')
     map_, label_coord = som.train(30)
     import matplotlib.pyplot as plt
