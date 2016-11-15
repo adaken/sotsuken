@@ -5,9 +5,9 @@ import numpy as np
 import matplotlib.pylab as pylab
 from sompy import SOM
 import matplotlib.pyplot as plt
-import util.modsom as modsom
+import som.modsom as modsom
 from collections import namedtuple
-from fft import fft
+from util import fft
 
 def normalize_standard(arr):
     """
