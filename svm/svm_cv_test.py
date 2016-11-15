@@ -5,6 +5,7 @@ from libsvm.python.svmutil import *
 import numpy as np
 from util.excelwrapper import ExcelWrapper
 from fft import fft
+from libsvm.python import svmutil
 
 def normalize_standard(arr):
     """
@@ -148,21 +149,11 @@ if __name__ == '__main__':
     print labels, vecs
 
     """
-    テストデータ生成
-    """
-    xls = r"E:\work\data\new_run.xlsx"
-    test_vec = make_input_from_xlsx(filename=xls, sheetname='Sheet4', col='F', read_range=(2, None),
-                                     sampling='rand', sample_cnt=20, overlap=0,
-                                     fft_N=128, normalizing='01', label=1, log=False)
-    test_labels = [vec[0] for vec in test_vec]
-    test_vecs = [list(vec[1]) for vec in test_vec]
-
-    """
     学習の実行
     """
     prob = svm_problem(labels, vecs)    # 教師データ (XOR)
-    param = svm_parameter('-s 0 -t 2 -c 1')    # パラメータ (C-SVC, RBF カーネル, C=1)
+    param = svm_parameter('-s 0 -t 2 -c 1 -v 5')    # パラメータ (C-SVC, RBF カーネル, C=1, 5-fold)
     machine = svm_train(prob, param)    # 学習
 
-    p_labels, p_acc, p_vals = svm_predict(test_labels,test_vecs,machine)    # テストデータ
-    print(p_labels)    # 識別結果を表示
+    #p_labels, p_acc, p_vals = svm_predict(test_labels,test_vecs,machine)    # テストデータ
+    #print(p_labels)    # 識別結果を表示
