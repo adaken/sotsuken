@@ -9,12 +9,13 @@ if __name__ == '__main__':
     n_list = [['Magnitude Vector']]
     cnt = 0
     for s in sheets:
+        old_cnt = cnt
         print s
         r = 2
         ws = ExcelWrapper(filename, s)
-        col = ws.select_column(column_letter='F', begin_row=r, end_row=None, log=True)
+        col = ws.select_column(column_letter='F', begin_row=r, end_row=None, log=False)
         while True:
-            if col[r] < 0.7:
+            if col[r] < 0.75:
                 n_list += [[i] for i in col[r:r+128]]
                 r += 350
                 cnt += 1
@@ -22,6 +23,7 @@ if __name__ == '__main__':
                     break
                 continue
             r += 1
+        print "ジャンプ回数:", cnt - old_cnt
     print "ジャンプ合計回数:", cnt
     wb = px.Workbook()
     ws = wb.active
