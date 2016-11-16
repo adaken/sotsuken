@@ -15,9 +15,9 @@ if __name__ == '__main__':
         ws = ExcelWrapper(filename, s)
         col = ws.select_column(column_letter='F', begin_row=r, end_row=None, log=False)
         while True:
-            if col[r] < 0.75:
+            if col[r] < 0.65:
                 n_list += [[i] for i in col[r:r+128]]
-                r += 350
+                r += 400
                 cnt += 1
                 if r + 128 > len(col):
                     break
