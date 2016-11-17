@@ -7,7 +7,7 @@ from sompy import SOM
 import matplotlib.pyplot as plt
 import som.modsom as modsom
 from collections import namedtuple
-from util import fft
+from util.fft import fft
 
 def normalize_standard(arr):
     """
@@ -73,8 +73,8 @@ def main():
             #plt.text(x, y, label, color=colors[label])
             plt.text(x, y, label, color=font_colors[label])
         plt.savefig(r"E:\work\128fft\900data128pFFT01scale100roopSOM_%d.png" % (i+1))
-        #plt.show()    
-    
+        #plt.show()
+
 def test1():
     Xls = namedtuple('Xls', 'label, path, sheet, rgb')
     xls = [Xls('r', r'E:\work\data\run.xlsx', 'Sheet4', [1, 0, 0]),
