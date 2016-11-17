@@ -4,7 +4,7 @@ from collections import namedtuple
 if __name__ == '__main__':
     Xl = namedtuple('Xl', 'filename, sheets, letter, color, sampling, overlap')
     xls =  {
-        #'R':Xl(r'E:\work\data\new_run.xlsx', ('Sheet4', 'Sheet5', 'Sheet6'), 'F', 'red', 'rand', 0),
+        'R':Xl(r'E:\work\data\new_run.xlsx', ('Sheet4', 'Sheet5', 'Sheet6'), 'F', 'red', 'rand', 0),
         'Jg':Xl(r'E:\work\data\jog_jump.xlsx', ('Sheet4', 'Sheet5', 'Sheet6'), 'F', 'green', 'std', 64),
         'W':Xl(r'E:\work\data\walk_jump.xlsx', ('Sheet4', 'Sheet5', 'Sheet6'), 'F', 'blue', 'std', 64),
         'Jp':Xl(r'E:\work\data\jump_128p_84data_fixed.xlsx', ('Sheet',), 'A', 'deeppink', 'std', 0),
