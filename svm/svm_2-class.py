@@ -6,38 +6,32 @@ import numpy as np
 from util.excelwrapper import ExcelWrapper
 from util.fft import fft
 from util.util import make_input_from_xlsx
-
+import random
+from collections import namedtuple
 
 if __name__ == '__main__':
     """
     教師データ生成
     """
-    xls = r"E:\work\data\new_run.xlsx"
-    input_vec = make_input_from_xlsx(filename=xls, sheetname='Sheet4', col='F', read_range=(2, None),
-                                     sampling='rand', sample_cnt=50, overlap=0,
-                                     fft_N=128, normalizing='01', label=1, log=False)
-    #print >> file(r'D:\home\desk\log.txt', 'w'), input_vec
-    #label = [1]*len(input_vec)
-    labels = [vec[0] for vec in input_vec]
-    vecs = [list(vec[1]) for vec in input_vec]
+    Xl = namedtuple('Xl', 'filename, sheet, letter, label, sampling, overlap')
+    xls =  (
+         Xl(r'E:\work\data\new_run.xlsx', 'Sheet4', 'F', 1, 'rand', 0),
+         Xl(r'E:\work\data\walk.xlsx', 'Sheet4', 'F', 2, 'rand', 0),
+         Xl(r'E:\work\data\jump_128p_84data_fixed.xlsx', 'Sheet', 'A', 3, 'std', 0),
+         Xl(r'E:\work\data\skip.xlsx', 'Sheet4', 'F', 4, 'rand', 0)
+        )
+    input_data = []
+    for xl in xls:
+        input_vec = make_input_from_xlsx(filename=xl.filename, sheetname=xl.sheet,
+                                               col=xl.letter, read_range=(2, None), overlap=xl.overlap,
+                                               sampling=xl.sampling, sample_cnt=50, fft_N=128,
+                                               normalizing='01', label=xl.label, log=False)
+        input_data += input_vec
 
+    random.shuffle(input_data)
 
-    xls = r"E:\work\data\walk.xlsx"
-    walk_vec = make_input_from_xlsx(filename=xls, sheetname='Sheet4', col='F', read_range=(2, None),
-                                     sampling='rand', sample_cnt=50, overlap=0,
-                                     fft_N=128, normalizing='01', label=2, log=False)
-    walk_labels = [vec[0] for vec in walk_vec]
-    walk_vecs = [list(vec[1]) for vec in walk_vec]
-
-    xls = r"E:\work\data\jump_128p_84data_fixed.xlsx"
-    jamp_vec = make_input_from_xlsx(filename=xls, sheetname='Sheet', col='A', read_range=(2, None),
-                                     sampling='std', sample_cnt=50, overlap=0,
-                                     fft_N=128, normalizing='01', label=3, log=False)
-    jamp_labels = [vec[0] for vec in jamp_vec]
-    jamp_vecs = [list(vec[1]) for vec in jamp_vec]
-
-    labels = labels + walk_labels + jamp_labels #labelsの結合
-    vecs = vecs + walk_vecs + jamp_vecs #vecsの結合
+    labels = [vec[0] for vec in input_data]
+    vecs = [list(vec[1]) for vec in input_data]
 
     print "input finish"
     print labels, vecs
@@ -45,30 +39,18 @@ if __name__ == '__main__':
     """
     テストデータ生成
     """
-    xls = r"E:\work\data\new_run.xlsx"
-    run_vec = make_input_from_xlsx(filename=xls, sheetname='Sheet4', col='F', read_range=(2, None),
-                                     sampling='rand', sample_cnt=10, overlap=0,
-                                     fft_N=128, normalizing='01', label=1, log=False)
-    run_labels = [vec[0] for vec in run_vec]
-    run_vecs = [list(vec[1]) for vec in run_vec]
+    test_data = []
+    for xl in xls:
+        test_vec = make_input_from_xlsx(filename=xl.filename, sheetname=xl.sheet,
+                                               col=xl.letter, read_range=(2, None), overlap=xl.overlap,
+                                               sampling=xl.sampling, sample_cnt=10, fft_N=128,
+                                               normalizing='01', label=xl.label, log=False)
+        test_data += test_vec
 
+    random.shuffle(test_data)
 
-    xls = r"E:\work\data\walk.xlsx"
-    test_walk_vec = make_input_from_xlsx(filename=xls, sheetname='Sheet4', col='F', read_range=(2, None),
-                                     sampling='rand', sample_cnt=10, overlap=0,
-                                     fft_N=128, normalizing='01', label=2, log=False)
-    test_walk_labels = [vec[0] for vec in test_walk_vec]
-    test_walk_vecs = [list(vec[1]) for vec in test_walk_vec]
-
-    xls = r"E:\work\data\jump_128p_84data_fixed.xlsx"
-    test_vec = make_input_from_xlsx(filename=xls, sheetname='Sheet', col='A', read_range=(2, None),
-                                     sampling='std', sample_cnt=10, overlap=0,
-                                     fft_N=128, normalizing='01', label=3, log=False)
-    test_labels = [vec[0] for vec in test_vec]
-    test_vecs = [list(vec[1]) for vec in test_vec]
-
-    test_labels = test_labels + test_walk_labels + run_labels #labelsの結合
-    test_vecs = test_vecs + test_walk_vecs + run_vecs #vecsの結合
+    test_labels = [vec[0] for vec in test_data]
+    test_vecs = [list(vec[1]) for vec in test_data]
 
     """
     学習の実行
@@ -80,4 +62,9 @@ if __name__ == '__main__':
     svm_save_model('libsvm.model', machine)
 
     p_labels, p_acc, p_vals = svm_predict(test_labels,test_vecs,machine)    # テストデータ
-    print(p_labels)    # 識別結果を表示
+
+    p_labels = [int(i) for i in p_labels]
+    print p_labels    # 識別結果を表示
+
+    print test_labels
+

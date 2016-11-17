@@ -7,37 +7,33 @@ from util.excelwrapper import ExcelWrapper
 from util.fft import fft
 from libsvm.python import svmutil
 from util.util import make_input_from_xlsx
+import random
+from collections import namedtuple
 
 
 if __name__ == '__main__':
     """
     教師データ生成
     """
-    xls = r"E:\work\data\new_run.xlsx"
-    input_vec = make_input_from_xlsx(filename=xls, sheetname='Sheet4', col='F', read_range=(2, None),
-                                     sampling='rand', sample_cnt=50, overlap=0,
-                                     fft_N=128, normalizing='01', label=1, log=False)
-    #print >> file(r'D:\home\desk\log.txt', 'w'), input_vec
-    #label = [1]*len(input_vec)
-    labels = [vec[0] for vec in input_vec]
-    vecs = [list(vec[1]) for vec in input_vec]
+    Xl = namedtuple('Xl', 'filename, sheet, letter, label, sampling, overlap')
+    xls =  (
+         Xl(r'E:\work\data\new_run.xlsx', 'Sheet4', 'F', 1, 'rand', 0),
+         Xl(r'E:\work\data\walk.xlsx', 'Sheet4', 'F', 2, 'rand', 0),
+         Xl(r'E:\work\data\jump_128p_84data_fixed.xlsx', 'Sheet', 'A', 3, 'std', 0),
+        #Xl(r'E:\work\data\skip.xlsx', 'Sheet4', 'F', 4, 'rand', 0)
+        )
+    input_data = []
+    for xl in xls:
+        input_vec = make_input_from_xlsx(filename=xl.filename, sheetname=xl.sheet,
+                                               col=xl.letter, read_range=(2, None), overlap=xl.overlap,
+                                               sampling=xl.sampling, sample_cnt=50, fft_N=128,
+                                               normalizing='01', label=xl.label, log=False)
+        input_data += input_vec
 
-    xls = r"E:\work\data\walk.xlsx"
-    walk_vec = make_input_from_xlsx(filename=xls, sheetname='Sheet4', col='F', read_range=(2, None),
-                                     sampling='rand', sample_cnt=50, overlap=0,
-                                     fft_N=128, normalizing='01', label=2, log=False)
-    walk_labels = [vec[0] for vec in walk_vec]
-    walk_vecs = [list(vec[1]) for vec in walk_vec]
+    random.shuffle(input_data)
 
-    xls = r"E:\work\data\jump_128p_84data_fixed.xlsx"
-    jamp_vec = make_input_from_xlsx(filename=xls, sheetname='Sheet', col='A', read_range=(2, None),
-                                     sampling='std', sample_cnt=50, overlap=0,
-                                     fft_N=128, normalizing='01', label=3, log=False)
-    jamp_labels = [vec[0] for vec in jamp_vec]
-    jamp_vecs = [list(vec[1]) for vec in jamp_vec]
-
-    labels = labels + walk_labels + jamp_labels #labelsの結合
-    vecs = vecs + walk_vecs + jamp_vecs #vecsの結合
+    labels = [vec[0] for vec in input_data]
+    vecs = [list(vec[1]) for vec in input_data]
 
     print "input finish"
     print labels, vecs
