@@ -75,7 +75,7 @@ if __name__ == '__main__':
     root = tk.Tk()
     root.title("卒業研究")
     root.geometry("640x480")
-    
+
     #ラベルフレーム
     f1 = tk.LabelFrame(root,
                        text ='KML',
@@ -86,14 +86,14 @@ if __name__ == '__main__':
                        bg = '#4169e1')
     #ボタン
     button1 = tk.Button(root,
-                        text = 'kml作成', 
-                        font = ('times', 15), 
+                        text = 'kml作成',
+                        font = ('times', 15),
                         bg = '#4169e1',
                         fg = '#fffafa',
                         relief = 'raised',
                         command = load_file)
     button1.pack(in_ = f1)
-    
+
     #フレームの配置
     f1.pack(padx = 5, pady = 5)
 
