@@ -15,7 +15,6 @@ fTyp_kml = [('kmlファイル', '*.kml')]
 fTyp_png = [('pngファイル', '*.png')]
 iDir = 'E:/work'
 
-
 def load_file():
 
     filename = tkfd.askopenfilename(filetypes=fTyp_xlsx, initialdir=iDir)
@@ -70,31 +69,47 @@ def replace_ext(filename, extension):
         if c == '.':
             return filename[:i] + extension
 
+
+
+
+
 if __name__ == '__main__':
 
     root = tk.Tk()
     root.title("卒業研究")
     root.geometry("640x480")
 
+
     #ラベルフレーム
-    f1 = tk.LabelFrame(root,
-                       text ='KML',
-                       relief = 'raised',
-                       width = 600,
-                       height = 300,
-                       labelanchor = 'nw',
-                       bg = '#4169e1')
+    f1 = tk.LabelFrame(root, text ='KML', relief = 'raised',
+                       width = 600, height = 300,
+                       labelanchor = 'nw')
     #ボタン
-    button1 = tk.Button(root,
-                        text = 'kml作成',
+    b1 = tk.Button(root, text = 'kml作成', relief = 'raised',
                         font = ('times', 15),
-                        bg = '#4169e1',
-                        fg = '#fffafa',
-                        relief = 'raised',
-                        command = load_file)
-    button1.pack(in_ = f1)
+                        bg = '#4169e1', fg = '#fffafa',
+                        command = load_file).pack(in_ = f1)
 
     #フレームの配置
     f1.pack(padx = 5, pady = 5)
 
-    root.mainloop()
+
+
+    #エントリー関連
+    #b = tk.Button(root, text="get", width=10, command=)
+    #b.pack()
+
+    e1 = tk.Entry(root, width=50).pack()
+    e2 = tk.Entry(root, width=50).pack()
+    e3 = tk.Entry(root, width=50).pack()
+    e4 = tk.Entry(root, width=50).pack()
+
+    e_v1 = e1.set()
+    e_v2 = e2.set()
+    e_v3 = e3.set()
+    e_v4 = e4.set()
+
+
+
+
+root.mainloop()
