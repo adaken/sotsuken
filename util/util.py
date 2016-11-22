@@ -89,7 +89,7 @@ def make_input_from_xlsx(filename,
     fft_N : int, default: 128
         FFTする際のポイント数
         1回のサンプリングでこの値の分だけ行を読み込む
-    
+
     fft_wf : str, default: 'hunning'
         FFTの際に使用する窓関数
         'hunning' : ハニング窓
@@ -126,6 +126,30 @@ def make_input_from_xlsx(filename,
         return [[label, list(normalize(fftdata))] for fftdata in (fft(data, fft_N, fft_wf) for data in sample_gen(*args))]
     else:
         return [list(normalize(fftdata)) for fftdata in (fft(data, fft_N) for data in sample_gen(*args))]
+
+
+def drow_circle(rgb, size, savepath):
+    """
+    円の画像(png)を作成
+    Parameter
+    ---------
+    rgb : tuple
+        円の色
+    size : tuple
+        円のサイズ
+    savepath : str
+        画像を保存するパス
+    """
+    assert isinstance(rgb, tuple)
+    assert isinstance(size, tuple)
+    assert isinstance(savepath, str)
+    from PIL import Image
+    from PIL import ImageDraw
+    im= Image.new('RGBA', size, (0, 0, 0, 0))
+    draw = ImageDraw.Draw(im)
+    draw.ellipse(((1, 1), size, outline=None, fill=rgb)
+    del draw
+    im.save(savepath)
 
 if __name__ == '__main__':
     # こんな感じで使う
