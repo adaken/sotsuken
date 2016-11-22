@@ -17,16 +17,16 @@ if __name__ == '__main__':
     """
     Xl = namedtuple('Xl', 'filename, sheet, letter, label, sampling, overlap')
     xls =  (
-         Xl(r'E:\work\data\new_run.xlsx', 'Sheet4', 'F', 1, 'rand', 0),
-         Xl(r'E:\work\data\walk.xlsx', 'Sheet4', 'F', 2, 'rand', 0),
-         Xl(r'E:\work\data\jump_128p_84data_fixed.xlsx', 'Sheet', 'A', 3, 'std', 0),
+         Xl(r'E:\work\data\run_1122_data.xlsx', 'Sheet1', 'F', 1, 'std', 0),
+         Xl(r'E:\work\data\walk_1122_data.xlsx', 'Sheet1', 'F', 2, 'std', 0),
+         Xl(r'E:\work\data\jump_128p_174data_fixed.xlsx', 'Sheet', 'A', 3, 'std', 0),
         #Xl(r'E:\work\data\skip.xlsx', 'Sheet4', 'F', 4, 'rand', 0)
         )
     input_data = []
     for xl in xls:
         input_vec = make_input_from_xlsx(filename=xl.filename, sheetname=xl.sheet,
                                                col=xl.letter, read_range=(2, None), overlap=xl.overlap,
-                                               sampling=xl.sampling, sample_cnt=50, fft_N=128,
+                                               sampling=xl.sampling, sample_cnt=120, fft_N=128,
                                                normalizing='01', label=xl.label, log=False)
         input_data += input_vec
 
