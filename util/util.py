@@ -50,6 +50,7 @@ def make_input_from_xlsx(filename,
                          sample_cnt=None,
                          overlap=0,
                          fft_N=128,
+                         fft_wf='hunning',
                          normalizing='01',
                          label=None,
                          log=False):
@@ -88,6 +89,12 @@ def make_input_from_xlsx(filename,
     fft_N : int, default: 128
         FFTする際のポイント数
         1回のサンプリングでこの値の分だけ行を読み込む
+    
+    fft_wf : str, default: 'hunning'
+        FFTの際に使用する窓関数
+        'hunning' : ハニング窓
+        'humming' : ハミング窓
+        'blackman': ブラックマン窓
 
     normalizing : str, default: '01'
         入力ベクトルの正規化方法
@@ -111,11 +118,12 @@ def make_input_from_xlsx(filename,
 
     assert sampling in ('std', 'rand')
     assert normalizing in ('std', '01')
+    assert fft_wf in ('hunning', 'humming', 'blackman')
     sample_gen = xlsx_sample_gen if sampling == 'std' else xlsx_random_sample_gen
     normalize = normalize_standard if normalizing == 'std' else normalize_scale
     args = (ExcelWrapper(filename, sheetname), col, read_range, fft_N, overlap, sample_cnt, log)
     if label is not None:
-        return [[label, list(normalize(fftdata))] for fftdata in (fft(data, fft_N) for data in sample_gen(*args))]
+        return [[label, list(normalize(fftdata))] for fftdata in (fft(data, fft_N, fft_wf) for data in sample_gen(*args))]
     else:
         return [list(normalize(fftdata)) for fftdata in (fft(data, fft_N) for data in sample_gen(*args))]
 
