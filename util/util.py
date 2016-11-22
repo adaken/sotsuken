@@ -3,6 +3,7 @@
 import numpy as np
 from excelwrapper import ExcelWrapper
 from fft import fft
+import random
 
 def normalize_standard(arr):
     """
@@ -150,6 +151,10 @@ def drow_circle(rgb, size, savepath):
     draw.ellipse(((1, 1), size), outline=None, fill=rgb)
     del draw
     im.save(savepath)
+    
+def drow_random_color_circle(size, savepath):
+    rgb = tuple([random.randint(0, 255) for i in range(3)])
+    return drow_circle(rgb, size, savepath)
 
 if __name__ == '__main__':
     # こんな感じで使う
