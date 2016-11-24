@@ -13,7 +13,7 @@ if __name__ == '__main__':
         print s
         r = 0
         ws = ExcelWrapper(filename, s)
-        col = ws.select_column(column_letter='F', begin_row=2, end_row=None, log=False)
+        col = ws.select_column(column_letter='F', (2, None), end_row=None, log=False)
         print "lencol:", len(col)
         while True:
             print r

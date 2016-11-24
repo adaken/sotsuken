@@ -29,7 +29,7 @@ def xlsx_sample_gen(ws, col, read_range, fft_N, overlap, sample_cnt, log):
     begin = read_range[0]
     for i in xrange(sample_cnt):
         end = begin + fft_N - 1
-        yield ws.select_column(col, begin, end, log)
+        yield ws.select_column(col, read_range, log=log)
         begin = end - overlap
 
 def xlsx_random_sample_gen(ws, col, read_range, fft_N, overlap, sample_cnt, log):
@@ -41,7 +41,7 @@ def xlsx_random_sample_gen(ws, col, read_range, fft_N, overlap, sample_cnt, log)
     for i in xrange(sample_cnt):
         rb = np.random.randint(low=read_range[0], high=read_stop - fft_N + 2)
         end = rb + fft_N - 1
-        yield ws.select_column(col, rb, end, log)
+        yield ws.select_column(col, (rb, end), log=log)
 
 def make_input_from_xlsx(filename,
                          sheetname='Sheet1',

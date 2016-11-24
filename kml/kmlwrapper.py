@@ -77,33 +77,6 @@ class KmlWrapper:
             print "タイムスタンプの形式を変更中です..."
             times = self._format_times(times)
 
-        """
-        # <IconStyle>
-        icon = simk.Icon(href=icon_res)
-        hotspot = simk.HotSpot(x=0, xunits=simk.Units.fraction,
-                               y=0, yunits=simk.Units.fraction)
-        iconstyle = simk.IconStyle(icon=icon, scale=icon_scale, hotspot=hotspot)
-
-        # 共通の<Style>
-        sharedstyle = simk.Style(iconstyle=iconstyle)
-
-        # kml生成
-        print "kmlを作成中です..."
-        kml = simk.Kml()
-        for i in xrange(0, len(times), sampling_step):
-
-            # <Placemark> <Point> <coordinates>
-            pnt = kml.newpoint(coords=[(lons[i], lats[i])])
-            pnt.style = sharedstyle
-
-            # <TimeStamp> <when>
-            pnt.timestamp.when = times[i]
-
-        # ファイルに出力
-        print "kmlを保存中です..."
-        kml.save(save_path, True)
-        """
-
         print "kmlを作成中です..."
         kml = simk.Kml()
         hotspot = simk.HotSpot(x=0, xunits=simk.Units.fraction,
@@ -188,9 +161,7 @@ if __name__ == "__main__":
     act_res_keys = act_res.keys()
     br = 9
     ws = ExcelWrapper(filename=r"E:\work\bicycle_gps_hirano.xlsx", sheetname='Sheet1')
-    times = ws.select_column(column_letter='A', begin_row=br, log=True)
-    lats  = ws.select_column(column_letter='J', begin_row=br, log=True)
-    lons  = ws.select_column(column_letter='K', begin_row=br, log=True)
+    times, lats, lons = ws.select_column(('A', 'J', 'K'), row_range=(br, None), mode='v', log=True)
     acts = [act_res_keys[random.randint(0, 2)] for i in xrange(len(times))]
     kml = KmlWrapper()
     kml.createAnimeKml(save_path=r'E:\test.kml', times=times, lons=lons, lats=lats, acts=acts,
