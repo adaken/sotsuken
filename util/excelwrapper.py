@@ -15,7 +15,6 @@ class ExcelWrapper(object):
     def select_column(self,
                       column_letter,
                       begin_row = 1,
-                      sampling_step=0,
                       end_row = None,
                       log = False):
         """
@@ -43,22 +42,25 @@ class ExcelWrapper(object):
         if end_row is None:
             # 最後の行
             end_row = self.ws.max_row
-        if log:
-            print "read", self.filename
-            print "reading column '%s%d:%s%d'..." % (column_letter, begin_row, column_letter, end_row)
         column = None
         if isinstance(column_letter, str):
+            if log: print "reading column '%s%d:%s%d'..." % (column_letter, begin_row, column_letter, end_row)
             column = self.ws['%s%d:%s' % (column_letter, begin_row, end_row)]
+            return [data[0].value for data in (cell for cell in column)]
         elif isinstance(column_letter, tuple):
+            if log: print "reading column '%s%d:%s%d'..." % (column_letter[0], begin_row, column_letter[1], end_row)
             column = self.ws['%s%d:%s%d' % (column_letter[0], begin_row, column_letter[1], end_row)]
-        return [data[0].value for data in (cell for cell in column)]
+            return [[v.value for v in data] for data in (cell for cell in column)]
 
 if __name__ == '__main__':
     filepath = r'E:\work\data\run.xlsx'
-    letter = 'F'
+    letter = ('D', 'F')
     begin = 2
     end = 100
     sheet = "Sheet4"
     excel = ExcelWrapper(filepath,sheet)
-    print excel.select_column(column_letter = letter, begin_row = begin, end_row = end, log = True)
+    data = excel.select_column(column_letter=letter, begin_row=begin, end_row=end, log=True)
+    print "size:", len(data)
+    print >> file('E:\log.txt', 'w'), data
+    print "finish"
 
