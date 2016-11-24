@@ -34,7 +34,8 @@ if __name__ == '__main__':
     vecs = [list(vec[1]) for vec in input_data]
 
     print "input finish"
-    print labels, vecs
+    print labels, len(vecs[0])
+    #print >> file(r'E:\log.txt', 'w') labels, len(vecs[0])
 
     """
     テストデータ生成
