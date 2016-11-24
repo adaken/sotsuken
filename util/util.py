@@ -132,8 +132,9 @@ def make_input_from_xlsx(filename,
 def drow_circle(rgb, size, savepath):
     """
     円の画像(png)を作成
-    Parameter
-    ---------
+    
+    Parameters
+    ----------
     rgb : tuple
         円の色
     size : tuple
@@ -153,6 +154,16 @@ def drow_circle(rgb, size, savepath):
     im.save(savepath)
     
 def drow_random_color_circle(size, savepath):
+    """
+    ランダムな色の円(png)を作成
+    
+    Parameters
+    ----------
+    size : tuple
+        円のサイズ
+    savepath : str
+        画像を保存するパス
+    """
     rgb = tuple([random.randint(0, 255) for i in range(3)])
     return drow_circle(rgb, size, savepath)
 
