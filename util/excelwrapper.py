@@ -12,7 +12,7 @@ class ExcelWrapper(object):
     def _read(self, col_range, row_range, log=False):
         c1, c2 = col_range
         r1, r2 = row_range
-        if c2 is None: c2 = self.ws._max_row
+        if r2 is None: r2 = self.ws.max_row
         if log: print "{}{}:{}{}を読み込み中です...".format(c1, r1, c2, r2)
         return self.ws['{}{}:{}{}'.format(c1, r1, c2, r2)]
 
