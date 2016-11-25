@@ -161,7 +161,7 @@ if __name__ == "__main__":
     act_res_keys = act_res.keys()
     br = 9
     ws = ExcelWrapper(filename=r"E:\work\bicycle_gps_hirano.xlsx", sheetname='Sheet1')
-    times, lats, lons = ws.select_column(('A', 'J', 'K'), row_range=(br, None), mode='v', log=True)
+    times, lats, lons = ws.select_column(('A', 'J', 'K'), row_range=(br, None), mode='c', log=True)
     acts = [act_res_keys[random.randint(0, 2)] for i in xrange(len(times))]
     kml = KmlWrapper()
     kml.createAnimeKml(save_path=r'E:\test.kml', times=times, lons=lons, lats=lats, acts=acts,
