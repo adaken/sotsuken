@@ -4,6 +4,18 @@ import numpy as np
 from excelwrapper import ExcelWrapper
 from fft import fft
 import random
+import time
+
+def timedecolater(func):
+    """
+    関数の処理時間を計測して標準出力に出力するデコレータ
+    """
+    def wrapper(*args):
+        start = time.time()
+        func(*args)
+        elapsed = time.time() - start
+        print "elapsed time for {}(): {}sec".format(func.__name__, float(elapsed))
+    return wrapper
 
 def normalize_standard(arr):
     """
@@ -173,18 +185,23 @@ def drow_random_color_circle(size, savepath):
     return drow_circle(rgb, size, savepath)
 
 if __name__ == '__main__':
-    # こんな感じで使う
     label, xls = 1, r"E:\work\data\run.xlsx"
-    input_vec = make_input_from_xlsx(filename=xls, sheetname='Sheet4', col='F', read_range=(2, None),
-                                     sampling='std', sample_cnt=20, overlap=0,
-                                     fft_N=128, normalizing='01', label=label, log=True)
-    print >> file(r'E:\log.txt', 'w'), input_vec
-    print "finish"
-    from som.modsom import SOM
-    som = SOM(shape=(30, 45), input_data=input_vec, display='gray_scale')
-    map_, label_coord = som.train(30)
-    import matplotlib.pyplot as plt
-    plt.imshow(map_, interpolation='nearest')
-    for l, c in label_coord:
-        plt.text(c[0], c[1], l, color='red')
-    plt.show()
+
+    @timedecolater
+    def main(label, xls):
+        # こんな感じで使う
+        input_vec = make_input_from_xlsx(filename=xls, sheetname='Sheet4', col='F', read_range=(2, None),
+                                         sampling='std', sample_cnt=20, overlap=0,
+                                         fft_N=128, normalizing='01', label=label, log=True)
+        print >> file(r'E:\log.txt', 'w'), input_vec
+        print "finish"
+        from som.modsom import SOM
+        som = SOM(shape=(30, 45), input_data=input_vec, display='gray_scale')
+        map_, label_coord = som.train(30)
+        import matplotlib.pyplot as plt
+        plt.imshow(map_, interpolation='nearest')
+        for l, c in label_coord:
+            plt.text(c[0], c[1], l, color='red')
+        plt.show()
+
+    main(label, xls)
