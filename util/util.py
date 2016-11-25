@@ -29,7 +29,7 @@ def xlsx_sample_gen(ws, col, read_range, fft_N, overlap, sample_cnt, log):
     begin = read_range[0]
     for i in xrange(sample_cnt):
         end = begin + fft_N - 1
-        yield ws.select_column(col, read_range, log=log)
+        yield ws.select_column(col, (begin, end), log=log)
         begin = end - overlap
 
 def xlsx_random_sample_gen(ws, col, read_range, fft_N, overlap, sample_cnt, log):
@@ -174,7 +174,7 @@ def drow_random_color_circle(size, savepath):
 
 if __name__ == '__main__':
     # こんな感じで使う
-    label, xls = 1, r"E:\work\data\jump.xlsx"
+    label, xls = 1, r"E:\work\data\run.xlsx"
     input_vec = make_input_from_xlsx(filename=xls, sheetname='Sheet4', col='F', read_range=(2, None),
                                      sampling='std', sample_cnt=20, overlap=0,
                                      fft_N=128, normalizing='01', label=label, log=True)
