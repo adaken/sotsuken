@@ -78,7 +78,7 @@ class SOM:
             self.input_layer = np.array(input_data, dtype=np.float32) \
             if isinstance(input_data, list) else input_data
         input_shape = tuple(self.input_layer.shape)
-        assert len(input_shape) == 2
+        assert len(input_shape) == 2, "input_shape_len: {}".format(input_shape)
         self.shape = tuple(shape)       # 入力層のサイズ(m x n)
         self.input_num = input_shape[0] # 入力ベクトルの総数
         self.input_dim = input_shape[1] # 入力ベクトルの次元
