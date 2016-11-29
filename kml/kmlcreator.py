@@ -13,8 +13,8 @@ import random
 @timecounter
 def make_kml_with_act():
     Xl = namedtuple('Xl', 'path, sheet, cols, begin')
-    acc_xl = Xl(r'E:\work\data\bicycle_acc_hirano.xlsx', 'Sheet4', {'time':'A', 'acc':'F'},            2)
-    gps_xl = Xl(r'E:\work\data\bicycle_gps_hirano.xlsx', 'Sheet1', {'time':'A', 'lat':'J', 'lon':'K'}, 9)
+    acc_xl = Xl(r'E:\work\data\walk_acc_tateno.xlsx', 'Sheet4', {'time':'A', 'acc':'F'},            2)
+    gps_xl = Xl(r'E:\work\data\walk_gps_tateno.xlsx', 'Sheet1', {'time':'A', 'lat':'J', 'lon':'K'}, 9)
     N = 128
 
     save_path = r'E:\kml_act_test.kml'
@@ -54,7 +54,11 @@ def make_kml_with_act():
         # テスト用コード
         #ret = [act_names[random.randint(0, len(act_names) - 1)] for i in xrange(len(accs))]
 
-        ret.append(ret[-1])# リストの長さを調整
+        print len(times),len(ret)
+        diff= int(len(times)/15/1.28) - len(ret)
+        print diff
+        if (diff != 0):
+            ret.append(ret[-1]*diff)# リストの長さを調整
         return ret
 
     acc_ws = ExcelWrapper(acc_xl.path).get_sheet(acc_xl.sheet)
