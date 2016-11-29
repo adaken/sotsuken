@@ -51,7 +51,7 @@ f1.pack(fill = BOTH)
     button1.pack()
 
 
-    def 
+    def
     #button2 = tk.Button(root, text = '', width = 10, command = )
     #button2.pack
 
@@ -59,4 +59,17 @@ f1.pack(fill = BOTH)
     #数値を変更・入力できるエントリー
     #FFT,SOM,SVM
 
+○entry widgetの場合
+
+self.<entry>.get()
+
+・・・引数なし。
+
+
+
+○text widgetの場合
+
+sel.<text>.get(<index_start>,<index_end>=None)
+
+・・・どこからどこまで取得したいかを指定する。
     root.mainloop()
