@@ -20,8 +20,8 @@ def make_kml_with_act():
     save_path = r'E:\kml_act_test.kml'
     icon_size = (16, 16)
     act_icons = {'run' :drow_circle(rgb=(255, 0, 0), size=icon_size, savepath=r'E:\tmp\run.png'),
-               'jump':drow_circle(rgb=(0, 255, 0), size=icon_size, savepath=r'E:\tmp\jump.png'),
-               'walk':drow_circle(rgb=(0, 0, 255), size=icon_size, savepath=r'E:\tmp\walk.png')}
+                 'jump':drow_circle(rgb=(0, 255, 0), size=icon_size, savepath=r'E:\tmp\jump.png'),
+                 'walk':drow_circle(rgb=(0, 0, 255), size=icon_size, savepath=r'E:\tmp\walk.png')}
     act_names = act_icons.keys()
 
     gps_ws = ExcelWrapper(gps_xl.path).get_sheet(gps_xl.sheet)
@@ -38,16 +38,23 @@ def make_kml_with_act():
         :return acts : 長さlen(accs)のアクションのリスト
         """
 
+        vecs = []
         ret = []
         for acc in accs:
             vec = normalize_scale(fft(acc, N))
-            # TODO
-            # svmで分類
+            vecs.append(vec)
+
+        from sklearn.externals import joblib
+        clf = joblib.load('E:\clf.pkl')
+        pred = clf.predict(vecs)  #他クラス分類器による識別
+        #ret.append(i for i in list(pred))
+        map(ret.append, pred)
+
 
         # テスト用コード
-        ret = [act_names[random.randint(0, len(act_names) - 1)] for i in xrange(len(accs))]
+        #ret = [act_names[random.randint(0, len(act_names) - 1)] for i in xrange(len(accs))]
 
-        ret.append(ret[-1]) # リストの長さを調整
+        ret.append(ret[-1])# リストの長さを調整
         return ret
 
     acc_ws = ExcelWrapper(acc_xl.path).get_sheet(acc_xl.sheet)
@@ -102,7 +109,7 @@ def make_kml_with_act():
 
     # kml生成
     KmlWrapper().createAnimeKml(save_path, times, lons, lats, acts=acts,
-                              act_icons=act_icons, sampling_step=sampling_step)
+                              act_icons=act_icons, sampling_step=sampling_step, icon_scale=0.5)
 
     print "kmlを作成しました: {}".format(save_path)
 
