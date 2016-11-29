@@ -66,9 +66,9 @@ def fft(arr, fft_points, window='hunning', out_fig=False):
 
     wind_arr = None
     if window == 'hunning':
-        wind_arr = __apply_hunningwin(arr, fs) # ハニング窓を適用
+        wind_arr = __apply_hunningwin(arr, fs)  # ハニング窓を適用
     elif window == 'humming':
-        wind_arr = __apply_hummingwin(arr, fs) # ハミング窓を適用
+        wind_arr = __apply_hummingwin(arr, fs)  # ハミング窓を適用
     elif window == 'blackman':
         wind_arr = __apply_blackmanwin(arr, fs) # ブラックマン窓を適用
     else:

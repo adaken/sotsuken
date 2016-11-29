@@ -1,20 +1,20 @@
 # coding: utf-8
 
 import numpy as np
-from excelwrapper import ExcelWrapper
 from fft import fft
 import random
 import time
 
-def timedecolater(func):
+def timecounter(func):
     """
     関数の処理時間を計測して標準出力に出力するデコレータ
     """
     def wrapper(*args):
         start = time.time()
-        func(*args)
+        ret = func(*args)
         elapsed = time.time() - start
         print "elapsed time for {}(): {}sec".format(func.__name__, float(elapsed))
+        return ret
     return wrapper
 
 def normalize_standard(arr):
@@ -41,7 +41,8 @@ def xlsx_sample_gen(ws, col, read_range, fft_N, overlap, sample_cnt, log):
     begin = read_range[0]
     for i in xrange(sample_cnt):
         end = begin + fft_N - 1
-        yield ws.select_column(col, (begin, end), log=log)
+        #yield ws.select_column(col, (begin, end), log=log)
+        yield ws.get_col(col, (begin, end), log=log)
         begin = end - overlap
 
 def xlsx_random_sample_gen(ws, col, read_range, fft_N, overlap, sample_cnt, log):
@@ -53,7 +54,8 @@ def xlsx_random_sample_gen(ws, col, read_range, fft_N, overlap, sample_cnt, log)
     for i in xrange(sample_cnt):
         rb = np.random.randint(low=read_range[0], high=read_stop - fft_N + 2)
         end = rb + fft_N - 1
-        yield ws.select_column(col, (rb, end), log=log)
+        #yield ws.select_column(col, (rb, end), log=log)
+        yield ws.get_col(col, (rb, end), log=log)
 
 def make_input_from_xlsx(filename,
                          sheetname='Sheet1',
@@ -132,9 +134,10 @@ def make_input_from_xlsx(filename,
     assert sampling in ('std', 'rand')
     assert normalizing in ('std', '01')
     assert fft_wf in ('hunning', 'humming', 'blackman')
+    from excelwrapper import ExcelWrapper
     sample_gen = xlsx_sample_gen if sampling == 'std' else xlsx_random_sample_gen
     normalize = normalize_standard if normalizing == 'std' else normalize_scale
-    args = (ExcelWrapper(filename, sheetname), col, read_range, fft_N, overlap, sample_cnt, log)
+    args = (ExcelWrapper(filename).get_sheet(sheetname), col, read_range, fft_N, overlap, sample_cnt, log)
     if label is not None:
         return [[label, list(normalize(fftdata))] for fftdata in (fft(data, fft_N, fft_wf) for data in sample_gen(*args))]
     else:
@@ -187,7 +190,7 @@ def drow_random_color_circle(size, savepath):
 if __name__ == '__main__':
     label, xls = 1, r"E:\work\data\run.xlsx"
 
-    @timedecolater
+    @timecounter
     def main(label, xls):
         # こんな感じで使う
         input_vec = make_input_from_xlsx(filename=xls, sheetname='Sheet4', col='F', read_range=(2, None),

@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import simplekml as simk
+from util.util import timecounter
 
 class KmlWrapper:
 
@@ -63,7 +64,10 @@ class KmlWrapper:
                 raise AssertionError("act_iconsを指定した場合、actsも指定する必要があります。")
             elif act_icons is None:
                 raise AssertionError("actsを指定した場合、act_iconsも指定する必要があります。")
-            assert len(times) == len(lons) == len(lats) == len(acts), "引数times, lons, lats, actsのサイズが違います。これらのサイズをそろえる必要があります。"
+            if not len(times) == len(lons) == len(lats) == len(acts):
+                raise ValueError("""引数times, lons, lats, actsのサイズが違います。
+これらのサイズをそろえる必要があります。: times: {}, lons: {}, lats: {}, acts: {}"""
+                .format(len(times), len(lons), len(lats), len(acts)))
         else:
             print "アクション指定なし"
             assert len(times) == len(lons) == len(lats), "引数times, lons, latsのサイズが違います。これらのサイズをそろえる必要があります。"
@@ -151,18 +155,22 @@ class KmlWrapper:
         return [t.strftime(format_new) for t in times]
 
 if __name__ == "__main__":
-    from util.excelwrapper import ExcelWrapper
-    from util.util import drow_circle
-    import random
-    icon_size = (16, 16)
-    act_res = {'run' :drow_circle(rgb=(255, 0, 0), size=icon_size, savepath=r'E:\tmp\run.png'),
-               'jump':drow_circle(rgb=(0, 255, 0), size=icon_size, savepath=r'E:\tmp\jump.png'),
-               'walk':drow_circle(rgb=(0, 0, 255), size=icon_size, savepath=r'E:\tmp\walk.png')}
-    act_res_keys = act_res.keys()
-    br = 9
-    ws = ExcelWrapper(filename=r"E:\work\bicycle_gps_hirano.xlsx", sheetname='Sheet1')
-    times, lats, lons = ws.select_column(('A', 'J', 'K'), row_range=(br, None), mode='c', log=True)
-    acts = [act_res_keys[random.randint(0, 2)] for i in xrange(len(times))]
-    kml = KmlWrapper()
-    kml.createAnimeKml(save_path=r'E:\test.kml', times=times, lons=lons, lats=lats, acts=acts,
-                       act_icons=act_res, icon_scale=0.3, format_time=True, sampling_step=10)
+    @timecounter
+    def main():
+        from util.excelwrapper import ExcelWrapper
+        from util.util import drow_circle
+        import random
+        icon_size = (16, 16)
+        act_res = {'run' :drow_circle(rgb=(255, 0, 0), size=icon_size, savepath=r'E:\tmp\run.png'),
+                   'jump':drow_circle(rgb=(0, 255, 0), size=icon_size, savepath=r'E:\tmp\jump.png'),
+                   'walk':drow_circle(rgb=(0, 0, 255), size=icon_size, savepath=r'E:\tmp\walk.png')}
+        act_res_keys = act_res.keys()
+        br = 9
+        ws = ExcelWrapper(filename=r"E:\work\bicycle_gps_hirano.xlsx", sheetname='Sheet1')
+        times, lats, lons = ws.select_column(('A', 'J', 'K'), row_range=(br, None), mode='c', log=True)
+        acts = [act_res_keys[random.randint(0, 2)] for i in xrange(len(times))]
+        kml = KmlWrapper()
+        kml.createAnimeKml(save_path=r'E:\test.kml', times=times, lons=lons, lats=lats, acts=acts,
+                           act_icons=act_res, icon_scale=0.3, format_time=True, sampling_step=3)
+
+    main()
