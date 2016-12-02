@@ -213,7 +213,7 @@ if __name__ == '__main__':
     N = 256
     x = np.linspace(0, 1, N)
     f = 20
-    y = 5 * np.sin(2*np.pi * x * 20) + 3 * np.sin(2*np.pi * x * 50) + 10 * np.sin(2*np.pi * x * 100)
+    y = 5 * np.sin(2*np.pi * x * 20) + 3 * np.sin(2*np.pi * x * 50) + 10 * np.sin(2*np.pi * x * 100) + 1 * np.sin(2*np.pi * x * 40)
 
     arrs = np.array([y, y])
     print fftn(arrs, N, wf='hanning', savepath=r'E:\fft_result.png')
