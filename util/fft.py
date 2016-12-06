@@ -28,7 +28,9 @@ def __apply_blackmanwin(a, fs):
 def fftn(arrs, fft_N, wf='hanning', savepath=None):
     """高速フーリエ変換を行う
 
-    :param arrs : ndarray
+    2D配列の場合はfft_iter()より高速
+
+    :param arrs : ndarray, list
         FFTする配列
         2Dndarray対応
 
@@ -49,13 +51,17 @@ def fftn(arrs, fft_N, wf='hanning', savepath=None):
 
     """
 
-    assert isinstance(arrs, np.ndarray)
+    assert isinstance(arrs, (list, np.ndarray))
+
+    if isinstance(arrs, list):
+        arrs = np.array(arrs)
+
     assert arrs.ndim in (1, 2)
     assert isinstance(fft_N, int)
     assert isinstance(wf, str)
     assert wf in ('hanning', 'hamming', 'blackman')
 
-    arrs.dtype = 'float' # 配列の型を変換
+    arrs.astype(np.float32) # 配列の型を変換
 
     dim = arrs.ndim
 
@@ -72,7 +78,7 @@ def fftn(arrs, fft_N, wf='hanning', savepath=None):
     fftdata = np.fft.fft(w_arrs)                  # FFT
     fftdata /= fft_N / 2                          # 正規化
     fftfreq = np.fft.fftfreq(fft_N, sp)[:fft_N/2] # 周波数のリスト
-    fftmags = None                                 # スペクトルの絶対値
+    fftmags = None                                # スペクトルの絶対値
     if dim == 1:
         fftmags = np.abs(fftdata[:fft_N/2])
     else:
@@ -114,6 +120,23 @@ def fftn(arrs, fft_N, wf='hanning', savepath=None):
         fig.savefig(savepath)
 
     return fftmags
+
+def fft_iter(arrs, fft_N, wf='hunning'):
+    """FFTした配列を返すイテレータ
+
+    :param arrs : iterable
+
+    :param fft_N : int
+
+    :return fft_iter : iterater
+
+    """
+
+    assert hasattr(arrs, '__iter__')
+    assert isinstance(fft_N, int)
+
+    for a in arrs:
+        yield fftn(arrs=a, fft_N=fft_N, wf=wf)
 
 def fft(arr, fft_points, window='hunning', out_fig=False):
     """Deprecated!! Use fftn()
