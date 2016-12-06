@@ -13,8 +13,8 @@ import random
 @timecounter
 def make_kml_with_act():
     Xl = namedtuple('Xl', 'path, sheet, cols, begin')
-    acc_xl = Xl(r'E:\work\data\walk_acc_tateno.xlsx', 'Sheet4', {'time':'A', 'acc':'F'},            2)
-    gps_xl = Xl(r'E:\work\data\walk_gps_tateno.xlsx', 'Sheet1', {'time':'A', 'lat':'J', 'lon':'K'}, 9)
+    acc_xl = Xl(r'E:\work\data\acc_random_1206.xlsx', 'Sheet4', {'time':'A', 'acc':'F'},            2)
+    gps_xl = Xl(r'E:\work\data\gps_random_1206.xlsx', 'Sheet1', {'time':'A', 'lat':'J', 'lon':'K'}, 9)
     N = 128
 
     save_path = r'E:\kml_act_test.kml'
@@ -37,7 +37,7 @@ def make_kml_with_act():
         :param accs : 要素N個ごとに分割された加速度のリストのイテレータ
         :return acts : 長さlen(accs)のアクションのリスト
         """
-        """
+
         vecs = []
         ret = []
         for acc in accs:
@@ -50,16 +50,20 @@ def make_kml_with_act():
         #ret.append(i for i in list(pred))
         map(ret.append, pred)
 
+        print pred
+
         print len(times),len(ret)
         diff= int(len(times)/15/1.28) - len(ret)
         print diff
         if (diff != 0):
-            ret.append(ret[-1]*diff)# リストの長さを調整
+            #ret.append(ret[-1]*diff)# リストの長さを調整
+            for i in xrange(diff): ret.append(ret[-1])
 
         """
         # テスト用コード
         ret = []
         ret = [act_names[random.randint(0, len(act_names) - 1)] for i in xrange(len(accs))]
+        """
         return ret
 
     acc_ws = ExcelWrapper(acc_xl.path).get_sheet(acc_xl.sheet)
@@ -124,7 +128,7 @@ def make_kml_with_act():
 
     # kml生成
     KmlWrapper().createAnimeKml(save_path, times, lons, lats, acts=acts,
-                              act_icons=act_icons, sampling_step=sampling_step, icon_scale=1)
+                              act_icons=act_icons, sampling_step=sampling_step, icon_scale=0.5)
 
     print "kmlを作成しました: {}".format(save_path)
 
