@@ -29,7 +29,7 @@ def make_kml_with_act():
     print >> open(r'E:\log_gps_times.txt', 'w'), times
     lats  = gps_ws.get_col(gps_xl.cols['lat'], (gps_xl.begin, None))
     lons  = gps_ws.get_col(gps_xl.cols['lon'], (gps_xl.begin, None))
-    sampling_step = 10
+    sampling_step = 1
 
     def make_classed_acts(accs, act_names, N):
         """svmによって加速度リストからアクションリストを作成
@@ -37,7 +37,7 @@ def make_kml_with_act():
         :param accs : 要素N個ごとに分割された加速度のリストのイテレータ
         :return acts : 長さlen(accs)のアクションのリスト
         """
-
+        """
         vecs = []
         ret = []
         for acc in accs:
@@ -50,15 +50,16 @@ def make_kml_with_act():
         #ret.append(i for i in list(pred))
         map(ret.append, pred)
 
-
-        # テスト用コード
-        #ret = [act_names[random.randint(0, len(act_names) - 1)] for i in xrange(len(accs))]
-
         print len(times),len(ret)
         diff= int(len(times)/15/1.28) - len(ret)
         print diff
         if (diff != 0):
             ret.append(ret[-1]*diff)# リストの長さを調整
+
+        """
+        # テスト用コード
+        ret = []
+        ret = [act_names[random.randint(0, len(act_names) - 1)] for i in xrange(len(accs))]
         return ret
 
     acc_ws = ExcelWrapper(acc_xl.path).get_sheet(acc_xl.sheet)
@@ -69,6 +70,7 @@ def make_kml_with_act():
     #acc_times.pop() # 余計な最後の要素を削除
     assert len(classed_acts) == len(acc_times), "act: {}, times: {}".format(len(classed_acts), len(acc_times))
 
+    @timecounter
     def make_acts(gps_times, acts, acc_times):
         """アクションのリストを作成
 
@@ -109,11 +111,20 @@ def make_kml_with_act():
         print >> open(r'E:\log_acts.txt', 'w'), ret
         return ret
 
+    def make_acts2(gps_times, acts):
+        ret = []
+        #map(ret.append, acts[int(gps_times/15/1.28)])
+        for i in xrange(len(gps_times)):
+            idx = int(i/15/1.28)
+            ret.append(acts[idx])
+        return ret
+
     acts  = make_acts(times, classed_acts, acc_times)
+    #acts = make_acts2(times, classed_acts)
 
     # kml生成
     KmlWrapper().createAnimeKml(save_path, times, lons, lats, acts=acts,
-                              act_icons=act_icons, sampling_step=sampling_step, icon_scale=0.5)
+                              act_icons=act_icons, sampling_step=sampling_step, icon_scale=1)
 
     print "kmlを作成しました: {}".format(save_path)
 
@@ -142,5 +153,5 @@ if __name__ == '__main__':
         from kml.kmlwrapper import KmlWrapper
         KmlWrapper().createAnimeKml(save_path=kml_path, times=getcol('A'), longitudes=getcol('K'),
                                   latitudes=getcol('J'), format_time=True, sampling_interval=15,
-                                  icon_res=icon_res, icon_scale=0.3)
+                                  icon_res=icon_res, icon_scale=0.6)
         print "completed!"
