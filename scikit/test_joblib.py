@@ -4,6 +4,8 @@ from util.util import make_input_from_xlsx
 import random
 from collections import namedtuple
 from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import classification_report
 from sklearn.externals import joblib
 
 if __name__ == '__main__':
@@ -12,9 +14,9 @@ if __name__ == '__main__':
     """
     Xl = namedtuple('Xl', 'filename, sheet, letter, label, sampling, overlap')
     xls =  (
-         Xl(r'E:\work\data\run_1122_data.xlsx', 'Sheet1', 'F', 1, 'std', 0),
-         Xl(r'E:\work\data\walk_1122_data.xlsx', 'Sheet1', 'F', 2, 'std', 0),
-         Xl(r'E:\work\data\jump_128p_174data_fixed.xlsx', 'Sheet', 'A', 3, 'std', 0),
+         Xl(r'E:\work\data\run_1122_data.xlsx', 'Sheet1', 'F', 'run', 'std', 0),
+         Xl(r'E:\work\data\walk_1122_data.xlsx', 'Sheet1', 'F', 'walk', 'std', 0),
+         Xl(r'E:\work\data\jump_128p_174data_fixed.xlsx', 'Sheet', 'A', 'jump', 'std', 0),
         #Xl(r'E:\work\data\skip.xlsx', 'Sheet4', 'F', 4, 'rand', 0)
         )
     input_data = []
@@ -33,4 +35,15 @@ if __name__ == '__main__':
 
     clf = joblib.load('E:\clf.pkl')
     test_pred = clf.predict(test_vecs)  #他クラス分類器One-versus-oneによる識別
+
+    #confusion matrix（ラベルの分類表。分類性能が高いほど対角線に値が集まる）
     print confusion_matrix(test_labels, test_pred)
+
+    #分類結果 適合率 再現率 F値の表示
+    print classification_report(test_labels, test_pred)
+
+    #正答率 分類ラベル/正解ラベル
+    print accuracy_score(test_labels, test_pred)
+
+    print test_labels       #分類前ラベル
+    print list(test_pred)   #One-against-restによる識別ラベル
