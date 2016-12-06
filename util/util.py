@@ -4,6 +4,8 @@ import numpy as np
 from fft import fft
 import random
 import time
+from util.fft import fftn
+from util.excelwrapper import ExcelWrapper
 
 def timecounter(func):
     """
@@ -173,6 +175,18 @@ def drow_circle(rgb, size, savepath):
     im.save(savepath)
     return savepath
 
+def make_input_data(xlsx, sheetname, col, begin_row, sample_cnt, fft_N, log):
+    """入力ベクトルを作成
+
+    """
+
+    row_range = (begin_row, fft_N * sample_cnt)
+    ws = ExcelWrapper(xlsx).get_sheet(sheetname)
+    acces = ws.iter_part_col(col=col, length=fft_N, row_range=row_range,log=log)
+    fftdata = fftn(arrs=acces, fft_N=fft_N)
+    fftdata = map(normalize_scale, fftdata)
+    return fftdata
+
 def drow_random_color_circle(size, savepath):
     """
     ランダムな色の円(png)を作成
@@ -206,5 +220,3 @@ if __name__ == '__main__':
         for l, c in label_coord:
             plt.text(c[0], c[1], l, color='red')
         plt.show()
-
-    main(label, xls)
