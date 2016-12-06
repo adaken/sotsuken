@@ -2,7 +2,6 @@
 
 import openpyxl as px
 import re
-from util import timecounter
 
 class ExcelWrapper(object):
     """
@@ -380,7 +379,7 @@ class ExcelWrapper(object):
                         break
 
 if __name__ == '__main__':
-
+    from util import timecounter
     @timecounter
     def test_get_letter():
         import random
