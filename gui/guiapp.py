@@ -42,8 +42,7 @@ class Frame(tk.Frame):
                             borderwidth = 4,
                             command = self.open_kml)
         #ラベル
-        self.title_label = tk.Label(self.f1, width=50, font=('times', 20), pady=2,
-                                     text='kml作成')
+        self.title_label = tk.Label(self.f1, text='kml作成', width=50, font=('times', 20), pady=2)
 
         # ラベルのバッファ
         self.filenames_buff = [tk.StringVar() for i in xrange(5)]
@@ -78,20 +77,12 @@ class Frame(tk.Frame):
         for i, filename in zip(xrange(len(self.filenames_buff)), filenames):
             self.filenames_buff[i].set(filename)
 
-    def make_window(self):
-        #ウィンドウ作成
-        window1=tk.Toplevel()
-        window1.title=('information')
-        tk.Message(window1, aspect=600,
-                   text='しばらくお待ちください', font = ('times', 20), width=400).pack()
-        window1.geometry("700x50+200+200")
-        self.after(500, self.open_kml)
 
     def open_kml(self):
         text1 = ["Please wait..."]*5
         for i, filename in zip(xrange(len(self.filenames_buff)), text1):
             self.filenames_buff[i].set(filename)
-        self.after(500, self.open_kml)
+        self.after(500, self.make_kml)
 
     def make_kml(self):
         """kml作成"""
@@ -122,7 +113,7 @@ class Frame(tk.Frame):
             print "completed!"
 
             #GoogleEarthで表示
-            sb.Popen(["C:\Program Files (x86)\Google\Google Earth\client\googleearth.exe", kml])
+            #sb.Popen(["C:\Program Files (x86)\Google\Google Earth\client\googleearth.exe", kml])
 
     def replace_ext(self, filename, extension):
         assert filename.find('.') is not -1
