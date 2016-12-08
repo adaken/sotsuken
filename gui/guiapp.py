@@ -69,7 +69,7 @@ class Frame(tk.Frame):
         """ファイルを選択"""
 
         fTyp_xlsx = [('Excelファイル', '*.xlsx')]
-        iDir = 'E:/work'
+        iDir = r'E:/work/players_data'
         filenames = tkfd.askopenfilenames(filetypes=fTyp_xlsx, initialdir=iDir)
         print "filenames:", filenames
         self.filenames =  filenames
