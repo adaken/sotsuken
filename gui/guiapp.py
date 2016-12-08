@@ -28,35 +28,22 @@ class Frame(tk.Frame):
         self.f1 = tk.Frame(root, relief = 'ridge',
                       width = 300, height = 300,
                       borderwidth = 4,
-<<<<<<< HEAD
                       padx=5, pady=5,
                       bg = '#fffafa')
-======
->>>>>>> branch 'svm' of https://github.com/adaken/sotsuken.git
 
         #ボタン
         self.select_button = tk.Button(self.f1, text = 'ファイル選択', relief = 'raised',
                             font = ('times', 10),
-<<<<<<< HEAD
                             bg = '#fffafa', fg = '#000000', borderwidth = 4,
-======
->>>>>>> branch 'svm' of https://github.com/adaken/sotsuken.git
                             command = self.select_files)
 
         self.kml_button = tk.Button(self.f1, text = '変換', relief = 'raised',
                             font = ('times', 10),
-<<<<<<< HEAD
                             bg = '#fffafa', fg = '#000000', borderwidth = 4,
-======
->>>>>>> branch 'svm' of https://github.com/adaken/sotsuken.git
                             command = self.open_kml)
         #ラベル
-<<<<<<< HEAD
         self.title_label = tk.Label(self.f1, width=50, font=('times', 20), pady=2,
-                                     text='kml作成', bg='#fffafa', fg='#000000')
-=======
->>>>>>> branch 'svm' of https://github.com/adaken/sotsuken.git
-
+                                     text='kml作成', bg='#fffafa', fg='#000000')
         # ラベルのバッファ
         self.filenames_buff = [tk.StringVar() for i in xrange(5)]
 
@@ -81,10 +68,7 @@ class Frame(tk.Frame):
         """ファイルを選択"""
 
         fTyp_xlsx = [('Excelファイル', '*.xlsx')]
-<<<<<<< HEAD
-=======
         iDir = r'E:/work/players_data'
->>>>>>> branch 'svm' of https://github.com/adaken/sotsuken.git
         filenames = tkfd.askopenfilenames(filetypes=fTyp_xlsx, initialdir=iDir)
         print "filenames:", filenames
         self.filenames =  filenames
