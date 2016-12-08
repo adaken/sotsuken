@@ -84,6 +84,8 @@ def mnist_test():
     # 70000枚の28x28(784px)の手書き文字画像データ
     # 訓練用60000枚、テスト用10000枚に分割
     train, test = datasets.get_mnist()
+    print type(train), type(test)
+    print type(train[0][0]), type(train[0][1])
     print >> file(r'E:\log_data_trait.txt', 'w'), [train[i] for i in range(10)]
     print >> file(r'E:\log_data_test.txt', 'w'), [test[i] for i in range(10)]
 
