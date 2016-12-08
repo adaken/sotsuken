@@ -29,21 +29,21 @@ class Frame(tk.Frame):
                       width = 300, height = 300,
                       borderwidth = 4,
                       padx=5, pady=5,
-                      bg = '#006400')
+                      bg = '#fffafa')
 
         #ボタン
         self.select_button = tk.Button(self.f1, text = 'ファイル選択', relief = 'raised',
                             font = ('times', 10),
-                            bg = '#006400', fg = '#fffafa', borderwidth = 4,
+                            bg = '#fffafa', fg = '#000000', borderwidth = 4,
                             command = self.select_files)
 
         self.kml_button = tk.Button(self.f1, text = '変換', relief = 'raised',
                             font = ('times', 10),
-                            bg = '#006400', fg = '#fffafa', borderwidth = 4,
+                            bg = '#fffafa', fg = '#000000', borderwidth = 4,
                             command = self.open_kml)
         #ラベル
         self.title_label = tk.Label(self.f1, width=50, font=('times', 20), pady=2,
-                                     text='kml作成', bg='#006400', fg='#fffafa')
+                                     text='kml作成', bg='#fffafa', fg='#000000')
 
         # ラベルのバッファ
         self.filenames_buff = [tk.StringVar() for i in xrange(5)]
@@ -69,7 +69,7 @@ class Frame(tk.Frame):
         """ファイルを選択"""
 
         fTyp_xlsx = [('Excelファイル', '*.xlsx')]
-        iDir = 'E:/work'
+        iDir = r'E:/work'
         filenames = tkfd.askopenfilenames(filetypes=fTyp_xlsx, initialdir=iDir)
         print "filenames:", filenames
         self.filenames =  filenames
