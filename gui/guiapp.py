@@ -28,22 +28,22 @@ class Frame(tk.Frame):
         self.f1 = tk.Frame(root, relief = 'ridge',
                       width = 300, height = 300,
                       borderwidth = 4,
-                      padx=5, pady=5,
-                      bg = '#006400')
+                      padx=5, pady=5
+                      )
 
         #ボタン
         self.select_button = tk.Button(self.f1, text = 'ファイル選択', relief = 'raised',
                             font = ('times', 10),
-                            bg = '#006400', fg = '#fffafa', borderwidth = 4,
+                            borderwidth = 4,
                             command = self.select_files)
 
         self.kml_button = tk.Button(self.f1, text = '変換', relief = 'raised',
                             font = ('times', 10),
-                            bg = '#006400', fg = '#fffafa', borderwidth = 4,
+                            borderwidth = 4,
                             command = self.open_kml)
         #ラベル
         self.title_label = tk.Label(self.f1, width=50, font=('times', 20), pady=2,
-                                     text='kml作成', bg='#006400', fg='#fffafa')
+                                     text='kml作成')
 
         # ラベルのバッファ
         self.filenames_buff = [tk.StringVar() for i in xrange(5)]
