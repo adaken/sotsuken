@@ -2,7 +2,6 @@
 
 import openpyxl as px
 import re
-from util import timecounter
 
 class ExcelWrapper(object):
     """
@@ -41,7 +40,7 @@ class ExcelWrapper(object):
     @staticmethod
     def _get_letter_index(num_idx, log=False):
         """数字インデックスから文字インデックスを計算(one-based index)"""
-        assert isinstance(num_idx, int)
+        assert isinstance(num_idx, int), "num_index: {}".format(num_idx)
         assert num_idx > 0
         N = 26
         num_idx -= 1
@@ -366,7 +365,7 @@ class ExcelWrapper(object):
             while True:
                 part_col = self.get_col(col, (r1, r2), iter_cell=False, log=log)
                 if not part_col: break
-                if log: print "part_col_len:", len(part_col)
+                #if log: print "part_col_len:", len(part_col)
                 yield part_col
                 r1 += length
                 r2 += length
@@ -380,13 +379,13 @@ class ExcelWrapper(object):
                         break
 
 if __name__ == '__main__':
-
+    from util import timecounter
     @timecounter
     def test_get_letter():
         import random
         letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-        itr = 20
-        max_digit = 2
+        itr =1000
+        max_digit = 3
         correct_n = 0
         incorrects = []
         for i in xrange(itr):
@@ -401,7 +400,7 @@ if __name__ == '__main__':
                 incorrects.append("{} : {}".format(n, l))
         print "Result: {} / {}".format(correct_n, itr)
         if not incorrects:
-            'OK'
+            print 'OK'
         else:
             for i in incorrects: print i
 
@@ -414,4 +413,4 @@ if __name__ == '__main__':
         ws = wb.get_sheet('Sheet1')
         print list(ws.iter_cell(coords=(('A', i) for i in xrange(1, 10, 2)), log=True))
 
-    main()
+    test_get_letter()

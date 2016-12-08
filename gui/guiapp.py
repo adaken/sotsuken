@@ -28,22 +28,34 @@ class Frame(tk.Frame):
         self.f1 = tk.Frame(root, relief = 'ridge',
                       width = 300, height = 300,
                       borderwidth = 4,
+<<<<<<< HEAD
                       padx=5, pady=5,
                       bg = '#fffafa')
+======
+>>>>>>> branch 'svm' of https://github.com/adaken/sotsuken.git
 
         #ボタン
         self.select_button = tk.Button(self.f1, text = 'ファイル選択', relief = 'raised',
                             font = ('times', 10),
+<<<<<<< HEAD
                             bg = '#fffafa', fg = '#000000', borderwidth = 4,
+======
+>>>>>>> branch 'svm' of https://github.com/adaken/sotsuken.git
                             command = self.select_files)
 
         self.kml_button = tk.Button(self.f1, text = '変換', relief = 'raised',
                             font = ('times', 10),
+<<<<<<< HEAD
                             bg = '#fffafa', fg = '#000000', borderwidth = 4,
+======
+>>>>>>> branch 'svm' of https://github.com/adaken/sotsuken.git
                             command = self.open_kml)
         #ラベル
+<<<<<<< HEAD
         self.title_label = tk.Label(self.f1, width=50, font=('times', 20), pady=2,
                                      text='kml作成', bg='#fffafa', fg='#000000')
+=======
+>>>>>>> branch 'svm' of https://github.com/adaken/sotsuken.git
 
         # ラベルのバッファ
         self.filenames_buff = [tk.StringVar() for i in xrange(5)]
@@ -69,7 +81,10 @@ class Frame(tk.Frame):
         """ファイルを選択"""
 
         fTyp_xlsx = [('Excelファイル', '*.xlsx')]
-        iDir = r'E:/work'
+<<<<<<< HEAD
+=======
+        iDir = r'E:/work/players_data'
+>>>>>>> branch 'svm' of https://github.com/adaken/sotsuken.git
         filenames = tkfd.askopenfilenames(filetypes=fTyp_xlsx, initialdir=iDir)
         print "filenames:", filenames
         self.filenames =  filenames
@@ -78,20 +93,12 @@ class Frame(tk.Frame):
         for i, filename in zip(xrange(len(self.filenames_buff)), filenames):
             self.filenames_buff[i].set(filename)
 
-    def make_window(self):
-        #ウィンドウ作成
-        window1=tk.Toplevel()
-        window1.title=('information')
-        tk.Message(window1, aspect=600,
-                   text='しばらくお待ちください', font = ('times', 20), width=400).pack()
-        window1.geometry("700x50+200+200")
-        self.after(500, self.open_kml)
 
     def open_kml(self):
         text1 = ["Please wait..."]*5
         for i, filename in zip(xrange(len(self.filenames_buff)), text1):
             self.filenames_buff[i].set(filename)
-        self.after(500, self.open_kml)
+        self.after(500, self.make_kml)
 
     def make_kml(self):
         """kml作成"""
@@ -122,7 +129,7 @@ class Frame(tk.Frame):
             print "completed!"
 
             #GoogleEarthで表示
-            sb.Popen(["C:\Program Files (x86)\Google\Google Earth\client\googleearth.exe", kml])
+            #sb.Popen(["C:\Program Files (x86)\Google\Google Earth\client\googleearth.exe", kml])
 
     def replace_ext(self, filename, extension):
         assert filename.find('.') is not -1

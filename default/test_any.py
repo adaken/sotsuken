@@ -1,6 +1,7 @@
 # coding: utf-8
 from fileinput import close
 from _struct import unpack
+from util.util import timecounter
 
 def csv_test():
     import csv
@@ -138,25 +139,38 @@ def som_test3():
     plt.imshow(output_map, interpolation='none')
     plt.show()
 
-def timedecolater(func):
-    def wrapper():
-        import time
-        start = time.time()
-        func()
-        elapsed = time.time() - start
-        print "elapsed time: %fsec" % elapsed
-    return wrapper
+def for_test():
+    a = []
+    for x in range(3):
+        for y in [100, 200, 300]:
+            a.append(x + y)
+    print a
+
+    print [x + y for x in range(3) for y in [100, 200, 300]]
+
+    b = []
+    for inner_list in [[1, 3], [5], [7, 9]]:
+        for x in inner_list:
+            b.append(x)
+    print b
+
+    print [x for inner_list in [[1, 3], [5], [7, 9]] for x in inner_list]
+
+    print ["{}".format(i * j) for i in range(1, 10) for j in range(1, 10)]
+
 
 if __name__ == "__main__":
-    from util.excelwrapper import ExcelWrapper
-    import matplotlib.pyplot as plt
-    ws = ExcelWrapper(r"E:\work\data\jump.xlsx", 'Sheet4')
-    time = ws.select_column(column_letter='A', begin_row=2, end_row=None, log=False)
-    acc =  ws.select_column(column_letter='F', begin_row=2, end_row=None, log=False)
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.plot(acc)
-    ax.set_xticks(range(0, len(time), 50))
-    ax.set_xticklabels([time[i] for i in range(0, len(time), 50)], rotation=75)
-    fig.tight_layout()
-    plt.show()
+    import numpy as np
+    import random
+
+    a = np.array([[1, 2, 3], [4, 5, 6]])
+    print a
+    
+    b = np.array([7, 8])
+    print b
+    
+    t = np.c_[a, b]
+    print t
+    
+    print t[:, :-1]
+    print t[:, -1:]
