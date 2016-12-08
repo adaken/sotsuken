@@ -114,13 +114,15 @@ def make_kml_with_act():
     def make_acts2(gps_times, acts):
         ret = []
         #map(ret.append, acts[int(gps_times/15/1.28)])
-        for i in xrange(len(gps_times)):
+        
+        for i in xrange(len(gps_times) - 1):
             idx = int(i/15/1.28)
             ret.append(acts[idx])
+        
         return ret
-
-    acts  = make_acts(times, classed_acts, acc_times)
-    #acts = make_acts2(times, classed_acts)
+        
+    #acts  = make_acts(times, classed_acts, acc_times)
+    acts = make_acts2(times, classed_acts)
 
     # kml生成
     KmlWrapper().createAnimeKml(save_path, times, lons, lats, acts=acts,
