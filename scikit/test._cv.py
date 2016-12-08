@@ -27,7 +27,7 @@ if __name__ == '__main__':
          Xl(r'E:\work\data\run_1122_data.xlsx', 'Sheet1', 'F', 1, 'std', 0),
          Xl(r'E:\work\data\walk_1122_data.xlsx', 'Sheet1', 'F', 2, 'std', 0),
          Xl(r'E:\work\data\jump_128p_174data_fixed.xlsx', 'Sheet', 'A', 3, 'std', 0),
-        #Xl(r'E:\work\data\skip.xlsx', 'Sheet4', 'F', 4, 'rand', 0)
+         Xl(r'E:\work\data\skip.xlsx', 'Sheet4', 'F', 4, 'rand', 0)
         )
     input_data = []
     for xl in xls:

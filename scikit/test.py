@@ -21,8 +21,8 @@ if __name__ == '__main__':
     xls =  (
          Xl(r'E:\work\data\run_1122_data.xlsx', 'Sheet1', 'F', 'run', 'std', 0),
          Xl(r'E:\work\data\walk_1122_data.xlsx', 'Sheet1', 'F', 'walk', 'std', 0),
-         Xl(r'E:\work\data\jump_128p_174data_fixed.xlsx', 'Sheet', 'A', 'jump', 'std', 0),
-        #Xl(r'E:\work\data\skip.xlsx', 'Sheet4', 'F', 4, 'rand', 0)
+         #Xl(r'E:\work\data\jump_128p_174data_fixed.xlsx', 'Sheet', 'A', 'jump', 'std', 0),
+         Xl(r'E:\work\data\acc_stop_1206.xlsx', 'Sheet4', 'F', 'stop', 'rand', 0)
         )
     input_data = []
     for xl in xls:
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     for xl in xls:
         test_vec = make_input_from_xlsx(filename=xl.filename, sheetname=xl.sheet,
                                                col=xl.letter, read_range=(12802, None), overlap=xl.overlap,
-                                               sampling=xl.sampling, sample_cnt=21, fft_N=128,
+                                               sampling=xl.sampling, sample_cnt=20, fft_N=128,
                                                normalizing='01', label=xl.label, log=False)
         test_data += test_vec
 
