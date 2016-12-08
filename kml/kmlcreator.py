@@ -13,8 +13,8 @@ import random
 @timecounter
 def make_kml_with_act():
     Xl = namedtuple('Xl', 'path, sheet, cols, begin')
-    acc_xl = Xl(r'E:\work\data\walk_acc_tateno.xlsx', 'Sheet4', {'time':'A', 'acc':'F'},            2)
-    gps_xl = Xl(r'E:\work\data\walk_gps_tateno.xlsx', 'Sheet1', {'time':'A', 'lat':'J', 'lon':'K'}, 9)
+    acc_xl = Xl(r'E:\work\data\acc_random_1206.xlsx', 'Sheet6', {'time':'A', 'acc':'F'},            2)
+    gps_xl = Xl(r'E:\work\data\gps_random_1206.xlsx', 'Sheet3', {'time':'A', 'lat':'J', 'lon':'K'}, 9)
     N = 128
 
     save_path = r'E:\kml_act_test.kml'
@@ -29,7 +29,7 @@ def make_kml_with_act():
     print >> open(r'E:\log_gps_times.txt', 'w'), times
     lats  = gps_ws.get_col(gps_xl.cols['lat'], (gps_xl.begin, None))
     lons  = gps_ws.get_col(gps_xl.cols['lon'], (gps_xl.begin, None))
-    sampling_step = 10
+    sampling_step = 5
 
     def make_classed_acts(accs, act_names, N):
         """svmによって加速度リストからアクションリストを作成
@@ -50,15 +50,20 @@ def make_kml_with_act():
         #ret.append(i for i in list(pred))
         map(ret.append, pred)
 
-
-        # テスト用コード
-        #ret = [act_names[random.randint(0, len(act_names) - 1)] for i in xrange(len(accs))]
+        print pred
 
         print len(times),len(ret)
         diff= int(len(times)/15/1.28) - len(ret)
         print diff
         if (diff != 0):
-            ret.append(ret[-1]*diff)# リストの長さを調整
+            #ret.append(ret[-1]*diff)# リストの長さを調整
+            for i in xrange(diff): ret.append(ret[-1])
+
+        """
+        # テスト用コード
+        ret = []
+        ret = [act_names[random.randint(0, len(act_names) - 1)] for i in xrange(len(accs))]
+        """
         return ret
 
     acc_ws = ExcelWrapper(acc_xl.path).get_sheet(acc_xl.sheet)
@@ -66,9 +71,11 @@ def make_kml_with_act():
     print >> open(r'E:\log_classed_acts.txt', 'w'), classed_acts
     acc_times = acc_ws.get_col(acc_xl.cols['time'], (acc_xl.begin, None), iter_cell=False, log=True)[::N]
     print >> open(r'E:\log_acc_times.txt', 'w'), acc_times
-    #acc_times.pop() # 余計な最後の要素を削除
+    if len(classed_acts) < len(acc_times):
+        acc_times.pop() # 余計な最後の要素を削除
     assert len(classed_acts) == len(acc_times), "act: {}, times: {}".format(len(classed_acts), len(acc_times))
 
+    @timecounter
     def make_acts(gps_times, acts, acc_times):
         """アクションのリストを作成
 
@@ -109,11 +116,22 @@ def make_kml_with_act():
         print >> open(r'E:\log_acts.txt', 'w'), ret
         return ret
 
-    acts  = make_acts(times, classed_acts, acc_times)
+    def make_acts2(gps_times, acts):
+        ret = []
+        #map(ret.append, acts[int(gps_times/15/1.28)])
+        
+        for i in xrange(len(gps_times) - 1):
+            idx = int(i/15/1.28)
+            ret.append(acts[idx])
+        
+        return ret
+        
+    #acts  = make_acts(times, classed_acts, acc_times)
+    acts = make_acts2(times, classed_acts)
 
     # kml生成
     KmlWrapper().createAnimeKml(save_path, times, lons, lats, acts=acts,
-                              act_icons=act_icons, sampling_step=sampling_step, icon_scale=0.5)
+                              act_icons=act_icons, sampling_step=sampling_step, icon_scale=0.4)
 
     print "kmlを作成しました: {}".format(save_path)
 
@@ -142,5 +160,5 @@ if __name__ == '__main__':
         from kml.kmlwrapper import KmlWrapper
         KmlWrapper().createAnimeKml(save_path=kml_path, times=getcol('A'), longitudes=getcol('K'),
                                   latitudes=getcol('J'), format_time=True, sampling_interval=15,
-                                  icon_res=icon_res, icon_scale=0.3)
+                                  icon_res=icon_res, icon_scale=0.6)
         print "completed!"

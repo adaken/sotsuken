@@ -4,6 +4,8 @@ import numpy as np
 from fft import fft
 import random
 import time
+from fft import fftn
+from excelwrapper import ExcelWrapper
 
 def timecounter(func):
     """
@@ -22,16 +24,27 @@ def normalize_standard(arr):
     正規化方法1
     (Xi - "Xの平均") / "Xの標準偏差" で平均0分散1にする
     """
-    if isinstance(arr, list): arr = np.array(arr)
-    return (arr - np.mean(arr)) / np.std(arr)
+
+    assert isinstance(arr,np.ndarray)
+    assert arr.ndim in (1, 2)
+    dim = arr.ndim
+    if dim == 1:
+        return (arr - np.mean(arr)) / np.std(arr)
+    else:
+        return np.array([normalize_standard(a) for a in arr])
 
 def normalize_scale(arr):
     """
     正規化方法2
     (Xi - Xmin) / (Xmax - Xmin) で0<Xi<1にする
     """
-    if isinstance(arr, list): arr = np.array(arr)
-    return (arr - np.min(arr)) / (np.max(arr) - np.min(arr))
+    assert isinstance(arr,np.ndarray)
+    assert arr.ndim in (1, 2)
+    dim = arr.ndim
+    if dim == 1:
+        return (arr - np.min(arr)) / (np.max(arr) - np.min(arr))
+    else:
+        return np.array([normalize_scale(a) for a in arr])
 
 def xlsx_sample_gen(ws, col, read_range, fft_N, overlap, sample_cnt, log):
     """
@@ -173,6 +186,81 @@ def drow_circle(rgb, size, savepath):
     im.save(savepath)
     return savepath
 
+def make_input(xlsx, sheetnames, col, min_row, fft_N, sample_cnt, wf='hanning',
+               normalizing='01', log=False):
+    """Excelファイルから入力ベクトルを作成
+
+    :return input_vector : ndarray
+    """
+
+    assert normalizing in ('01', 'std')
+
+    wb = ExcelWrapper(xlsx)
+    input_vecs = []
+    is_full = False
+    vec_cnt = 0
+
+    for sheetname in sheetnames:
+        ws = wb.get_sheet(sheetname)
+        vec_iter = ws.iter_part_col(col=col, length=fft_N, row_range=(min_row, None), log=log)
+        for vec in vec_iter:
+            input_vecs.append(vec)
+            vec_cnt += 1
+            if vec_cnt == sample_cnt:
+                is_full = True
+                break
+        if is_full:
+            break
+    else:
+        if not vec_cnt == sample_cnt:
+            raise AssertionError("サンプル回数に対してデータが足りません: {}/{}"
+                                 .format(vec_cnt, sample_cnt))
+
+    normalizer = normalize_scale if normalizing == '01' else normalize_standard
+    input_vecs = np.array(input_vecs)
+    input_vecs = normalizer(fftn(arrs=input_vecs, fft_N=fft_N, wf=wf))
+
+    return input_vecs
+
+def make_input_data(xlsx, sheetname, col, min_row, sample_cnt, fft_N, log=False):
+    """加速度の入力ベクトルを作成
+
+    :param xlsx : str or ExcelWrapper
+        Excelファイルのパス
+        またはExcelWrapperオブジェクト
+
+    :param sheename : str
+        Excelファイルのシート名
+
+    :param col : str
+        読み込みたい列のインデックス(文字列)
+
+    :param min_row : int
+        読み込み開始行
+
+    :param sample_cnt : int
+        欲しい入力ベクトルの数
+
+    :param fft_N : int
+        FFTのポイント数
+
+    :return input_data : ndarrray
+        作成した入力ベクトル(長さfft_N/2)の配列
+
+    """
+
+    row_range = (min_row, min_row + fft_N * sample_cnt)
+    ws = None
+    if isinstance(xlsx, str):
+        ws = ExcelWrapper(xlsx).get_sheet(sheetname)
+    else:
+        ws = xlsx.get_sheet(sheetname)
+    acces = ws.iter_part_col(col=col, length=fft_N, row_range=row_range,log=log)
+    acces = list(acces)
+    fftdata = fftn(arrs=acces, fft_N=fft_N)
+    input_vecs = map(normalize_scale, fftdata)
+    return input_vecs
+
 def drow_random_color_circle(size, savepath):
     """
     ランダムな色の円(png)を作成
@@ -207,4 +295,10 @@ if __name__ == '__main__':
             plt.text(c[0], c[1], l, color='red')
         plt.show()
 
-    main(label, xls)
+    def test1():
+        invec = make_input_data(xlsx=r'E:\work\data\new_run.xlsx', sheetname='Sheet4', col='F',
+                         begin_row=2, sample_cnt=10, fft_N=128, log=True)
+
+        print len(invec), len(invec[0])
+
+    test1()
