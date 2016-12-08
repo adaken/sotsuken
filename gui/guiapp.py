@@ -3,25 +3,35 @@
 import Tkinter as tk
 import tkFileDialog as tkfd
 import subprocess as sb
+import tkMessageBox as tkmb
+from kml.kmlwrapper import KmlWrapper
+from msilib.schema import SelfReg
 
 class Frame(tk.Frame):
 
     def __init__(self, root, master=None):
         tk.Frame.__init__(self, master)
-        self.master.title('卒業研究')
+        self.master.title('TkApp')
+        self.filenames = None
+        self.create_widgets()
 
+
+
+    def create_widgets(self):
+        """ウィジェット"""
+        #メニュー
         self.menu = tk.Menu(root)
         self.menu.add_command(label='Exit', command=root.quit)
         root.configure(menu=self.menu)
 
-        self.filenames = None
-
+        #フレーム
         self.f1 = tk.Frame(root, relief = 'ridge',
-                      width = 640, height = 240,
+                      width = 300, height = 300,
                       borderwidth = 4,
                       padx=5, pady=5,
                       bg = '#006400')
 
+        #ボタン
         self.select_button = tk.Button(self.f1, text = 'ファイル選択', relief = 'raised',
                             font = ('times', 10),
                             bg = '#006400', fg = '#fffafa', borderwidth = 4,
@@ -31,7 +41,7 @@ class Frame(tk.Frame):
                             font = ('times', 10),
                             bg = '#006400', fg = '#fffafa', borderwidth = 4,
                             command = self.open_kml)
-
+        #ラベル
         self.title_label = tk.Label(self.f1, width=50, font=('times', 20), pady=2,
                                      text='kml作成', bg='#006400', fg='#fffafa')
 
@@ -40,9 +50,7 @@ class Frame(tk.Frame):
 
         self.labels = []
         map(self.labels.append,
-            (tk.Label(self.f1, width=50, font=('times', 12), pady=2, relief='raised', textvariable=self.filenames_buff[i]) for i in xrange(5)))
-
-        #フレームの配置
+            (tk.Label(self.f1, width=50, font=('times', 13), pady=2, relief='raised', textvariable=self.filenames_buff[i]) for i in xrange(5)))
 
         # ラベルの配置
         self.title_label.grid(row=0, column=0, pady=10)
@@ -52,9 +60,10 @@ class Frame(tk.Frame):
         # ボタンの配置
         self.select_button.grid(row=6, column=0, pady=5)
         self.kml_button.grid(row=7, column=0, pady=5)
-
         # フレームを配置
         self.f1.pack()
+
+
 
     def select_files(self):
         """ファイルを選択"""
@@ -69,8 +78,24 @@ class Frame(tk.Frame):
         for i, filename in zip(xrange(len(self.filenames_buff)), filenames):
             self.filenames_buff[i].set(filename)
 
+    def make_window(self):
+        #ウィンドウ作成
+        window1=tk.Toplevel()
+        window1.title=('information')
+        tk.Message(window1, aspect=600,
+                   text='しばらくお待ちください', font = ('times', 20), width=400).pack()
+        window1.geometry("700x50+200+200")
+        self.after(500, self.open_kml)
 
     def open_kml(self):
+        text1 = ["Please wait..."]*5
+        for i, filename in zip(xrange(len(self.filenames_buff)), text1):
+            self.filenames_buff[i].set(filename)
+        self.after(500, self.open_kml)
+
+    def make_kml(self):
+        """kml作成"""
+
         filenames2 = self.replace_exts(self.filenames, 'kml')
         #kml
         #リソース作成
@@ -86,20 +111,14 @@ class Frame(tk.Frame):
 
             # Excelを読み込む
             from util.excelwrapper import ExcelWrapper
-            ws = ExcelWrapper(filename=xl, sheetname='Sheet1')
+            ws = ExcelWrapper(filename=xl).get_sheet('Sheet1')
 
             # 読み込みを開始する行
             begin_row = 9
 
-            # 列のリストを取得する関数
-            getcol = lambda l : ws.select_column(column_letter=l,
-                                                 begin_row=begin_row)
+            times, lats, lons = ws.iter_cols(('A', 'J', 'K'), row_range=(begin_row, None))
+            KmlWrapper().createAnimeKml(kml, times, lons, lats, icon_scale=0.3, sampling_step=10)
 
-            # kmlに書き出す
-            from kml.kmlwrapper import KmlWrapper
-            KmlWrapper().createAnimeKml(save_path=kml, times=getcol('A'), longitudes=getcol('K'),
-                            latitudes=getcol('J'), format_time=True,
-                            sampling_interval=15, icon_scale=0.3)
             print "completed!"
 
             #GoogleEarthで表示
@@ -120,7 +139,7 @@ class Frame(tk.Frame):
 
 if __name__ == '__main__':
     root = tk.Tk()
-    root.geometry("800x300")
+    root.geometry("800x350")
     f = Frame(root)
     f.pack()
     f.mainloop()
