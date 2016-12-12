@@ -163,14 +163,9 @@ if __name__ == "__main__":
     import numpy as np
     import random
 
-    a = np.array([[1, 2, 3], [4, 5, 6]])
-    print a
-    
-    b = np.array([7, 8])
-    print b
-    
-    t = np.c_[a, b]
-    print t
-    
-    print t[:, :-1]
-    print t[:, -1:]
+    a = np.array([0., 2., 3.])
+    b = np.array([0., 0., 0.])
+    c = a / b
+    print c
+    c[np.isnan(c)] = 1
+    print c

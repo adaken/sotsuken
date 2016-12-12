@@ -6,6 +6,7 @@ import random
 import time
 from fft import fftn
 from excelwrapper import ExcelWrapper
+import itertools as it
 
 def timecounter(func):
     """
@@ -147,7 +148,6 @@ def make_input_from_xlsx(filename,
     assert sampling in ('std', 'rand')
     assert normalizing in ('std', '01')
     assert fft_wf in ('hunning', 'humming', 'blackman')
-    from excelwrapper import ExcelWrapper
     sample_gen = xlsx_sample_gen if sampling == 'std' else xlsx_random_sample_gen
     normalize = normalize_standard if normalizing == 'std' else normalize_scale
     args = (ExcelWrapper(filename).get_sheet(sheetname), col, read_range, fft_N, overlap, sample_cnt, log)
@@ -186,81 +186,6 @@ def drow_circle(rgb, size, savepath):
     im.save(savepath)
     return savepath
 
-def make_input(xlsx, sheetnames, col, min_row, fft_N, sample_cnt, wf='hanning',
-               normalizing='01', log=False):
-    """Excelファイルから入力ベクトルを作成
-
-    :return input_vector : ndarray
-    """
-
-    assert normalizing in ('01', 'std')
-
-    wb = ExcelWrapper(xlsx)
-    input_vecs = []
-    is_full = False
-    vec_cnt = 0
-
-    for sheetname in sheetnames:
-        ws = wb.get_sheet(sheetname)
-        vec_iter = ws.iter_part_col(col=col, length=fft_N, row_range=(min_row, None), log=log)
-        for vec in vec_iter:
-            input_vecs.append(vec)
-            vec_cnt += 1
-            if vec_cnt == sample_cnt:
-                is_full = True
-                break
-        if is_full:
-            break
-    else:
-        if not vec_cnt == sample_cnt:
-            raise AssertionError("サンプル回数に対してデータが足りません: {}/{}"
-                                 .format(vec_cnt, sample_cnt))
-
-    normalizer = normalize_scale if normalizing == '01' else normalize_standard
-    input_vecs = np.array(input_vecs)
-    input_vecs = normalizer(fftn(arrs=input_vecs, fft_N=fft_N, wf=wf))
-
-    return input_vecs
-
-def make_input_data(xlsx, sheetname, col, min_row, sample_cnt, fft_N, log=False):
-    """加速度の入力ベクトルを作成
-
-    :param xlsx : str or ExcelWrapper
-        Excelファイルのパス
-        またはExcelWrapperオブジェクト
-
-    :param sheename : str
-        Excelファイルのシート名
-
-    :param col : str
-        読み込みたい列のインデックス(文字列)
-
-    :param min_row : int
-        読み込み開始行
-
-    :param sample_cnt : int
-        欲しい入力ベクトルの数
-
-    :param fft_N : int
-        FFTのポイント数
-
-    :return input_data : ndarrray
-        作成した入力ベクトル(長さfft_N/2)の配列
-
-    """
-
-    row_range = (min_row, min_row + fft_N * sample_cnt)
-    ws = None
-    if isinstance(xlsx, str):
-        ws = ExcelWrapper(xlsx).get_sheet(sheetname)
-    else:
-        ws = xlsx.get_sheet(sheetname)
-    acces = ws.iter_part_col(col=col, length=fft_N, row_range=row_range,log=log)
-    acces = list(acces)
-    fftdata = fftn(arrs=acces, fft_N=fft_N)
-    input_vecs = map(normalize_scale, fftdata)
-    return input_vecs
-
 def drow_random_color_circle(size, savepath):
     """
     ランダムな色の円(png)を作成
@@ -274,6 +199,140 @@ def drow_random_color_circle(size, savepath):
     """
     rgb = tuple([random.randint(0, 255) for i in range(3)])
     return drow_circle(rgb, size, savepath)
+
+def _sample_xlsx(xlsx, sheetnames, col, min_row, fft_N, sample_cnt, overlap, log):
+    """Excelを順にサンプリング"""
+
+    wb = ExcelWrapper(xlsx)
+    input_vecs = []
+    is_full = False
+    vec_cnt = 0
+
+    def iter_alt(iter1, iter2):
+        """交互にイテレート"""
+        for i1, i2 in it.izip_longest(iter1, iter2):
+            if i1 is not None:
+                yield i1
+            if i2 is not None:
+                yield i2
+
+    for sheetname in sheetnames:
+        ws = wb.get_sheet(sheetname)
+        vec_iter = ws.iter_part_col(col, fft_N, (min_row, None), log=log)
+
+        if overlap:
+            _vec_iter = ws.iter_part_col(col, fft_N, (min_row + fft_N - overlap, None), log=log)
+            _iter = iter_alt(vec_iter, _vec_iter)
+        else:
+            _iter = vec_iter
+
+        for vec in _iter:
+            input_vecs.append(vec)
+            vec_cnt += 1
+            if vec_cnt == sample_cnt:
+                is_full = True
+                break
+        if is_full:
+            break
+    else:
+        if not vec_cnt == sample_cnt:
+            raise AssertionError("指定したサンプル回数に対してデータが足りません: {}/{}"
+                                 .format(vec_cnt, sample_cnt))
+    return input_vecs
+
+def _sample_xlsx_random(xlsx, sheetnames, col, min_row, fft_N, sample_cnt, overlap, log):
+    """Excelをランダムサンプリング"""
+
+    from random import randint
+    wb = ExcelWrapper(xlsx)
+    ws = [wb.get_sheet(s) for s in sheetnames]
+    n_ws = len(ws) - 1
+    begin_limits = [s.ws.max_row - fft_N for s in ws] # 読み込み開始行の限界
+
+    input_vecs = []
+    for r in (randint(0, n_ws) for i in xrange(sample_cnt)):
+        begin = randint(min_row, begin_limits[r])
+        vec = ws[r].get_col(col, (begin, begin + fft_N - 1), log=log)
+        input_vecs.append(vec)
+
+    return input_vecs
+
+
+def make_input(xlsx, sheetnames, col, min_row, fft_N, sample_cnt, label=None,
+               wf='hanning', normalizing='01', sampling='std', overlap=0, log=False):
+
+    """Excelファイルから入力ベクトルを作成
+
+    sheetnamesはリストで、サンプル回数に対して足りないデータはリストの次のシートから読み込む
+
+    :param xlsx : str
+        Excelファイルのパス
+
+    :param sheetnames : iterable of str
+        読み込み可能なシート名のiterable
+
+    :param col : str
+        読み込む列
+
+    :param min_row : int
+        読み込み開始行
+
+    :param fft_N : int
+        FFTのポイント数、一度に読み込む行数
+
+    :param sample_cnt : int
+        欲しい入力ベクトルの数
+
+    :param label : str or int, default: None
+        指定した場合は長さsample_cntのラベルのリストも返す
+
+    :param wf : str, default: 'hanning'
+        FFTで使う窓関数
+        'hanning', 'hamming', 'blackman'
+
+    :param normalizing : str, default: '01'
+        入力ベクトルの正規化方法
+        '01'  -> 各ベクトルの要素を0-1の間に丸める
+        'std' -> 各ベクトルの要素を平均0、分散1にする
+
+    :param sampling : str, default: 'std'
+        ランダムにサンプリングを行うかどうか
+        Trueの場合、シートリストの全体からランダムにサンプリングを行う
+        'std', 'rand'
+
+    :param overlap : int, default: 0
+        オーバーラップさせて読み込む行数
+        samplingが'std'のときのみ使用される
+
+    :param log : bool, default: False
+        ログを出力するかどうか
+
+    :return input_vectors : ndarray
+    :return labels : list
+        長さfft_N/2の2D配列
+        またはtuple(input_vectors, labels)
+    """
+
+    assert normalizing in ('01', 'std')
+    assert 0 <= overlap < fft_N
+
+    args = (xlsx, sheetnames, col, min_row, fft_N, sample_cnt)
+    kwargs = {'overlap': overlap, 'log': log}
+
+    if sampling == 'std':
+        input_vecs = _sample_xlsx(*args, **kwargs)
+    elif sampling == 'rand':
+        input_vecs = _sample_xlsx_random(*args, **kwargs)
+    else:
+        raise ValueError
+
+    normalizer = normalize_scale if normalizing == '01' else normalize_standard
+    input_vecs = np.array(input_vecs)
+    input_vecs = normalizer(fftn(arrs=input_vecs, fft_N=fft_N, wf=wf))
+
+    if label is not None:
+        return input_vecs, [label]*sample_cnt
+    return input_vecs
 
 if __name__ == '__main__':
     label, xls = 1, r"E:\work\data\run.xlsx"
@@ -296,9 +355,10 @@ if __name__ == '__main__':
         plt.show()
 
     def test1():
-        invec = make_input_data(xlsx=r'E:\work\data\new_run.xlsx', sheetname='Sheet4', col='F',
-                         begin_row=2, sample_cnt=10, fft_N=128, log=True)
+        invecs, labels = make_input(xlsx=r'E:\work\data\new_run.xlsx', sheetnames=['Sheet4'],
+                           col='F', min_row=2, sample_cnt=20, fft_N=128, log=True, label=0,
+                           sampling='std', overlap=64)
 
-        print len(invec), len(invec[0])
+        print len(invecs), len(invecs[0]), len(labels)
 
     test1()
