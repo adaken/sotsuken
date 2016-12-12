@@ -126,16 +126,17 @@ class ExcelWrapper(object):
         def __init__(self, wb, sheetname):
             self.wb = wb
             self.ws = wb[sheetname]
+            self.name = sheetname
 
         def _select(self, key, log=False):
             """min_col, min_row, max_col, max_row"""
             key_len = len(key)
             assert key_len in (2, 4)
             if key_len == 2:
-                if log: print "{}{}を読み込み中です...".format(*key)
+                if log: print "{}, {}{}を読み込み中です...".format(self.name, *key)
                 return self.ws['{}{}'.format(*key)]
             elif key_len == 4:
-                if log: print "{}{}:{}{}を読み込み中です...".format(*key)
+                if log: print "{}, {}{}:{}{}を読み込み中です...".format(self.name, *key)
                 return self.ws['{}{}:{}{}'.format(*key)]
 
         def pickup_cell(self, coord, log=False):
@@ -146,7 +147,7 @@ class ExcelWrapper(object):
                 ('A', 1): 'A1'のセル
 
             """
-            return self._select(coord).value
+            return self._select(coord, log).value
 
         def iter_cell(self, coords, log=False):
             """セルをイテレーション
@@ -159,7 +160,7 @@ class ExcelWrapper(object):
             assert hasattr(coords, '__iter__')
 
             for coord in coords:
-                yield self.pickup_cell(coord)
+                yield self.pickup_cell(coord, log)
 
         def get_col(self, col, row_range=(1, None), iter_cell=False, log=False):
             """1列だけ読み込む
@@ -226,7 +227,7 @@ class ExcelWrapper(object):
         def iter_cols(self, cols, row_range=(1, None), iter_cell=False, log=False, mode='line'):
             """指定した列のジェネレータ
 
-            1列のみ読み込む場合はget_single_col()の使用を推奨
+            1列のみ読み込む場合はget_col()の使用を推奨
 
             :param cols : iterable
                 読み込むいくつかの列

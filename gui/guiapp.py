@@ -3,6 +3,7 @@
 import Tkinter as tk
 import tkFileDialog as tkfd
 from msilib.schema import SelfReg
+from util.util import drow_circle
 
 class Frame(tk.Frame):
 
@@ -140,7 +141,10 @@ class Frame(tk.Frame):
             begin_row = 9
 
             times, lats, lons = ws.iter_cols(('A', 'J', 'K'), row_range=(begin_row, None))
-            KmlWrapper().createAnimeKml(kml, times, lons, lats, icon_scale=0.3, sampling_step=10)
+            import os
+            print os.getcwd()
+            icon = os.path.abspath(drow_circle((255, 0, 0), size=(16, 16), savepath=r'..\tmp\red.png'))
+            KmlWrapper().createAnimeKml(kml, times, lons, lats, icon_scale=0.3, sampling_step=10, icon_res=icon)
 
             print "completed!"
 
