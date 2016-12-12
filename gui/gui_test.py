@@ -10,7 +10,7 @@ class Application(Tk.Frame):
         self.create_widgets()
         self.pack()
         
-    def create_widgets(self):
+    def create_test_widgets(self):
         #var
         self.var_entry=Tk.StringVar()
         self.var_entry.trace('w', self.entry_changed)
