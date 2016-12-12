@@ -15,7 +15,7 @@ if __name__ == '__main__':
            Xl(r'E:\work\players\player_5_coord.xlsx', '5')]
 
     icon_colors = {'1': [255, 0, 0],
-                   '2': [204, 86, 22],
+                   '2': [241, 147, 0],
                    '3': [245, 216, 0],
                    '4': [0, 255, 0],
                    '5': [0, 0, 255]}
@@ -26,4 +26,4 @@ if __name__ == '__main__':
         ws = ExcelWrapper(xl.path).get_sheet('Sheet1')
         times, lons, lats = ws.iter_cols(('A', 'K', 'J'), (9, None), log=True)
         KmlWrapper().createAnimeKml(save, times, lons, lats,
-                                    icon_res=icon_res, icon_scale=0.5, sampling_step=5)
+                                    icon_res=icon_res, icon_scale=0.3, sampling_step=10)
