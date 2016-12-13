@@ -3,11 +3,12 @@
 import os
 import Tkinter as Tk
 import sys
+import tkFileDialog as tkfd
 
 class Application(Tk.Frame):
     def __init__(self, master=None):
         Tk.Frame.__init__(self, master)
-        self.create_widgets()
+        self.create_test_widgets()
         self.pack()
         
     def create_test_widgets(self):
@@ -38,6 +39,11 @@ class Application(Tk.Frame):
             self.text.delete('1.0', Tk.END)
             self.text.insert('1,0', open(self.var_entry.get()).read())
 
+
+
+
+
+    
 root = Tk.Tk()
 app = Application(master=root)
 app.mainloop()
