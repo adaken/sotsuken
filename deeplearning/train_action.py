@@ -78,10 +78,6 @@ def train_MLP():
             fm[np.isnan(fm)] = 1
             return fm
 
-        @property
-        def last_matrix(self):
-            return self.old
-
     class Classifier(chainer.link.Chain):
         """評価関数を定義"""
 
@@ -145,15 +141,17 @@ def train_MLP():
     batch_size = 50
     epoch = 1000
     n_in = N / 2
-    n_units = 700
+    n_units = 20
+    #n_units_2 = 500
     n_out = len(xls)
 
+    # 入力ベクトルを作成
     for xl in xls:
-        vecs = make_input(xlsx=xl.path, sheetnames=xl.sheets, col=xl.col,
+        vecs, label = make_input(xlsx=xl.path, sheetnames=xl.sheets, col=xl.col,
                           min_row=xl.min_row, fft_N=N,sample_cnt=sample_cnt,
-                          sampling=xl.sampling, log=False)
+                          sampling=xl.sampling, normalizing='std', label=xl.label, log=True)
         map(in_vecs.append, vecs)
-        labels += [xl.label] * len(vecs)
+        labels += label
 
     print "vecs_len  :", len(in_vecs)
     print "vec_len   :", len(in_vecs[0])
