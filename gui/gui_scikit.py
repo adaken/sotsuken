@@ -19,8 +19,8 @@ if __name__ == '__main__':
     """
     Xl = namedtuple('Xl', 'filename, sheet, letter, label, sampling, overlap')
     xls =  (
-         Xl(r'E:\work\data\run_1122_data.xlsx', 'Sheet1', 'F', 'run', 'std', 0),
-         Xl(r'E:\work\data\walk_1122_data.xlsx', 'Sheet1', 'F', 'walk', 'std', 0),
+         Xl(r'E:\work\data\run_1122_data.xlsx', 'Sheet4', 'F', 'run', 'std', 0),
+         Xl(r'E:\work\data\walk_1122_data.xlsx', 'Sheet4', 'F', 'walk', 'std', 0),
          #Xl(r'E:\work\data\jump_128p_174data_fixed.xlsx', 'Sheet', 'A', 'jump', 'std', 0),
          Xl(r'E:\work\data\acc_stop_1206.xlsx', 'Sheet4', 'F', 'stop', 'rand', 0)
         )
