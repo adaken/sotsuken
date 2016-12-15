@@ -2,11 +2,7 @@
 
 import Tkinter as tk
 import tkFileDialog as tkfd
-import subprocess as sb
-import tkMessageBox as tkmb
-from kml.kmlwrapper import KmlWrapper
 from msilib.schema import SelfReg
-from util.util import drow_circle
 
 class Frame(tk.Frame):
 
@@ -14,38 +10,50 @@ class Frame(tk.Frame):
         tk.Frame.__init__(self, master)
         self.master.title('TkApp')
         self.filenames = None
-        self.create_widgets()
+        self.filename = None
+        self.create_menu()
+        self.create_kml_widgets()
 
-
-
-    def create_widgets(self):
-        """ウィジェット"""
-        #メニュー
+    def create_menu(self):
         self.menu = tk.Menu(root)
-        self.menu.add_command(label='Exit', command=root.quit)
         root.configure(menu=self.menu)
+        self.menu.add_command(label='kml作成', command=self.check_frame_kml)
+        self.menu.add_command(label='svm', command=self.check_frame_svm)
+        self.menu.add_command(label='Exit', command=root.quit)
+
+    def check_frame_svm(self):
+        if self.f1.winfo_exists() == 1:
+            self.f1.destroy()
+            self.create_svm_widgets()
+        else:
+            self.create_svm_widgets()
+    def check_frame_kml(self):
+        if self.f1.winfo_exists() == 1:
+            self.f1.destroy()
+            self.create_kml_widgets()
+        else:
+            self.create_kml_widgets()
+
+    def create_kml_widgets(self):
+        """ウィジェット"""
 
         #フレーム
-        self.f1 = tk.Frame(root, relief = 'ridge',
-                      width = 300, height = 300,
-                      borderwidth = 4,
-                      padx=5, pady=5,
-                      bg = '#fffafa')
+        self.f1 = tk.LabelFrame(root, relief = 'ridge', width = 300, height = 300, text='kml作成', labelanchor=tk.N,
+                           borderwidth = 4, padx=5, pady=5, bg = '#fffafa', font=('times', 20))
 
         #ボタン
         self.select_button = tk.Button(self.f1, text = 'ファイル選択', relief = 'raised',
-                            font = ('times', 10),
-                            bg = '#fffafa', fg = '#000000', borderwidth = 4,
+                            font = ('times', 10), bg = '#fffafa', fg = '#000000', borderwidth = 4,
                             command = self.select_files)
 
         self.kml_button = tk.Button(self.f1, text = '変換', relief = 'raised',
-                            font = ('times', 10),
-                            bg = '#fffafa', fg = '#000000', borderwidth = 4,
+                            font = ('times', 10), bg = '#fffafa', fg = '#000000', borderwidth = 4,
                             command = self.open_kml)
         #ラベル
         self.title_label = tk.Label(self.f1, width=50, font=('times', 20), pady=2,
-                                     text='kml作成', bg='#fffafa', fg='#000000')
-        # ラベルのバッファ
+                                    text='kml作成', bg='#fffafa', fg='#000000')
+
+        #ラベルのバッファ
         self.filenames_buff = [tk.StringVar() for i in xrange(5)]
 
         self.labels = []
@@ -53,7 +61,7 @@ class Frame(tk.Frame):
             (tk.Label(self.f1, width=50, font=('times', 13), pady=2, relief='raised', textvariable=self.filenames_buff[i]) for i in xrange(5)))
 
         # ラベルの配置
-        self.title_label.grid(row=0, column=0, pady=10)
+        #self.title_label.grid(row=0, column=0, pady=10)
         for i, label in zip(xrange(1, len(self.labels)+1), self.labels):
             label.grid(row=i, column=0)
 
@@ -62,14 +70,58 @@ class Frame(tk.Frame):
         self.kml_button.grid(row=7, column=0, pady=5)
         # フレームを配置
         self.f1.pack()
+    def create_svm_widgets(self):
+        #フレーム
+        self.f1 = tk.LabelFrame(root, relief = 'ridge', text='scikit-learn', labelanchor=tk.N,
+                           borderwidth = 4, padx=5, pady=5, bg = '#fffafa', font=('times', 20))
+
+        #ボタン
+        self.select_file1 = tk.Button(self.f1, text = 'ファイル選択', relief = 'raised',
+                            font = ('times', 10), bg = '#fffafa', fg = '#000000', borderwidth = 4,
+                            command = self.select_svm_file1, padx=5)
+        self.select_file2 = tk.Button(self.f1, text = 'ファイル選択', relief = 'raised',
+                            font = ('times', 10), bg = '#fffafa', fg = '#000000', borderwidth = 4,
+                            command = self.select_svm_file2, padx=5)
+        self.select_file3 = tk.Button(self.f1, text = 'ファイル選択', relief = 'raised',
+                            font = ('times', 10), bg = '#fffafa', fg = '#000000', borderwidth = 4,
+                            command = self.select_svm_file3, padx=5)
+
+        #ラベルのバッファ
+        self.filename1_buff=tk.StringVar()
+        self.filename2_buff=tk.StringVar()
+        self.filename3_buff=tk.StringVar()
+        #ラベル
+        self.title_label = tk.Label(self.f1, width=40, font=('times', 20), pady=2,
+                                    text='Support Vector Machine', bg='#fffafa', fg='#000000')
+        self.label_A=tk.Label(self.f1, text='A')
+        self.label_B=tk.Label(self.f1, text='B')
+        self.label_C=tk.Label(self.f1, text='C')
+
+        self.filename1_label=tk.Label(self.f1, textvariable=self.filename1_buff, width=30)
+        self.filename2_label=tk.Label(self.f1, textvariable=self.filename2_buff, width=30)
+        self.filename3_label=tk.Label(self.f1, textvariable=self.filename3_buff, width=30)
+
+        # ラベルの配置
+        #self.title_label.grid(row=0, column=1)
+        self.label_A.grid(row=1, column=0)
+        self.label_B.grid(row=2, column=0)
+        self.label_C.grid(row=3, column=0)
+        self.filename1_label.grid(row=1, column=1)
+        self.filename2_label.grid(row=2, column=1)
+        self.filename3_label.grid(row=3, column=1)
+        # ボタンの配置
+        self.select_file1.grid(row=1, column=2)
+        self.select_file2.grid(row=2, column=2)
+        self.select_file3.grid(row=3, column=2)
+        # フレームを配置
+        self.f1.pack()
 
 
-
-    def select_files(self):
+    def select_files(self): #kml
         """ファイルを選択"""
 
         fTyp_xlsx = [('Excelファイル', '*.xlsx')]
-        iDir = r'E:/work/players_data'
+        iDir = r'E:/work'
         filenames = tkfd.askopenfilenames(filetypes=fTyp_xlsx, initialdir=iDir)
         print "filenames:", filenames
         self.filenames =  filenames
@@ -78,8 +130,8 @@ class Frame(tk.Frame):
         for i, filename in zip(xrange(len(self.filenames_buff)), filenames):
             self.filenames_buff[i].set(filename)
 
-
     def open_kml(self):
+        """Please wait..."""
         text1 = ["Please wait..."]*5
         for i, filename in zip(xrange(len(self.filenames_buff)), text1):
             self.filenames_buff[i].set(filename)
@@ -87,7 +139,7 @@ class Frame(tk.Frame):
 
     def make_kml(self):
         """kml作成"""
-
+        from kml.kmlwrapper import KmlWrapper
         filenames2 = self.replace_exts(self.filenames, 'kml')
         #kml
         #リソース作成
@@ -107,17 +159,24 @@ class Frame(tk.Frame):
 
             # 読み込みを開始する行
             begin_row = 9
-
             times, lats, lons = ws.iter_cols(('A', 'J', 'K'), row_range=(begin_row, None))
             import os
             print os.getcwd()
-            icon = os.path.abspath(drow_circle((255, 0, 0), size=(16, 16), savepath=r'..\tmp\red.png'))
+            from util.util import drow_circle
+            icon = os.path.abspath(drow_circle((255, 0, 0), size=(16, 16), savepath=r'.\tmp\red.png'))
             KmlWrapper().createAnimeKml(kml, times, lons, lats, icon_scale=0.3, sampling_step=10, icon_res=icon)
 
             print "completed!"
 
             #GoogleEarthで表示
             #sb.Popen(["C:\Program Files (x86)\Google\Google Earth\client\googleearth.exe", kml])
+
+            self.after(500, self.change_complete)
+
+    def change_complete(self):
+        text1 = ["Completed!"]*5
+        for i, filename in zip(xrange(len(self.filenames_buff)), text1):
+            self.filenames_buff[i].set(filename)
 
     def replace_ext(self, filename, extension):
         assert filename.find('.') is not -1
@@ -132,9 +191,30 @@ class Frame(tk.Frame):
             list_.append(self.replace_ext(f, extension))
         return list_
 
+    def select_svm_file1(self): #svm
+        fTyp_xlsx=[('Excelファイル', '*.xlsx')]
+        iDir=r'E:work'
+        filename1=tkfd.askopenfilename(filetypes=fTyp_xlsx, initialdir=iDir)
+        #self.filename=filename1
+        self.filename1_buff.set(filename1)
+    def select_svm_file2(self):
+        fTyp_xlsx=[('Excelファイル', '*.xlsx')]
+        iDir=r'E:work'
+        filename2=tkfd.askopenfilename(filetypes=fTyp_xlsx, initialdir=iDir)
+        #self.filename=filename2
+        self.filename2_buff.set(filename2)
+    def select_svm_file3(self):
+        fTyp_xlsx=[('Excelファイル', '*.xlsx')]
+        iDir=r'E:work'
+        filename3=tkfd.askopenfilename(filetypes=fTyp_xlsx, initialdir=iDir)
+        #self.filename=filename3
+        self.filename3_buff.set(filename3)
+
+
+
 if __name__ == '__main__':
     root = tk.Tk()
-    root.geometry("800x350")
+    root.geometry("800x400")
     f = Frame(root)
     f.pack()
     f.mainloop()
