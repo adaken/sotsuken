@@ -4,7 +4,7 @@ from util.excelwrapper import ExcelWrapper
 from util.util import timecounter
 
 @timecounter
-def cutoff(xlsx, sheetname, savename, col='F', row_range=(1, None), N=128,
+def clip_xlsx(xlsx, sheetname, savename, col='F', row_range=(1, None), N=128,
            threshold=3.5, interval=0):
     """突発的な加速度を切り出してExcelに保存
 
@@ -41,4 +41,4 @@ def cutoff(xlsx, sheetname, savename, col='F', row_range=(1, None), N=128,
 if __name__ == '__main__':
     xlsx, sheetname = r'../data/20161215_rugby/tackle/1215_tackle2_fix.xlsx', 'Sheet2'
     savename = r'../data/cutoff_test.xlsx'
-    cutoff(xlsx, sheetname, savename, 'F', (2, None), threshold=3.2, interval=200)
+    clip_xlsx(xlsx, sheetname, savename, 'F', (2, None), threshold=3.2, interval=200)
