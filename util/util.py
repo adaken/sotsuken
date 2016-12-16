@@ -12,9 +12,9 @@ def timecounter(func):
     """
     関数の処理時間を計測して標準出力に出力するデコレータ
     """
-    def wrapper(*args):
+    def wrapper(*args, **kwargs):
         start = time.time()
-        ret = func(*args)
+        ret = func(*args, **kwargs)
         elapsed = time.time() - start
         print "elapsed time for {}(): {}sec".format(func.__name__, float(elapsed))
         return ret
@@ -85,7 +85,7 @@ def make_input_from_xlsx(filename,
                          log=False):
     """
     非推奨!!! make_input()を使え
-    
+
     Excelファイルから入力ベクトル列を作成
 
     Parameters
