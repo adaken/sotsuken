@@ -239,7 +239,7 @@ class Frame(tk.Frame):
 
     def make_kml(self):
         """kml作成"""
-        from kml.kmlwrapper import KmlWrapper
+        from app.kml.kmlwrapper import KmlWrapper
         filenames2 = self.replace_exts(self.filenames, 'kml')
         #kml
         #リソース作成
@@ -254,7 +254,7 @@ class Frame(tk.Frame):
             #icon_res = icons[random.randint(0, 2)]
 
             # Excelを読み込む
-            from util.excelwrapper import ExcelWrapper
+            from app.util.excelwrapper import ExcelWrapper
             ws = ExcelWrapper(filename=xl).get_sheet('Sheet1')
 
             # 読み込みを開始する行
@@ -262,7 +262,7 @@ class Frame(tk.Frame):
             times, lats, lons = ws.iter_cols(('A', 'J', 'K'), row_range=(begin_row, None))
             import os
             print os.getcwd()
-            from util.util import drow_circle
+            from app.util.iconmaker import drow_circle
             icon = os.path.abspath(drow_circle((255, 0, 0), size=(16, 16), savepath=r'.\tmp\red.png'))
             KmlWrapper().createAnimeKml(kml, times, lons, lats, icon_scale=0.3, sampling_step=10, icon_res=icon)
 
@@ -340,7 +340,8 @@ class Frame(tk.Frame):
 
     def run_scikit_learn(self):
         from sklearn import svm
-        from util.util import make_input_from_xlsx
+        #from util.util import make_input_from_xlsx
+        from app.util.inputmaker import make_input
         import random
         from collections import namedtuple
         from sklearn.metrics import confusion_matrix
