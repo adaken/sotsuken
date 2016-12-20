@@ -17,25 +17,39 @@ from app import R, T, L
 
 if __name__ == '__main__':
     """
-    教師データ生成
+    データ生成
     """
     Xl = namedtuple('Xl', 'filename, sheet, letter, label, sampling, overlap')
     xls =  (
-         #Xl(R(r'data\acc\dropkick_acc_128p_16data.xlsx'), ['Sheet'], 'A', 'dk', 'std', 0),
-         Xl(R(r'data\acc\place.kick_128p_22data.xlsx'), ['Sheet'], 'A', 'pk', 'std', 0),
-         Xl(R(r'data\acc\run_acc_128p_32data.xlsx'), ['Sheet2'], 'F', 'run', 'std', 0),
-         Xl(R(r'data\acc\tackle_acc_128p_62data.xlsx'), ['Sheet'], 'A', 'tackle', 'std', 0)
+         Xl(R(r'data\raw\run_1122_data.xlsx'), ['Sheet1'], 'F', 'run', 'std', 0),
+         Xl(R(r'data\raw\walk_1122_data.xlsx'), ['Sheet1'], 'F', 'walk', 'std', 0),
+         Xl(R(r'data\raw\jump_128p_174data_fixed.xlsx'), ['Sheet'], 'A', 'jump', 'std', 0),
         )
     input_vecs = []
     input_labels = []
     for xl in xls:
         input_vec, labels = make_input(xlsx=xl.filename, sheetnames=xl.sheet,col=xl.letter,
-                                                min_row=2,fft_N=128, sample_cnt=16,
+                                                min_row=2,fft_N=128, sample_cnt=100,
                                                 label=xl.label,sampling=xl.sampling,
                                                 overlap=xl.overlap,normalizing='01', log=False)
+        #input_vecs.append(input_vec)
+        #input_labels.append(labels)
         map(input_vecs.append, input_vec)
         input_labels += labels
+    
+    print len(input_labels)
+    print len(input_vecs)
+    
+    input_vector = [0,0,0,0,0]
+    input_label = [0,0,0,0,0]
+    for i in xrange(0,15):
+        for j in xrange(0,300,19):
+            print i,j
+            input_vector[i].append(input_vecs[j])
+            input_label[i].append(input_labels[j])
+            print input_label[i]
 
+    
     from app.util.inputmaker import random_input_iter
     input_vecs1, input_labels1 = [], []
     for i, j in random_input_iter(input_vecs, input_labels):
