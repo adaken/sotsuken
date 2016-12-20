@@ -140,5 +140,21 @@ def make_input(xlsx, sheetnames, col, min_row, fft_N, sample_cnt, label=None,
         return input_vecs, [label]*sample_cnt
     return input_vecs
 
+def _random_idx_gen(self, n):
+    """要素が0からnまでの重複のないランダム値を返すジェネレータ"""
+    vacant_idx = range(n)
+    for i in xrange(n):
+        r = np.random.randint(0, len(vacant_idx))
+        yield vacant_idx[r]
+        del vacant_idx[r]
+
+def random_input_iter(inputs, labels):
+    """入力ベクトルとラベルをシャッフルしてイテレート"""
+
+    assert len(inputs) == len(labels)
+    r_gen = _random_idx_gen(len(inputs))
+    for r in r_gen:
+        yield inputs[r], labels[r]
+
 if __name__ == '__main__':
     pass

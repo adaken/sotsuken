@@ -24,7 +24,6 @@ if __name__ == '__main__':
     for i, xl in enumerate(xls):
         save = R(r'data\kml\players\{}.kml').format(i+1)
         icon_res = drow_circle(icon_colors[xl.id], (8, 8), T(r'players{}.png').format(i+1))
->>>>>>> refs/heads/test
         ws = ExcelWrapper(xl.path).get_sheet('Sheet1')
         times, lons, lats = ws.iter_cols(('A', 'K', 'J'), (9, None), log=True)
         KmlWrapper().createAnimeKml(save, times, lons, lats,
