@@ -3,7 +3,7 @@
 import openpyxl as px
 from excelwrapper import ExcelWrapper
 from timecounter import timecounter
-from app import R, L
+from app import R, L, T
 
 @timecounter
 def clip_xlsx(xlsx, sheetname, savename, col='F', row_range=(1, None), N=128,
@@ -28,6 +28,7 @@ def clip_xlsx(xlsx, sheetname, savename, col='F', row_range=(1, None), N=128,
         if col_v[i] > threshold:
             vec = col_v[i-(half):i+(half)]
             ret += [[elem] for elem in vec]
+            print "{}. {} : {}".format(len(ret) / N, i-half, i+half)
             i += half + 1 + interval
         else:
             i += 1
@@ -41,6 +42,6 @@ def clip_xlsx(xlsx, sheetname, savename, col='F', row_range=(1, None), N=128,
     print "finish"
 
 if __name__ == '__main__':
-    xlsx, sheetname = R(r'data/raw/tackle/1215_tackle2_fix.xlsx'), 'Sheet2'
-    savename = L(r'clip/cliptest.xlsx', mkdir=True)
-    clip_xlsx(xlsx, sheetname, savename, 'F', (2, None), threshold=3.2, interval=200)
+    xlsx, sheetname = R(r'data/raw/placekick/1215_place_fix.xlsx'), 'Sheet2'
+    savename = L(r'clip/place/place.xlsx', mkdir=True)
+    clip_xlsx(xlsx, sheetname, savename, 'F', (2, None), threshold=4.5, interval=350)
