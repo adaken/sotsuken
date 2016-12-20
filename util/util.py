@@ -12,9 +12,9 @@ def timecounter(func):
     """
     関数の処理時間を計測して標準出力に出力するデコレータ
     """
-    def wrapper(*args):
+    def wrapper(*args, **kwargs):
         start = time.time()
-        ret = func(*args)
+        ret = func(*args, **kwargs)
         elapsed = time.time() - start
         print "elapsed time for {}(): {}sec".format(func.__name__, float(elapsed))
         return ret
@@ -84,6 +84,8 @@ def make_input_from_xlsx(filename,
                          label=None,
                          log=False):
     """
+    非推奨!!! make_input()を使え
+
     Excelファイルから入力ベクトル列を作成
 
     Parameters
@@ -334,6 +336,8 @@ def make_input(xlsx, sheetnames, col, min_row, fft_N, sample_cnt, label=None,
         return input_vecs, [label]*sample_cnt
     return input_vecs
 
+
+
 if __name__ == '__main__':
     label, xls = 1, r"E:\work\data\run.xlsx"
 
@@ -361,4 +365,7 @@ if __name__ == '__main__':
 
         print len(invecs), len(invecs[0]), len(labels)
 
-    test1()
+    def create_icons():
+        for i in xrange(1, 201):
+            drow_random_color_circle((8,8), savepath=r'E:\color_icons\icon{}.png'.format(i))
+    create_icons()
