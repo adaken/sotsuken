@@ -152,7 +152,7 @@ def random_input_iter(inputs, labels):
     """入力ベクトルとラベルをシャッフルしてイテレート"""
 
     assert len(inputs) == len(labels)
-    r_gen = _random_idx_gen(len(inputs))
+    r_gen = _random_idx_gen(len(inputs)-1)
     for r in r_gen:
         yield inputs[r], labels[r]
 
