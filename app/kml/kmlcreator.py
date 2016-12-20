@@ -1,13 +1,13 @@
 # coding: utf-8
 
-from util.util import timecounter
-from util.excelwrapper import ExcelWrapper
-from util.fft import fft
+from app.util.timecounter import timecounter
+from app.util.excelwrapper import ExcelWrapper
+from app.util.fft import fftn
 from collections import namedtuple
 from kmlwrapper import KmlWrapper
-from util.util import drow_circle
+from app.util.iconmaker import drow_circle
 from datetime import timedelta
-from util.util import normalize_scale
+from app.util.normalize import scale_zero_one, standardize
 import random
 
 @timecounter
@@ -41,7 +41,7 @@ def make_kml_with_act():
         vecs = []
         ret = []
         for acc in accs:
-            vec = normalize_scale(fft(acc, N))
+            vec = scale_zero_one(fftn(acc, N))
             vecs.append(vec)
 
         from sklearn.externals import joblib
@@ -119,13 +119,13 @@ def make_kml_with_act():
     def make_acts2(gps_times, acts):
         ret = []
         #map(ret.append, acts[int(gps_times/15/1.28)])
-        
+
         for i in xrange(len(gps_times) - 1):
             idx = int(i/15/1.28)
             ret.append(acts[idx])
-        
+
         return ret
-        
+
     #acts  = make_acts(times, classed_acts, acc_times)
     acts = make_acts2(times, classed_acts)
 
@@ -147,7 +147,6 @@ if __name__ == '__main__':
         icon_res = r"E:\work\circle_blue.png"
 
         # Excelを読み込む
-        from util.excelwrapper import ExcelWrapper
         ws = ExcelWrapper(filename=xlsx_path, sheetname='Sheet1')
 
         # 読み込みを開始する行
@@ -157,7 +156,6 @@ if __name__ == '__main__':
         getcol = lambda l : ws.select_column(col_letter=l, begin_row=begin_row)
 
         # kmlに書き出す
-        from kml.kmlwrapper import KmlWrapper
         KmlWrapper().createAnimeKml(save_path=kml_path, times=getcol('A'), longitudes=getcol('K'),
                                   latitudes=getcol('J'), format_time=True, sampling_interval=15,
                                   icon_res=icon_res, icon_scale=0.6)

@@ -178,18 +178,6 @@ class SOM:
                 #print "%.5f%%" % (roop_p/roop_*100)
         print ""
 
-        """
-        data = self.input_layer
-        input_len = n * self.input_num
-        for i in xrange(n - 1):
-            data = np.r_[data, self.input_layer]
-        for i, r in zip(xrange(input_len), self._random_idx_gen(input_len)):
-            win_idx = self._get_winner_node(data[r])
-            self._update(win_idx, data[r], i)
-            if (i+1)/float(input_len)*100%10==0: print "%d%%"%((i+1)/float(input_len)*100),
-        print ""
-        """
-
         return self._return_map()
 
     def _return_map(self):

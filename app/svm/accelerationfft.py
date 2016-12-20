@@ -75,7 +75,8 @@ def main():
         plt.savefig(r"E:\work\128fft\900data128pFFT01scale100roopSOM_%d.png" % (i+1))
         #plt.show()
 
-def test1():
+
+def testdirmanager():
     Xls = namedtuple('Xls', 'label, path, sheet, rgb')
     xls = [Xls('r', r'E:\work\data\run.xlsx', 'Sheet4', [1, 0, 0]),
            Xls('w', r'E:\work\data\walk.xlsx', 'Sheet4', [0, 0, 1]),
@@ -142,9 +143,9 @@ def som_gray_with_label():
     train_itr = 100
     # ラベル付き特徴ベクトルのリストを生成
     patterns =  [("pattern%d" % (i+1), np.random.randint(0, 2, vec_dim))
-                 for i in xrange(data_type_count)]
+                 for i in xrange(datadirmanagertype_count)]
     for i, v in enumerate(patterns): print "pattern:%d\n" % (i+1), v
-    input_vec = [patterns[np.random.randint(data_type_count)] for i in xrange(vec_size)]
+    input_vec = [patterns[np.random.randint(data_type_count)] for idirmanagerin xrange(vec_size)]
     som = modsom.SOM(map_size, input_vec, display='gray_scale')
     som.set_parameter(neighbor=0.2, learning_rate=0.3, input_length_ratio=0.25)
     map_, label_coord = som.train(train_itr)
@@ -179,13 +180,13 @@ def som_color_with_label():
     train_itr = 70
     vec_patterns = [["pattern%d" % (i+1), # ラベル
                      np.random.randint(0, 255, 3), # 色
-                     np.random.randint(0, 2, vec_dim)] # 入力ベクトル
+         dirmanager           np.random.randint(0, 2, vec_dim)] # 入力ベクトル
                     for i in xrange(data_type_count)]
     for i, v in enumerate(vec_patterns):
         print "pattern:%d\n" % (i+1), v[2]
         print "label:", v[0]
         print "color:", v[1]
-    input_vec = [vec_patterns[np.random.randint(data_type_count)] for i in xrange(vec_size)]
+    input_vdirmanagerc = [vec_patterns[np.random.randint(data_type_count)] for i in xrange(vec_size)]
     som = modsom.SOM(map_size, input_vec)
     som.set_parameter(neighbor=0.2, learning_rate=0.3, input_length_ratio=0.25)
     map_, labels = som.train(train_itr)
@@ -209,7 +210,7 @@ def som_color_without_label():
     for i, v in enumerate(vec_patterns):
         print "pattern:%d\n" % (i+1), v[1]
         print "label:", v[0]
-    input_vec = [vec_patterns[np.random.randint(data_type_count)] for i in xrange(vec_size)]
+    input_vec = [vec_patterns[np.random.rdirmanagerndint(data_type_count)] for i in xrange(vec_size)]
     som = modsom.SOM(map_size, input_vec)
     som.set_parameter(neighbor=0.2, learning_rate=0.3, input_length_ratio=0.25)
     output_map = som.train(train_itr)

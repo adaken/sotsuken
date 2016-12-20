@@ -1,9 +1,8 @@
 # coding: utf-8
 from collections import namedtuple
-from util.excelwrapper import ExcelWrapper
-from util.util import make_input_data, normalize_scale
-from util.fft import fftn
+from app.util.inputmaker import make_input
 from modsom import SOM
+from app import R, T, L
 import matplotlib.pyplot as plt
 
 def som_action():
@@ -11,10 +10,10 @@ def som_action():
     min_row = 2
     N = 128
     Xl = namedtuple('Xl', 'path, sheet, col')
-    xls = {'S':Xl(r'E:\work\data\acc_stop_1206.xlsx', 'Sheet4', 'F'),
-           'B':Xl(r'E:\work\data\walk.xlsx', 'Sheet4', 'F'),
-           'R':Xl(r'E:\work\data\run_1122.xlsx', 'Sheet4', 'F'),
-           'J':Xl(r'E:\work\data\jump_128p_174data_fixed.xlsx', 'Sheet', 'A')}
+    xls = {'S':Xl(R(r'data\raw\acc_stop_1206.xlsx'), 'Sheet4', 'F'),
+           'B':Xl(R(r'data\raw\walk.xlsx'), 'Sheet4', 'F'),
+           'R':Xl(R(r'data\raw\run_1122.xlsx'), 'Sheet4', 'F'),
+           'J':Xl(R(r'data\raw\jump_128p_174data_fixed.xlsx'), 'Sheet', 'A')}
 
     colors = {'S':'blue',
               'B':'green',
@@ -23,12 +22,11 @@ def som_action():
 
     in_vecs = []
     for key, xl in xls.items():
-        wb = ExcelWrapper(xl.path)
-        vecs = make_input_data(xlsx=wb, sheetname=xl.sheet, col=xl.col, min_row=min_row,
-                              sample_cnt=sample_cnt, fft_N=N, log=True)
-        #vecs = normalize_scale(fftn(vecs, N))
+        vecs, labels = make_input(xlsx=xl.path, sheetnames=[xl.sheet], col=xl.col,
+                                  min_row=min_row, fft_N=N, sample_cnt=sample_cnt,
+                                  label=key, wf='hanning', normalizing='std', sampling='std',
+                                  overlap=0, log=True)
         vecs = [[key, vec] for vec in vecs]
-
         in_vecs += vecs
 
     som = SOM(shape=(40, 60), input_data=in_vecs, display='gray_scale')

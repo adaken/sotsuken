@@ -1,7 +1,6 @@
 # coding: utf-8
 
 import simplekml as simk
-from util.util import timecounter
 
 class KmlWrapper:
 
@@ -147,30 +146,12 @@ class KmlWrapper:
     def _format_times(self, times):
         """
         タイムスタンプの形式を整える
-        yyyy/m/d hh:mm:ss.mmm -> yyyy-mm-dd"T"hh:mm:ss.mmm"Z"
-        "%Y-%m-%d %H:%M:%S.%f" # 元の形式
-        "%Y-%m-%d %H:%M:%S" # microsecondが0のときの形式
+        yyyy/m/dirmanager hh:mm:ss.mmm -> yyyy-mm-dd"T"hh:mm:ss.mmm"Z"
+        "%Y-%m-%dirmanager %H:%M:%S.%f" # 元の形式
+        "%Y-%m-%dirmanager %H:%M:%S" # microsecondが0のときの形式
         """
         format_new = "%Y-%m-%dT%H:%M:%S.%fZ" # 新しい形式
         return [t.strftime(format_new) for t in times]
 
 if __name__ == "__main__":
-    @timecounter
-    def main():
-        from util.excelwrapper import ExcelWrapper
-        from util.util import drow_circle
-        import random
-        icon_size = (16, 16)
-        act_res = {'run' :drow_circle(rgb=(255, 0, 0), size=icon_size, savepath=r'E:\tmp\run.png'),
-                   'jump':drow_circle(rgb=(0, 255, 0), size=icon_size, savepath=r'E:\tmp\jump.png'),
-                   'walk':drow_circle(rgb=(0, 0, 255), size=icon_size, savepath=r'E:\tmp\walk.png')}
-        act_res_keys = act_res.keys()
-        br = 9
-        ws = ExcelWrapper(filename=r"E:\work\bicycle_gps_hirano.xlsx", sheetname='Sheet1')
-        times, lats, lons = ws.select_column(('A', 'J', 'K'), row_range=(br, None), mode='c', log=True)
-        acts = [act_res_keys[random.randint(0, 2)] for i in xrange(len(times))]
-        kml = KmlWrapper()
-        kml.createAnimeKml(save_path=r'E:\test.kml', times=times, lons=lons, lats=lats, acts=acts,
-                           act_icons=act_res, icon_scale=0.3, format_time=True, sampling_step=3)
-
-    main()
+    pass

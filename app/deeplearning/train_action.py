@@ -9,7 +9,7 @@ from chainer.training import extensions, extension
 from chainer.datasets.tuple_dataset import TupleDataset
 import matplotlib.pyplot as plt
 import json
-from util.util import make_input, timecounter
+from app.util.inputmaker import make_input
 from collections import namedtuple
 import random
 from chainer import reporter
