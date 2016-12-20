@@ -140,7 +140,7 @@ def make_input(xlsx, sheetnames, col, min_row, fft_N, sample_cnt, label=None,
         return input_vecs, [label]*sample_cnt
     return input_vecs
 
-def _random_idx_gen(self, n):
+def _random_idx_gen(n):
     """要素が0からnまでの重複のないランダム値を返すジェネレータ"""
     vacant_idx = range(n)
     for i in xrange(n):
