@@ -363,7 +363,7 @@ class Frame(tk.Frame):
             )
         input_data = []
         for xl in xls:
-            input_vec = make_input_from_xlsx(filename=xl.filename, sheetname=xl.sheet,
+            input_vec = make_input(filename=xl.filename, sheetname=xl.sheet,
                                                    col=xl.letter, read_range=(2, None), overlap=xl.overlap,
                                                    sampling=xl.sampling, sample_cnt=100, fft_N=128,
                                                    normalizing='01', label=xl.label, log=False)
@@ -379,7 +379,7 @@ class Frame(tk.Frame):
         """
         test_data = []
         for xl in xls:
-            test_vec = make_input_from_xlsx(filename=xl.filename, sheetname=xl.sheet,
+            test_vec = make_input(filename=xl.filename, sheetname=xl.sheet,
                                                    col=xl.letter, read_range=(12802, None), overlap=xl.overlap,
                                                    sampling=xl.sampling, sample_cnt=20, fft_N=128,
                                                    normalizing='01', label=xl.label, log=False)

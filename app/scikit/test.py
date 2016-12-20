@@ -3,7 +3,7 @@
 
 
 from sklearn import svm
-from util.util import make_input_from_xlsx
+from app.util.inputmaker import make_input
 import random
 from collections import namedtuple
 from sklearn.metrics import confusion_matrix
@@ -12,6 +12,8 @@ from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
 from sklearn.externals import joblib
+import numpy as np
+from app import R, T, L
 
 if __name__ == '__main__':
     """
@@ -19,58 +21,75 @@ if __name__ == '__main__':
     """
     Xl = namedtuple('Xl', 'filename, sheet, letter, label, sampling, overlap')
     xls =  (
-         Xl(r'E:\work\data\run_1122_data.xlsx', 'Sheet1', 'F', 'run', 'std', 0),
-         Xl(r'E:\work\data\walk_1122_data.xlsx', 'Sheet1', 'F', 'walk', 'std', 0),
-         #Xl(r'E:\work\data\jump_128p_174data_fixed.xlsx', 'Sheet', 'A', 'jump', 'std', 0),
-         Xl(r'E:\work\data\acc_stop_1206.xlsx', 'Sheet4', 'F', 'stop', 'rand', 0)
+         Xl(R(r'data\raw\run_1122_data.xlsx'), ['Sheet1'], 'F', 'run', 'std', 0),
+         Xl(R(r'data\raw\walk_1122_data.xlsx'), ['Sheet1'], 'F', 'walk', 'std', 0),
+         Xl(R(r'data\raw\jump_128p_174data_fixed.xlsx'), ['Sheet'], 'A', 'jump', 'std', 0),
+         #Xl(r'E:\work\data\acc_stop_1206.xlsx', ['Sheet4'], 'F', 'stop', 'rand', 0)
         )
-    input_data = []
+    input_vecs = []
+    input_labels = []
     for xl in xls:
-        input_vec = make_input_from_xlsx(filename=xl.filename, sheetname=xl.sheet,
-                                               col=xl.letter, read_range=(2, None), overlap=xl.overlap,
-                                               sampling=xl.sampling, sample_cnt=100, fft_N=128,
-                                               normalizing='01', label=xl.label, log=False)
-        input_data += input_vec
+        input_vec, labels = make_input(xlsx=xl.filename, sheetnames=xl.sheet,col=xl.letter, 
+                                                min_row=2,fft_N=128, sample_cnt=100, 
+                                                label=xl.label,sampling=xl.sampling, 
+                                                overlap=xl.overlap,normalizing='01', log=False)
+        map(input_vecs.append, input_vec)
+        input_labels += labels
 
-    random.shuffle(input_data)
-
-    labels = [vec[0] for vec in input_data]
-    vecs = [list(vec[1]) for vec in input_data]
-
+    """
+    tmp = np.c_[input_vec, labels]
+    random.shuffle(tmp)
+    input_vec = tmp[:, :-1]
+    labels  = tmp[:, -1]
+    #labels = [vec[0] for vec in input_data]
+    #vecs = [list(vec[1]) for vec in input_data]
+    """
     """
     テストデータ生成
     """
-    test_data = []
+    test_vecs = []
+    test_labels = []
     for xl in xls:
-        test_vec = make_input_from_xlsx(filename=xl.filename, sheetname=xl.sheet,
-                                               col=xl.letter, read_range=(12802, None), overlap=xl.overlap,
-                                               sampling=xl.sampling, sample_cnt=20, fft_N=128,
-                                               normalizing='01', label=xl.label, log=False)
-        test_data += test_vec
+        test_vec, test_label = make_input(xlsx=xl.filename, sheetnames=xl.sheet,col=xl.letter, 
+                                                min_row=12802,fft_N=128, sample_cnt=21, 
+                                                label=xl.label,sampling=xl.sampling, 
+                                                overlap=xl.overlap,normalizing='01', log=False)
+        map(test_vecs.append, test_vec)
+        test_labels += test_label
 
-    random.shuffle(test_data)
+    print "input_vec_len    :", len(input_vecs)
+    #print "input_vec_shape  :", input_vecs.shape
+    print "labels_len       :", len(input_labels)
+    print "test_vec_len     :", len(test_vecs)
+    #print "test_vec_shape   :", test_vecs.shape
+    print "test_labels      :", len(test_labels)
 
-    test_labels = [vec[0] for vec in test_data]
-    test_vecs = [list(vec[1]) for vec in test_data]
-
+    """
+    tmpt = np.c_[test_vec, test_labels]
+    random.shuffle(tmpt)
+    test_vec = tmpt[:, :-1]
+    test_labels  = tmpt[:, -1]
+    #test_labels = [vec[0] for vec in test_data]
+    #test_vecs = [list(vec[1]) for vec in test_data]
+    """
     """
     教師データの学習分類
     """
     est = svm.SVC(C=1, kernel='rbf', gamma=0.01)    # パラメータ (C-SVC, RBF カーネル, C=1)
     clf = OneVsRestClassifier(est)  #他クラス分類器One-against-restによる識別
-    clf.fit(vecs, labels)
+    clf.fit(input_vecs, input_labels)
     test_pred = clf.predict(test_vecs)
 
     clf2 = SVC(C=1, kernel='rbf', gamma=0.01)    # パラメータ (C-SVC, RBF カーネル, C=1)
-    clf2.fit(vecs, labels)
+    clf2.fit(input_vecs, input_labels)
     test_pred2 = clf2.predict(test_vecs)  #他クラス分類器One-versus-oneによる識別
 
     """
     学習モデルのローカル保存
-    """
+
     joblib.dump(clf, 'E:\clf.pkl')
     joblib.dump(clf2, 'E:\clf2.pkl')
-
+    """
     #confusion matrix（ラベルの分類表。分類性能が高いほど対角線に値が集まる）
     print confusion_matrix(test_labels, test_pred)
     print confusion_matrix(test_labels, test_pred2)
