@@ -70,6 +70,7 @@ class Dir(object):
         elif not self._exists(name): # ファイルシステムに存在しない
             print "parsing?:", Dir.parsing
             print "automkdir?:", Dir.auto_mkdir
+            print "permit_empty_file?", Dir.permit_empty_file
             if Dir.parsing and Dir.auto_mkdir: # パス解析中かつ自動作成ON
                 self.mkdir(name)
                 return self._getdir(name)
