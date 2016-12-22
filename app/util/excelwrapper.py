@@ -380,7 +380,7 @@ class ExcelWrapper(object):
                         break
 
 if __name__ == '__main__':
-    from util import timecounter
+    from app.util.timecounter import timecounter
     @timecounter
     def test_get_letter():
         import random
