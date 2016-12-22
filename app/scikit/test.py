@@ -23,7 +23,7 @@ if __name__ == '__main__':
     xls =  (
          #Xl(R(r'data\acc\dropkick_acc_128p_16data.xlsx'), ['Sheet'], 'A', 'dk', 'std', 0),
          Xl(R(r'data\acc\place.kick_128p_22data.xlsx'), ['Sheet'], 'A', 'pk', 'std', 0),
-         Xl(R(r'data\acc\run_acc_128p_32data.xlsx'), ['Sheet2'], 'F', 'run', 'std', 0),
+         Xl(R(r'data\acc\run_acc_128p_81data.xlsx'), ['Sheet2'], 'F', 'run', 'std', 0),
          Xl(R(r'data\acc\tackle_acc_128p_62data.xlsx'), ['Sheet'], 'A', 'tackle', 'std', 0)
         )
     input_vecs = []

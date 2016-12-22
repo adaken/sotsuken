@@ -14,6 +14,7 @@ from sklearn.metrics import classification_report
 from sklearn.externals import joblib
 import numpy as np
 from app import R, T, L
+from sklearn.cross_validation import StratifiedKFold
 
 if __name__ == '__main__':
     """
@@ -21,9 +22,9 @@ if __name__ == '__main__':
     """
     Xl = namedtuple('Xl', 'filename, sheet, letter, label, sampling, overlap')
     xls =  (
-         Xl(R(r'data\raw\run_1122_data.xlsx'), ['Sheet1'], 'F', 'run', 'std', 0),
-         Xl(R(r'data\raw\walk_1122_data.xlsx'), ['Sheet1'], 'F', 'walk', 'std', 0),
-         Xl(R(r'data\raw\jump_128p_174data_fixed.xlsx'), ['Sheet'], 'A', 'jump', 'std', 0),
+         Xl(R(r'data\raw\run_1122_data.xlsx'), ['Sheet1'], 'F', '0', 'std', 0),
+         Xl(R(r'data\raw\walk_1122_data.xlsx'), ['Sheet1'], 'F', '1', 'std', 0),
+         Xl(R(r'data\raw\jump_128p_174data_fixed.xlsx'), ['Sheet'], 'A', '2', 'std', 0),
         )
     input_vecs = []
     input_labels = []
@@ -37,8 +38,39 @@ if __name__ == '__main__':
         map(input_vecs.append, input_vec)
         input_labels += labels
     
-    print len(input_labels)
-    print len(input_vecs)
+    #print len(input_labels)
+    #print len(input_vecs)
+    
+    #from sklearn import datasets
+    #iris = datasets.load_iris()
+    #data = iris.data[0:100][:,::2]
+    #print iris.target[0:100]
+    
+    #label = np.r_[np.repeat(0,20), np.repeat(1,10)]
+    skf = StratifiedKFold(input_labels, n_folds=5, shuffle=False)
+    #print skf
+    
+    train_vecs = [[]]*5
+    train_labels = [[]]*5
+    test_vecs = [[]]*5
+    test_labels = [[]]*5
+    for tr, ts in skf:
+        print("%s %s" % (tr, ts))
+        for i in xrange(5):
+            for j in tr:
+                #print i
+                train_vecs[i].append(input_vecs[j])
+                train_labels[i].append(input_labels[j])
+        for i in xrange(5):
+            for j in ts:
+                #print i
+                test_vecs[i].append(input_vecs[j])
+                test_labels[i].append(input_labels[j])
+    print train_labels[0]
+    print test_labels[0]
+    
+    #for fr, fs in zip([0,1,2,3,4], [5,6,7,8,9]):
+        #print("%s %s" % (fr, fs))
     
     input_vector = [0,0,0,0,0]
     input_label = [0,0,0,0,0]

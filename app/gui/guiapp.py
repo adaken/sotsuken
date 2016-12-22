@@ -35,7 +35,6 @@ class Frame(tk.Frame):
             self.create_kml_widgets()
         else:
             self.create_kml_widgets()
-
     def check_frame_som(self):
         if self.f1.winfo_exists() == 1:
             self.f1.destroy()
@@ -44,7 +43,7 @@ class Frame(tk.Frame):
             self.create_som_widgets()
 
     def create_kml_widgets(self):
-        """ウィジェット"""
+        """kmlのウィジェット"""
 
         #フレーム
         self.f1 = tk.LabelFrame(root, relief = 'ridge', width = 300, height = 300, text='kml作成', labelanchor=tk.N,
@@ -80,54 +79,74 @@ class Frame(tk.Frame):
         # フレームを配置
         self.f1.pack()
     def create_svm_widgets(self):
+        """svmのウィジェット"""
         #フレーム
         self.f1 = tk.LabelFrame(root, relief = 'ridge', text='scikit-learn', labelanchor=tk.N,
-                           borderwidth = 4, padx=5, pady=5, bg = '#fffafa', font=('times', 30), width=500, height=300)
-        #ボタン
-        self.select_fileA = tk.Button(self.f1, text = 'ファイル選択', relief = 'raised',
-                            bg = '#fffafa', fg = '#000000', borderwidth = 4,
-                            command = self.select_svm_fileA)
-        self.select_fileB = tk.Button(self.f1, text = 'ファイル選択', relief = 'raised',
-                            bg = '#fffafa', fg = '#000000', borderwidth = 4,
-                            command = self.select_svm_fileB)
-        self.select_fileC = tk.Button(self.f1, text = 'ファイル選択', relief = 'raised',
-                            bg = '#fffafa', fg = '#000000', borderwidth = 4,
-                            command = self.select_svm_fileC)
+                           borderwidth = 4, padx=5, pady=5, font=('times', 30), width=800, height=300)
+        #ラベルフレーム(lf)
+        self.lf_labelname_skl = tk.LabelFrame(self.f1, text='ラベル名', labelanchor=tk.NW)
+        self.lf_sheetname_skl = tk.LabelFrame(self.f1, text='Sheet名', labelanchor=tk.NW)
+        self.lf_filename_skl = tk.LabelFrame(self.f1, text='ファイル名', labelanchor=tk.NW)
+        self.f_button_skl = tk.Frame(self.f1)
 
-        #ラベルのバッファ
+        #ボタン
+        self.select_fileA = tk.Button(self.f_button_skl, text = 'ファイル選択', relief = 'raised',
+                            bg = '#fffafa', fg = '#000000', borderwidth = 4,
+                            command = self.select_svm_fileA).pack()
+        self.select_fileB = tk.Button(self.f_button_skl, text = 'ファイル選択', relief = 'raised',
+                            bg = '#fffafa', fg = '#000000', borderwidth = 4,
+                            command = self.select_svm_fileB).pack()
+        self.select_fileC = tk.Button(self.f_button_skl, text = 'ファイル選択', relief = 'raised',
+                            bg = '#fffafa', fg = '#000000', borderwidth = 4,
+                            command = self.select_svm_fileC).pack()
+        self.run_skl_button=tk.Button(self.f1, text = '実行', relief = 'raised',
+                            bg = '#fffafa', fg = '#000000', borderwidth = 4,
+                            command = self.run_scikit_learn)
+
+        #タイトルラベル
+        self.title_label = tk.Label(self.f1, width=40, font=('times', 20), pady=2,
+                                    text='Scikit-learn', bg='#fffafa', fg='#000000')
+
+        #ラベル(ファイル名)
         self.filenameA_buff=tk.StringVar()
         self.filenameB_buff=tk.StringVar()
         self.filenameC_buff=tk.StringVar()
-        #ラベル
-        self.title_label = tk.Label(self.f1, width=40, font=('times', 20), pady=2,
-                                    text='Support Vector Machine', bg='#fffafa', fg='#000000')
-        self.label_A=tk.Label(self.f1, text='A')
-        self.label_B=tk.Label(self.f1, text='B')
-        self.label_C=tk.Label(self.f1, text='C')
+        self.filenameA_label=tk.Label(self.lf_filename_skl, relief='ridge', textvariable=self.filenameA_buff, width=50).pack()
+        self.filenameB_label=tk.Label(self.lf_filename_skl, relief='ridge', textvariable=self.filenameB_buff, width=50).pack()
+        self.filenameC_label=tk.Label(self.lf_filename_skl, relief='ridge', textvariable=self.filenameC_buff, width=50).pack()
 
-        self.filenameA_label=tk.Label(self.f1, relief='ridge', textvariable=self.filenameA_buff, width=40)
-        self.filenameB_label=tk.Label(self.f1, relief='ridge', textvariable=self.filenameB_buff, width=40)
-        self.filenameC_label=tk.Label(self.f1, relief='ridge', textvariable=self.filenameC_buff, width=40)
+        #エントリー(ラベル名)
+        self.e_ln1_skl_buff=tk.StringVar()
+        self.e_ln2_skl_buff=tk.StringVar()
+        self.e_ln3_skl_buff=tk.StringVar()
+        self.e_ln1_skl=tk.Entry(self.lf_labelname_skl, textvariable=self.e_ln1_skl_buff, width=10).pack()
+        self.e_ln2_skl=tk.Entry(self.lf_labelname_skl, textvariable=self.e_ln2_skl_buff, width=10).pack()
+        self.e_ln3_skl=tk.Entry(self.lf_labelname_skl, textvariable=self.e_ln3_skl_buff, width=10).pack()
+        #エントリー(Sheet名)
+        self.e_sheet1_skl_buff=tk.StringVar()
+        self.e_sheet2_skl_buff=tk.StringVar()
+        self.e_sheet3_skl_buff=tk.StringVar()
+        self.e_sheet1_skl_buff.set('Sheet')
+        self.e_sheet2_skl_buff.set('Sheet')
+        self.e_sheet3_skl_buff.set('Sheet')
+        self.e_sheet1_skl=tk.Entry(self.lf_sheetname_skl, textvariable=self.e_sheet1_skl_buff, width=10).pack()
+        self.e_sheet2_skl=tk.Entry(self.lf_sheetname_skl, textvariable=self.e_sheet2_skl_buff, width=10).pack()
+        self.e_sheet3_skl=tk.Entry(self.lf_sheetname_skl, textvariable=self.e_sheet3_skl_buff, width=10).pack()
 
-        # ラベルの配置
-        self.label_A.place(relx=0.05, rely=0.1)
-        self.label_B.place(relx=0.05, rely=0.2)
-        self.label_C.place(relx=0.05, rely=0.3)
-        self.filenameA_label.place(relx=0.1, rely=0.1)
-        self.filenameB_label.place(relx=0.1, rely=0.2)
-        self.filenameC_label.place(relx=0.1, rely=0.3)
-        self.select_fileA.place(relx=0.7, rely=0.09)
-        self.select_fileB.place(relx=0.7, rely=0.19)
-        self.select_fileC.place(relx=0.7, rely=0.29)
-        # フレームを配置
+        #配置(ボタン)
+        self.run_skl_button.place(relx=0.45, rely=0.5)
+        #配置(フレーム)
+        self.lf_labelname_skl.place(relx=0.1, rely=0.1)
+        self.lf_sheetname_skl.place(relx=0.2, rely=0.1)
+        self.lf_filename_skl.place(relx=0.3, rely=0.1)
+        self.f_button_skl.place(relx=0.8, rely=0.1)
         self.f1.pack()
     def create_som_widgets(self):
+        """somのウィジェット"""
         #フレーム
         self.f1 = tk.LabelFrame(root, relief = 'ridge', text='SOM', labelanchor=tk.N,
                            borderwidth = 4, padx=5, pady=5, bg='#006400', fg='#fffafa', font=('times', 30), width=800, height=300)
-        #ラベルフレーム
-        self.frame_labelname=tk.LabelFrame(self.f1, relief='ridge', text='ラベル名', labelanchor=tk.NW,
-                                           bg='#006400', fg='#fffafa')
+
         #var
         self.labelname1_buff=tk.StringVar()
         self.labelname2_buff=tk.StringVar()
@@ -154,6 +173,8 @@ class Frame(tk.Frame):
                             bg = '#fffafa', fg = '#000000', borderwidth = 4, command = self.select_som_file3)
         self.select_file4 = tk.Button(self.f1, text = 'ファイル選択', relief = 'raised',
                             bg = '#fffafa', fg = '#000000', borderwidth = 4, command = self.select_som_file4)
+        self.run_som_button = tk.Button(self.f1, text = '実行', relief = 'raised',
+                            bg = '#fffafa', fg = '#000000', borderwidth = 4, command = self.select_som_file4)
         #ラベル
         self.label_1=tk.Label(self.f1, bg='#006400', fg='#fffafa', text='ラベル名')
         self.label_2=tk.Label(self.f1, bg='#006400', fg='#fffafa', text='色')
@@ -169,10 +190,10 @@ class Frame(tk.Frame):
         self.filename4_label=tk.Label(self.f1, textvariable=self.filename4_buff, width=50, relief='ridge')
 
         #エントリー
-        self.labelname1_entry=tk.Entry(self.frame_labelname, textvariable=self.labelname1_buff, width=15)
-        self.labelname2_entry=tk.Entry(self.frame_labelname, textvariable=self.labelname2_buff, width=15)
-        self.labelname3_entry=tk.Entry(self.frame_labelname, textvariable=self.labelname3_buff, width=15)
-        self.labelname4_entry=tk.Entry(self.frame_labelname, textvariable=self.labelname4_buff, width=15)
+        self.labelname1_entry=tk.Entry(self.f1, textvariable=self.labelname1_buff, width=15)
+        self.labelname2_entry=tk.Entry(self.f1, textvariable=self.labelname2_buff, width=15)
+        self.labelname3_entry=tk.Entry(self.f1, textvariable=self.labelname3_buff, width=15)
+        self.labelname4_entry=tk.Entry(self.f1, textvariable=self.labelname4_buff, width=15)
         self.count_entry=tk.Entry(self.f1, textvariable=self.count_buff, width=5)
         self.point_entry=tk.Entry(self.f1, textvariable=self.point_buff, width=5)
         self.size_y_entry=tk.Entry(self.f1, textvariable=self.size_y_buff, width=5)
@@ -217,6 +238,9 @@ class Frame(tk.Frame):
         self.size_x_entry.place(relx=0.78, rely=0.7)
         #フレーム配置
         self.f1.pack()
+
+
+
     def select_files(self): #kml関連
         """ファイルを選択"""
 
@@ -241,7 +265,6 @@ class Frame(tk.Frame):
         """kml作成"""
         from app.kml.kmlwrapper import KmlWrapper
         filenames2 = self.replace_exts(self.filenames, 'kml')
-        #kml
         #リソース作成
         for i, zip_ in enumerate(zip(self.filenames, filenames2)):
             xl, kml = zip_
@@ -296,23 +319,155 @@ class Frame(tk.Frame):
 
     def select_svm_fileA(self): #svm関連
         fTyp_xlsx=[('Excelファイル', '*.xlsx')]
-        iDir=r'E:work'
+        iDir=r'E:\Eclipse\pleiades\workspace\Sotsugyo_kenkyu\res\data'
         filenameA=tkfd.askopenfilename(filetypes=fTyp_xlsx, initialdir=iDir)
         #self.filename=filename1
         self.filenameA_buff.set(filenameA)
     def select_svm_fileB(self):
         fTyp_xlsx=[('Excelファイル', '*.xlsx')]
-        iDir=r'E:work'
+        iDir=r'E:\Eclipse\pleiades\workspace\Sotsugyo_kenkyu\res\data'
         filenameB=tkfd.askopenfilename(filetypes=fTyp_xlsx, initialdir=iDir)
         #self.filename=filename2
         self.filenameB_buff.set(filenameB)
     def select_svm_fileC(self):
         fTyp_xlsx=[('Excelファイル', '*.xlsx')]
-        iDir=r'E:work'
+        iDir=r'E:\Eclipse\pleiades\workspace\Sotsugyo_kenkyu\res\data'
         filenameC=tkfd.askopenfilename(filetypes=fTyp_xlsx, initialdir=iDir)
         #self.filename=filename3
         self.filenameC_buff.set(filenameC)
 
+    def run_scikit_learn(self):
+        
+        from sklearn import svm
+        from app.util.inputmaker import make_input
+        import random
+        from collections import namedtuple
+        from sklearn.metrics import confusion_matrix
+        from sklearn.multiclass import OneVsRestClassifier
+        from sklearn.svm import SVC
+        from sklearn.metrics import accuracy_score
+        from sklearn.metrics import classification_report
+        from sklearn.externals import joblib
+        import numpy as np
+        from app import R, T, L
+        
+        #ファイル名取得
+        file1=self.filenameA_buff.get()
+        file2=self.filenameB_buff.get()
+        file3=self.filenameC_buff.get()
+        sheet1=self.e_sheet1_skl_buff.get()
+        sheet2=self.e_sheet2_skl_buff.get()
+        sheet3=self.e_sheet3_skl_buff.get()
+        label1=self.e_ln1_skl_buff.get()
+        label2=self.e_ln2_skl_buff.get()
+        label3=self.e_ln3_skl_buff.get()
+        
+        """
+        教師データ生成
+        """
+        Xl = namedtuple('Xl', 'filename, sheet, letter, label, sampling, overlap')
+        xls =  (
+             #Xl(R(r'data\acc\dropkick_acc_128p_16data.xlsx'), ['Sheet'], 'A', 'dk', 'std', 0),
+             Xl(file1, [sheet1], 'F', label1, 'std', 0),
+             Xl(file2, [sheet2], 'F', label2, 'std', 0),
+             Xl(file3, [sheet3], 'A', label3, 'std', 0)
+            )
+        input_vecs = []
+        input_labels = []
+        for xl in xls:
+            input_vec, labels = make_input(xlsx=xl.filename, sheetnames=xl.sheet,col=xl.letter,
+                                                    min_row=2,fft_N=128, sample_cnt=100,
+                                                    label=xl.label,sampling=xl.sampling,
+                                                    overlap=xl.overlap,normalizing='01', log=False)
+            map(input_vecs.append, input_vec)
+            input_labels += labels
+    
+        from app.util.inputmaker import random_input_iter
+        input_vecs1, input_labels1 = [], []
+        for i, j in random_input_iter(input_vecs, input_labels):
+            input_vecs1.append(i)
+            input_labels1.append(j)
+    
+        """
+        tmp = np.c_[input_vec, labels]
+        random.shuffle(tmp)
+        input_vec = tmp[:, :-1]
+        labels  = tmp[:, -1]
+        #labels = [vec[0] for vec in input_data]
+        #vecs = [list(vec[1]) for vec in input_data]
+        """
+        """
+        テストデータ生成
+        """
+        test_vecs = []
+        test_labels = []
+        for xl in xls:
+            test_vec, test_label = make_input(xlsx=xl.filename, sheetnames=xl.sheet,col=xl.letter,
+                                                    min_row=128*100+1,fft_N=128, sample_cnt=21,
+                                                    label=xl.label,sampling=xl.sampling,
+                                                    overlap=xl.overlap,normalizing='01', log=False)
+            map(test_vecs.append, test_vec)
+            test_labels += test_label
+    
+        test_vecs1, test_labels1 = [], []
+        for i, j in random_input_iter(test_vecs, test_labels):
+            test_vecs1.append(i)
+            test_labels1.append(j)
+        """
+        print "input_vec_len    :", len(input_vecs)
+        #print "input_vec_shape  :", input_vecs.shape
+        print "labels_len       :", len(input_labels)
+        print "test_vec_len     :", len(test_vecs)
+        #print "test_vec_shape   :", test_vecs.shape
+        print "test_labels      :", len(test_labels)
+        """
+        
+        """
+        tmpt = np.c_[test_vec, test_labels]
+        random.shuffle(tmpt)
+        test_vec = tmpt[:, :-1]
+        test_labels  = tmpt[:, -1]
+        #test_labels = [vec[0] for vec in test_data]
+        #test_vecs = [list(vec[1]) for vec in test_data]
+        """
+        """
+        教師データの学習分類
+        """
+        est = svm.SVC(C=1, kernel='rbf', gamma=0.01)    # パラメータ (C-SVC, RBF カーネル, C=1)
+        clf = OneVsRestClassifier(est)  #他クラス分類器One-against-restによる識別
+        clf.fit(input_vecs1, input_labels1)
+        test_pred = clf.predict(test_vecs1)
+    
+        clf2 = SVC(C=1, kernel='rbf', gamma=0.01)    # パラメータ (C-SVC, RBF カーネル, C=1)
+        clf2.fit(input_vecs1, input_labels1)
+        test_pred2 = clf2.predict(test_vecs1)  #他クラス分類器One-versus-oneによる識別
+    
+        """
+        学習モデルのローカル保存
+        """
+        joblib.dump(clf, R('misc\model\clf.pkl'))
+        joblib.dump(clf2, R('misc\model\clf2.pkl'))
+    
+        #confusion matrix（ラベルの分類表。分類性能が高いほど対角線に値が集まる）
+        print confusion_matrix(test_labels1, test_pred)
+        print confusion_matrix(test_labels1, test_pred2)
+    
+        #分類結果 適合率 再現率 F値の表示
+        print classification_report(test_labels1, test_pred)
+        print classification_report(test_labels1, test_pred2)
+    
+        #正答率 分類ラベル/正解ラベル
+        print accuracy_score(test_labels1, test_pred)
+        print accuracy_score(test_labels1, test_pred2)
+    
+        print test_labels1       #分類前ラベル
+        print list(test_pred)   #One-against-restによる識別ラベル
+        print list(test_pred2)  #One-versus-oneによる識別ラベル
+    
+        """
+        target_names = ['class 0', 'class 1', 'class 2']
+        print(classification_report(test_labels, test_pred, target_names=target_names))
+        """
     def select_som_file1(self): #som関連
         fTyp_xlsx=[('Excelファイル', '*.xlsx')]
         iDir=r'E:work'
@@ -338,96 +493,6 @@ class Frame(tk.Frame):
         #self.filename=filename3
         self.filename4_buff.set(filename4)
 
-    def run_scikit_learn(self):
-        from sklearn import svm
-        #from util.util import make_input_from_xlsx
-        from app.util.inputmaker import make_input
-        import random
-        from collections import namedtuple
-        from sklearn.metrics import confusion_matrix
-        from sklearn.multiclass import OneVsRestClassifier
-        from sklearn.svm import SVC
-        from sklearn.metrics import accuracy_score
-        from sklearn.metrics import classification_report
-        from sklearn.externals import joblib
-
-        """
-        教師データ生成
-        """
-        Xl = namedtuple('Xl', 'filename, sheet, letter, label, sampling, overlap')
-        xls =  (
-             Xl(r'E:\work\data\walk_1122_data.xlsx', 'Sheet4', 'F', 'run', 'std', 0),
-             Xl(r'E:\work\data\walk_1122_data.xlsx', 'Sheet4', 'F', 'walk', 'std', 0),
-             #Xl(r'E:\work\data\jump_128p_174data_fixed.xlsx', 'Sheet', 'A', 'jump', 'std', 0),
-             Xl(r'E:\work\data\acc_stop_1206.xlsx', 'Sheet4', 'F', 'stop', 'rand', 0)
-            )
-        input_data = []
-        for xl in xls:
-            input_vec = make_input(filename=xl.filename, sheetname=xl.sheet,
-                                                   col=xl.letter, read_range=(2, None), overlap=xl.overlap,
-                                                   sampling=xl.sampling, sample_cnt=100, fft_N=128,
-                                                   normalizing='01', label=xl.label, log=False)
-            input_data += input_vec
-
-        random.shuffle(input_data)
-
-        labels = [vec[0] for vec in input_data]
-        vecs = [list(vec[1]) for vec in input_data]
-
-        """
-        テストデータ生成
-        """
-        test_data = []
-        for xl in xls:
-            test_vec = make_input(filename=xl.filename, sheetname=xl.sheet,
-                                                   col=xl.letter, read_range=(12802, None), overlap=xl.overlap,
-                                                   sampling=xl.sampling, sample_cnt=20, fft_N=128,
-                                                   normalizing='01', label=xl.label, log=False)
-            test_data += test_vec
-
-        random.shuffle(test_data)
-
-        test_labels = [vec[0] for vec in test_data]
-        test_vecs = [list(vec[1]) for vec in test_data]
-
-        """
-        教師データの学習分類
-        """
-        est = svm.SVC(C=1, kernel='rbf', gamma=0.01)    # パラメータ (C-SVC, RBF カーネル, C=1)
-        clf = OneVsRestClassifier(est)  #他クラス分類器One-against-restによる識別
-        clf.fit(vecs, labels)
-        test_pred = clf.predict(test_vecs)
-
-        clf2 = SVC(C=1, kernel='rbf', gamma=0.01)    # パラメータ (C-SVC, RBF カーネル, C=1)
-        clf2.fit(vecs, labels)
-        test_pred2 = clf2.predict(test_vecs)  #他クラス分類器One-versus-oneによる識別
-
-        """
-        学習モデルのローカル保存
-        """
-        joblib.dump(clf, 'E:\clf.pkl')
-        joblib.dump(clf2, 'E:\clf2.pkl')
-
-        #confusion matrix（ラベルの分類表。分類性能が高いほど対角線に値が集まる）
-        print confusion_matrix(test_labels, test_pred)
-        print confusion_matrix(test_labels, test_pred2)
-
-        #分類結果 適合率 再現率 F値の表示
-        print classification_report(test_labels, test_pred)
-        print classification_report(test_labels, test_pred2)
-
-        #正答率 分類ラベル/正解ラベル
-        print accuracy_score(test_labels, test_pred)
-        print accuracy_score(test_labels, test_pred2)
-
-        print test_labels       #分類前ラベル
-        print list(test_pred)   #One-against-restによる識別ラベル
-        print list(test_pred2)  #One-versus-oneによる識別ラベル
-
-        """
-        target_names = ['class 0', 'class 1', 'class 2']
-        print(classification_report(test_labels, test_pred, target_names=target_names))
-        """
 
 if __name__ == '__main__':
     root = tk.Tk()
@@ -435,3 +500,4 @@ if __name__ == '__main__':
     f = Frame(root)
     f.pack()
     f.mainloop()
+
