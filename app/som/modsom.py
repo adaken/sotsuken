@@ -93,7 +93,7 @@ class SOM:
         self._param_learning_rate = 0.1
         self.display = display
 
-    def set_parameter(self, neighbor=None, learning_rate=None, input_length_ratio=None):
+    def set_parameter(self, neighbor=None, learning_rate=None, input_length_ratio=None): 
         if neighbor:
             self._param_neighbor = neighbor
         if learning_rate:
