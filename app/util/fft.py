@@ -9,7 +9,7 @@ def fftn(arrs, fft_N, wf='hanning', savepath=None):
 
     2D配列の場合はfft_iter()より高速
 
-    :param arrs : ndarray, list
+    :param arrs : ndarray or list of ndarrays
         FFTする配列
         2Dndarray対応
 
@@ -47,7 +47,6 @@ def fftn(arrs, fft_N, wf='hanning', savepath=None):
     #arrs -= np.mean(arrs) # DC成分を除去
 
     # 窓関数を適用
-    w_arrs = None
     if   wf == 'hanning':
         w_arrs = arrs * np.hanning(fft_N)
     elif wf == 'hamming':
@@ -59,14 +58,13 @@ def fftn(arrs, fft_N, wf='hanning', savepath=None):
     fftdata = np.fft.fft(w_arrs)                  # FFT
     fftdata /= fft_N / 2                          # 正規化
     fftfreq = np.fft.fftfreq(fft_N, sp)[:fft_N/2] # 周波数のリスト
-    fftmags = None                                # スペクトルの絶対値
+
     if dim == 1:
-        fftmags = np.abs(fftdata[:fft_N/2])
+        fftmags = np.abs(fftdata[:fft_N/2]) # スペクトルの絶対値
     else:
         fftmags = np.abs(fftdata[:, :fft_N/2])
 
     if savepath is not None:
-        a, w, f = [None] * 3
         if dim == 1:
             a, w, f = arrs, w_arrs, fftmags
         else:
@@ -128,8 +126,9 @@ if __name__ == '__main__':
     f = 20
     y = 5 * np.sin(2*np.pi * x * 20) + 3 * np.sin(2*np.pi * x * 50) + 10 * np.sin(2*np.pi * x * 100) + 1 * np.sin(2*np.pi * x * 40)
 
+    from app import L
     arrs = np.array([y, y])
-    print fftn(arrs, N, wf='hanning', savepath=r'E:\fft_result.png')
+    print fftn(arrs, N, wf='hanning', savepath=L('fft_result.png'))
 
     """
     print x.size
