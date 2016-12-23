@@ -39,6 +39,9 @@ def get_input_from_json(filename):
         return l, f
 
 if __name__ == '__main__':
+    from app import R
+    from . import make_input, ExcelWrapper
+
     def test():
         from app import L
         save_input_to_json([1, 2, 3], [[5.2, 6.2, 9., 8.], [67., 6.2, 6., 42.], [6.24, 3.5, 52.5, 5215.]], L('test.json'))
@@ -46,7 +49,5 @@ if __name__ == '__main__':
         print labels
         print features
 
-    def main():
-        from app import R
-
-    test()
+    def conv(xlsx, label):
+        ws = ExcelWrapper(xlsx).get_sheet(sheetname)

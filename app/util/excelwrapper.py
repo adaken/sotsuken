@@ -28,6 +28,7 @@ class ExcelWrapper(object):
     @staticmethod
     def _get_num_index(letter_idx):
         """文字インデックスから数字インデックスを計算(one-based index)"""
+
         assert isinstance(letter_idx, str)
         assert re.match(r'[A-Z]+$', letter_idx)
         idx = 0
@@ -40,6 +41,7 @@ class ExcelWrapper(object):
     @staticmethod
     def _get_letter_index(num_idx, log=False):
         """数字インデックスから文字インデックスを計算(one-based index)"""
+
         assert isinstance(num_idx, int), "num_index: {}".format(num_idx)
         assert num_idx > 0
         N = 26
@@ -57,6 +59,7 @@ class ExcelWrapper(object):
 
         def conv_radix(dec, radix):
             """A-Zを使わない基数変換"""
+
             if dec == 0: return [0]
             rs = []
             while dec > 0:
@@ -101,6 +104,7 @@ class ExcelWrapper(object):
     @staticmethod
     def _letter_idx_gen(letter_idx_range):
         """レターインデックスのジェネレータ"""
+
         min_i, max_i = letter_idx_range
         assert re.match(r'[A-Z]+', min_i)
         assert re.match(r'[A-Z]+', max_i)
@@ -119,14 +123,77 @@ class ExcelWrapper(object):
 
         """
 
+        if not sheetname in self.sheetnames:
+            raise ValueError("No such sheet: {}".format(sheetname))
+
         return self.Sheet(self.wb, sheetname)
 
     class Sheet(object):
 
         def __init__(self, wb, sheetname):
-            self.wb = wb
-            self.ws = wb[sheetname]
-            self.name = sheetname
+            self.wb = wb # 所属しているWorkbookオブジェクト
+            self.ws = wb[sheetname] # openpyxlのSheetオブジェクト
+            self.name = sheetname # シート名
+
+        def _find_header(self, row_range=(1, 10)):
+            """ヘッダを探す
+
+            :param row_range : tuple, default: (1, 10)
+                探索範囲
+
+            :return header: list or None
+                ヘッダのリスト
+                見つからなかった場合はNone
+
+            """
+
+            rows = list(self.iter_rows(row_range, mode='rect'))
+            for i in xrange(len(rows)):
+                if all(isinstance(v, unicode) for v in rows[i]): # 1行すべて文字列
+                    r1, r2 = rows[i+1], rows[i+2]
+                    if any(v != None for v in r1 + r2):
+                        return rows[i]
+            return None
+
+        def find_letter_by_header(self, headername, headerrow=None, row_range=(1, 10)):
+            """ヘッダ名から列のレターを探してみる
+
+            :param headername : str
+                ヘッダ名
+
+            :param headerrow : int, default: None
+                ヘッダの行
+                事前にヘッダの位置が分かる場合は指定
+
+            :return letter : str or None
+                推測された列のレター
+                ヘッダが見つからなかった場合はNone
+
+            """
+
+            if headerrow:
+                header = self.get_row(headerrow)
+            else:
+                header = self._find_header(row_range)
+
+            if header:
+                if headername not in header:
+                    raise ValueError("No such header: {}".format(headername))
+                idx = header.index(headername) + 1
+                return ExcelWrapper._get_letter_index(idx)
+
+
+        def find_letters_by_header(self, *args, **kwargs):
+            """ヘッダ名から列のレターを探してみる
+
+            :return letters : tuple
+
+            """
+
+            ret = []
+            for n in args:
+                ret.append(self.find_letter_by_header(n, **kwargs))
+            return tuple(ret)
 
         def _select(self, key, log=False):
             """min_col, min_row, max_col, max_row"""
@@ -414,4 +481,11 @@ if __name__ == '__main__':
         ws = wb.get_sheet('Sheet1')
         print list(ws.iter_cell(coords=(('A', i) for i in xrange(1, 10, 2)), log=True))
 
-    test_get_letter()
+    def header_test():
+        from app import R
+        ws = ExcelWrapper(R('data/raw/1.xlsx')).get_sheet('Sheet1')
+        print ws.find_letters_by_header("Time", "Latitude")
+        print ws.find_letters_by_header("Time", "Latitude", headerrow=8)
+
+    header_test()
+
