@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import json
+import numpy as np
 
 def save_input_to_json(labels, features, savename):
     """入力ベクトルをjsonで保存
@@ -38,16 +39,23 @@ def get_input_from_json(filename):
             f.append(j)
         return l, f
 
+def save_features_to_json(features, savename):
+    """入力ベクトルをラベルなしで保存"""
+    
+    if isinstance(features, np.ndarray):
+        features = features.tolist()
+    with open(savename, 'w') as fp:
+        s = json.dumps(features)
+        fp.write(s.replace('],', '],\n'))
+
 if __name__ == '__main__':
     from app import R
-    from . import make_input, ExcelWrapper
+    from app.util import make_input
 
-    def test():
-        from app import L
-        save_input_to_json([1, 2, 3], [[5.2, 6.2, 9., 8.], [67., 6.2, 6., 42.], [6.24, 3.5, 52.5, 5215.]], L('test.json'))
-        labels, features = get_input_from_json(L('test.json'))
-        print labels
-        print features
-
-    def conv(xlsx, label):
-        ws = ExcelWrapper(xlsx).get_sheet(sheetname)
+    xls = [('placekick', R('data/acc/placekick_128p_52data.xlsx'), 52),
+           ('run', R('data/acc/run_acc_128p_132data.xlsx'), 132),
+           ('tackle', R('data/acc/tackle_acc_128p_92data.xlsx'), 92)]
+    for act, xl, cnt in xls:
+        vec = make_input(xl, cnt, log=True)
+        print "shape:", vec.shape
+        save_features_to_json(vec, R('data/acc/fft/{}_acc_128p_{}data.json'.format(act, cnt)))
