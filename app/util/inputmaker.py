@@ -6,15 +6,17 @@ from random import randint
 from excelwrapper import ExcelWrapper
 from normalize import standardize, scale_zero_one
 from fft import fftn
-import json
 
-def _sample_xlsx(xlsx, sheetnames, col, min_row, fft_N, sample_cnt, overlap, log):
+def _sample_xlsx(xlsx, sample_cnt, sheetnames, col, min_row, fft_N, overlap, log):
     """Excelを順にサンプリング"""
 
     wb = ExcelWrapper(xlsx)
     input_vecs = []
     is_full = False
     vec_cnt = 0
+
+    if sheetnames is None:
+        sheetnames = wb.sheetnames
 
     def iter_alt(iter1, iter2):
         """交互にイテレート"""
@@ -26,6 +28,10 @@ def _sample_xlsx(xlsx, sheetnames, col, min_row, fft_N, sample_cnt, overlap, log
 
     for sheetname in sheetnames:
         ws = wb.get_sheet(sheetname)
+
+        if col is None:
+            _, col = ws.find_letter_by_header('Magnitude Vector')
+
         vec_iter = ws.iter_part_col(col, fft_N, (min_row, None), log=log)
 
         if overlap:
@@ -46,15 +52,24 @@ def _sample_xlsx(xlsx, sheetnames, col, min_row, fft_N, sample_cnt, overlap, log
         if not vec_cnt == sample_cnt:
             raise AssertionError("指定したサンプル回数に対してデータが足りません: {}/{}"
                                  .format(vec_cnt, sample_cnt))
+        else:
+            raise RuntimeError
+
     return input_vecs
 
-def _sample_xlsx_random(xlsx, sheetnames, col, min_row, fft_N, sample_cnt, overlap, log):
+def _sample_xlsx_random(xlsx, sample_cnt, sheetnames, col, min_row, fft_N, overlap, log):
     """Excelをランダムサンプリング"""
 
     wb = ExcelWrapper(xlsx)
     ws = [wb.get_sheet(s) for s in sheetnames]
     n_ws = len(ws) - 1
     begin_limits = [s.ws.max_row - fft_N for s in ws] # 読み込み開始行の限界
+
+    if sheetnames is None:
+        sheetnames = wb.sheetnames
+
+    if col is None:
+        _, col = ws.find_letter_by_header('Magnitude Vector')
 
     input_vecs = []
     for r in (randint(0, n_ws) for i in xrange(sample_cnt)):
@@ -65,7 +80,7 @@ def _sample_xlsx_random(xlsx, sheetnames, col, min_row, fft_N, sample_cnt, overl
     return input_vecs
 
 
-def make_input(xlsx, sheetnames, col, min_row, fft_N, sample_cnt, label=None,
+def make_input(xlsx, sample_cnt, sheetnames=None, col=None, min_row=2, fft_N=128, label=None,
                wf='hanning', normalizing='01', sampling='std', overlap=0, log=False):
 
     """Excelファイルから入力ベクトルを作成
@@ -75,20 +90,22 @@ def make_input(xlsx, sheetnames, col, min_row, fft_N, sample_cnt, label=None,
     :param xlsx : str
         Excelファイルのパス
 
-    :param sheetnames : iterable of str
-        読み込み可能なシート名のiterable
-
-    :param col : str
-        読み込む列
-
-    :param min_row : int
-        読み込み開始行
-
-    :param fft_N : int
-        FFTのポイント数、一度に読み込む行数
-
     :param sample_cnt : int
         欲しい入力ベクトルの数
+
+    :param sheetnames : iterable of str or None
+        読み込み可能なシート名のiterable
+        Noneを指定ですべてのシート
+
+    :param col : str, default: None
+        読み込む列
+        None指定で'Magnitude Vector'列を自動で検索
+
+    :param min_row : int, default: 2
+        読み込み開始行
+
+    :param fft_N : int, default: 128
+        FFTのポイント数、一度に読み込む行数
 
     :param label : str or int, default: None
         指定した場合は長さsample_cntのラベルのリストも返す
@@ -103,8 +120,8 @@ def make_input(xlsx, sheetnames, col, min_row, fft_N, sample_cnt, label=None,
         'std' -> 各ベクトルの要素を平均0、分散1にする
 
     :param sampling : str, default: 'std'
-        ランダムにサンプリングを行うかどうか
-        Trueの場合、シートリストの全体からランダムにサンプリングを行う
+        サンプリング方法
+        'rand'の場合、シートリストの全体からランダムにサンプリングを行う
         'std', 'rand'
 
     :param overlap : int, default: 0
@@ -123,7 +140,7 @@ def make_input(xlsx, sheetnames, col, min_row, fft_N, sample_cnt, label=None,
     assert normalizing in ('01', 'std')
     assert 0 <= overlap < fft_N
 
-    args = (xlsx, sheetnames, col, min_row, fft_N, sample_cnt)
+    args = (xlsx, sample_cnt, sheetnames, col, min_row, fft_N)
     kwargs = {'overlap': overlap, 'log': log}
 
     if sampling == 'std':

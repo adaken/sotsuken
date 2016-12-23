@@ -8,7 +8,7 @@ class ExcelWrapper(object):
     Excelファイルを扱うラッパークラスです
     openpyxlを使ってExcelファイルを操作します
     主にファイル読み込みなどを抽象化してあります
-    より深いことを行い場合はopenpyxlを直接使おう
+    より深いことを行い場合はopenpyxlを直接使う
 
     基本的にシート単位で操作するので、
     インスタンスを作った後、get_sheet()を使ってシートのオブジェクトを入手してください
@@ -75,30 +75,11 @@ class ExcelWrapper(object):
             size = l / n + (l % n> 0)
             return [itr[i:i+size] for i in xrange(0, l, size)]
 
-        def print_log(msg):
-            if log:
-                print msg
-
-        print_log('num_idx - 1          : {}'.format(num_idx))
-
         digit, offset = search_digit(num_idx, N) # N進数において何桁かを求める
-        print_log('digit_class({}base)  : {}'.format(N, digit))
-        print_log('idx_offset           : {}'.format(offset))
-
         pf_idx = num_idx - offset                # digit桁の数列のインデックス(10進数)
-        print_log('idx_in_digit_class   : {}'.format(pf_idx))
-
         pfs = conv_radix(pf_idx, N)              # インデックスを素因数分解
-        print_log('idx({}base)          : {}'.format(N, pfs))
-
         while len(pfs) < digit: pfs.insert(0, 0) # digitに合わせて桁を調整
-
-        print_log('zerofilled_idx       : {}'.format(pfs))
-
         ret = ''.join(ExcelWrapper.LETTERS[i] for i in pfs)
-        print_log('Result:')
-        print_log('num: {}'.format(num_idx + 1))
-        print_log('str: {}'.format(ret))
         return ret
 
     @staticmethod
@@ -136,24 +117,15 @@ class ExcelWrapper(object):
             self.name = sheetname # シート名
 
         def _find_header(self, row_range=(1, 10)):
-            """ヘッダを探す
-
-            :param row_range : tuple, default: (1, 10)
-                探索範囲
-
-            :return header: list or None
-                ヘッダのリスト
-                見つからなかった場合はNone
-
-            """
+            """ヘッダを探す"""
 
             rows = list(self.iter_rows(row_range, mode='rect'))
             for i in xrange(len(rows)):
                 if all(isinstance(v, unicode) for v in rows[i]): # 1行すべて文字列
                     r1, r2 = rows[i+1], rows[i+2]
                     if any(v != None for v in r1 + r2):
-                        return rows[i]
-            return None
+                        return i, rows[i]
+            return None, None
 
         def find_letter_by_header(self, headername, headerrow=None, row_range=(1, 10)):
             """ヘッダ名から列のレターを探してみる
@@ -165,8 +137,11 @@ class ExcelWrapper(object):
                 ヘッダの行
                 事前にヘッダの位置が分かる場合は指定
 
-            :return letter : str or None
-                推測された列のレター
+            :param row_range : tuple of ints
+                探索範囲
+
+            :return (rowidx, letter) : tuple(int, str) or tuple(None, None)
+                推測されたヘッダ行の添字(1base)と列のレター
                 ヘッダが見つからなかった場合はNone
 
             """
@@ -174,13 +149,13 @@ class ExcelWrapper(object):
             if headerrow:
                 header = self.get_row(headerrow)
             else:
-                header = self._find_header(row_range)
+                rowidx, header = self._find_header(row_range)
 
             if header:
                 if headername not in header:
                     raise ValueError("No such header: {}".format(headername))
                 idx = header.index(headername) + 1
-                return ExcelWrapper._get_letter_index(idx)
+                return rowidx, ExcelWrapper._get_letter_index(idx)
 
 
         def find_letters_by_header(self, *args, **kwargs):
@@ -428,6 +403,7 @@ class ExcelWrapper(object):
 
             r1 = row_range[0]
             limit_row = row_range[1] if row_range[1] is not None else self.ws.max_row
+            print limit_row
             r2 = r1 + length - 1
             is_last = False
             while True:
