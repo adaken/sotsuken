@@ -2,7 +2,7 @@
 
 import json
 
-def tojson(labels, features, savename):
+def save_input_to_json(labels, features, savename):
     """入力ベクトルをjsonで保存
 
     :param labels : iterable
@@ -20,10 +20,14 @@ def tojson(labels, features, savename):
         #fp.write(s.replace('},', '},\n')) # '},'で改行させてファイルに書き込む
         fp.write(s.replace('],', '],\n'))
 
-def fromjson(filename):
+def get_input_from_json(filename):
     """jsonから入力ベクトルを読み込む
 
     :param filename : str
+        jsonのパス
+
+    :return (labels, features) : list of strs, list of lists
+        ラベルのlistと特徴ベクトルのlist
 
     """
 
@@ -34,10 +38,15 @@ def fromjson(filename):
             f.append(j)
         return l, f
 
-
 if __name__ == '__main__':
-    from app import L
-    tojson([1, 2, 3], [[52, 62, 9, 8], [67, 62, 6, 42], [624, 35, 525, 5215]], L('test.json'))
-    labels, features = fromjson(L('test.json'))
-    print labels
-    print features
+    def test():
+        from app import L
+        save_input_to_json([1, 2, 3], [[5.2, 6.2, 9., 8.], [67., 6.2, 6., 42.], [6.24, 3.5, 52.5, 5215.]], L('test.json'))
+        labels, features = get_input_from_json(L('test.json'))
+        print labels
+        print features
+
+    def main():
+        from app import R
+
+    test()
