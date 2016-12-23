@@ -6,6 +6,7 @@ from random import randint
 from excelwrapper import ExcelWrapper
 from normalize import standardize, scale_zero_one
 from fft import fftn
+import json
 
 def _sample_xlsx(xlsx, sheetnames, col, min_row, fft_N, sample_cnt, overlap, log):
     """Excelを順にサンプリング"""

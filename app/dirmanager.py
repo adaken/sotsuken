@@ -13,19 +13,20 @@ class Dir(object):
     auto_mkdir = False # 存在しないにディレクトリを指定した場合に作成するかどうか
 
     def __init__(self, root, emptyfile=True):
-        os.chdir(os.path.split(__file__)[0]) # このディレクトリにcd
-        assert os.path.exists(root)
+        os.chdir(os.path.split(__file__)[0]) # このモジュールのディレクトリにcd
+        assert os.path.exists(root), "No such directory"
         self.path = os.path.abspath(root) # 引数の絶対パス
         Dir.permit_empty_file = emptyfile
         self.updata()
 
     def __call__(self, *key, **kwargs):
-        """インスタンスを()で呼び出すとgetにアクセスできる"""
+        """インスタンスを()で呼び出すとget()にアクセスできる"""
 
         return self.get(*key, **kwargs)
 
     def updata(self):
-        paths = glob.glob(self.path + '\\*') # ディレクトリ下の絶対パスのリストを入手
+        """索引を更新"""
+        paths = glob.glob(self.path + '\\*') # ディレクトリ下のファイルの絶対パスのリストを入手
         self.subdirs = [Dir(p) for p in paths if os.path.isdir(p)] # サブディレクトリ
         self.subdir_names = [n.name for n in self.subdirs] # サブディレクトリ名リスト
         # ファイル名リスト
@@ -55,7 +56,7 @@ class Dir(object):
                     yield self._get_file_or_dir(key, **kwargs)
             return _gen(*args)
 
-    def _get_file_or_dir(self, name, mkdir=False):
+    def _get_file_or_dir(self, name, mkdir=False, updated=False):
         """名前からファイルの絶対パスかDirオブジェクト"""
 
         isfile = lambda a: a in self.filenames
@@ -68,8 +69,9 @@ class Dir(object):
         elif isdir(name):            # ディレクトリリストにある
             return self._getdir(name)
         elif not self._exists(name): # ファイルシステムに存在しない
-            print "parsing?:", Dir.parsing
-            print "automkdir?:", Dir.auto_mkdir
+            #print "parsing?:", Dir.parsing
+            #print "automkdir?:", Dir.auto_mkdir
+            #print "permit_empty_file?", Dir.permit_empty_file
             if Dir.parsing and Dir.auto_mkdir: # パス解析中かつ自動作成ON
                 self.mkdir(name)
                 return self._getdir(name)
@@ -78,16 +80,20 @@ class Dir(object):
                 return self.path + '\\' + name
             else:
                 raise ValueError("No such file or directory: '{}'".format(name))
+        elif not updated:
+            # 新しいファイルが作成された可能性があるため、索引を更新
+            self.updata()
+            return self._get_file_or_dir(name, mkdir, updated=True)
         else:
-            raise RuntimeError
+            raise RuntimeError # 原因不明なエラー
 
     def _getr(self, path, mkdir):
         """再帰的にパスを解析"""
 
         Dir.auto_mkdir = mkdir
         Dir.parsing = True
-        names = iter(filter(lambda w: len(w) > 0, self._splitp(path)))
-        def f(d=self, n=names.next()):
+        names = iter(filter(lambda w: len(w) > 0, self._splitp(path))) # パスを分割
+        def f(d=self, n=names.next()): # 再帰関数
             try:
                 n_ = names.next()
             except StopIteration:
@@ -95,11 +101,12 @@ class Dir(object):
                 Dir.auto_mkdir = False
             except:
                 Dir.parsing = False
+                Dir.auto_mkdir = False
             p = d.get(n)
             if not Dir.parsing: # 解析終了
                 return p
             return f(p, n_)
-        return f()
+        return f() # 再帰実行
 
     def _ispath(self, path):
         """パスかどうか判別"""
@@ -130,7 +137,6 @@ class Dir(object):
 
         return os.path.basename(self.path)
 
-    @property
     def ls(self):
         """lsコマンドみたいなリスト
 
@@ -147,17 +153,30 @@ class Dir(object):
             os.mkdir(self._getabs(name))
             self.updata()
         else:
-            warnings.warn("directory already exists")
+            warnings.warn("Directory already exists")
         return self._getabs(name)
+
+    def rm(self, name):
+        """配下のファイルを削除"""
+
+        if self._exists(name):
+            if not os.path.isfile(self._getabs(name)):
+                raise ValueError("'name' must be file name. Not directory name: {}".format(name))
+            os.remove(self._getabs(name))
+            self.updata()
+        else:
+            warnings.warn("Already not exists: {}".format(name))
 
     def rmdir(self, name):
         """配下のディレクトリを削除"""
 
-        if self.exits(name):
+        if self._exists(name):
+            if not os.path.isdir(self._getabs(name)):
+                raise ValueError("'name' must be directory name. Not file name: {}".format(name))
             os.removedirs(self._getabs(name))
             self.updata()
         else:
-            warnings.warn("directory not exists")
+            warnings.warn("Already not exists: {}".format(name))
 
     def _exists(self, name):
         return os.path.exists(self._getabs(name))

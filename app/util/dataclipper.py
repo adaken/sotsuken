@@ -42,6 +42,6 @@ def clip_xlsx(xlsx, sheetname, savename, col='F', row_range=(1, None), N=128,
     print "finish"
 
 if __name__ == '__main__':
-    xlsx, sheetname = R(r'data/raw/tackle/tackle_1222_fix.xlsx'), 'Sheet2'
-    savename = L(r'clip/tackle.xlsx', mkdir=True)
+    xlsx, sheetname = R('data/raw/tackle/tackle_1222_fix.xlsx'), 'Sheet2'
+    savename = L('clip/tackle.xlsx', mkdir=True)
     clip_xlsx(xlsx, sheetname, savename, 'F', (2, None), threshold=2.2, interval=350)
