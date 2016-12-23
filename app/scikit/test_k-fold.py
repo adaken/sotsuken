@@ -64,23 +64,28 @@ if __name__ == '__main__':
         #print("%s %s" % (tr, ts))
         #print tr
         #print ts
-        #print l
-        #l = l + 1
 
         # vecs[tr],labels[tr]をtrain用のlistにまとめる
-        #for i in xrange(k):
         for j in tr:
-            print tr
+            print j
+            #for i in xrange(k):
             train_vecs[i].append(input_vecs[j])
             train_labels[i].append(input_labels[j])
+            print len(train_vecs[i])
+            print len(train_labels[i])
+            if len(train_vecs[i]) == 240 :
+                i = 1
         
         # vecs[ts],labels[ts]をtest用のlistにまとめる
-        #for i in xrange(k):
         for j in ts:
-            print ts
+            #print j
+            #for i in xrange(k):
             test_vecs[i].append(input_vecs[j])
             test_labels[i].append(input_labels[j])
-
+        #break
+    print len(train_vecs[1])
+    print len(test_vecs[1])
+    
     print len(train_vecs[0])
     print len(test_vecs[0])
 
