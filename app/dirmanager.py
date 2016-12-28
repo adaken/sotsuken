@@ -10,7 +10,7 @@ class Dir(object):
 
     parsing = False # パス解析中かどうか
     permit_empty_file = False # 存在しないファイル名指定を許容するかどうか
-    auto_mkdir = False # 存在しないにディレクトリを指定した場合に作成するかどうか
+    auto_mkdir = False # 存在しないディレクトリを指定した場合に作成するかどうか
 
     def __init__(self, root, emptyfile=True):
         os.chdir(os.path.split(__file__)[0]) # このモジュールのディレクトリにcd
@@ -26,11 +26,16 @@ class Dir(object):
 
     def updata(self):
         """索引を更新"""
-        paths = glob.glob(self.path + '\\*') # ディレクトリ下のファイルの絶対パスのリストを入手
-        self.subdirs = [Dir(p) for p in paths if os.path.isdir(p)] # サブディレクトリ
-        self.subdir_names = [n.name for n in self.subdirs] # サブディレクトリ名リスト
+
+        # ディレクトリ下のファイルの絶対パスのリストを入手
+        paths = glob.glob(self.path + '\\*')
+        # サブディレクトリ
+        self.subdirs = [Dir(p) for p in paths if os.path.isdir(p)]
+        # サブディレクトリ名リスト
+        self.subdir_names = [n.name for n in self.subdirs]
         # ファイル名リスト
-        self.filenames = [os.path.basename(p) for p in paths if os.path.isfile(p)]
+        self.filenames = [os.path.basename(p)
+                          for p in paths if os.path.isfile(p)]
 
     def get(self, *args, **kwargs):
         """ディレクトリ配下の絶対パスかDirオブジェクトを入手
@@ -79,20 +84,22 @@ class Dir(object):
             elif (not Dir.parsing) and Dir.permit_empty_file:
                 return self.path + '\\' + name
             else:
-                raise ValueError("No such file or directory: '{}'".format(name))
+                raise ValueError(u"no such file or directory: '{}'"
+                                 .format(name))
         elif not updated:
             # 新しいファイルが作成された可能性があるため、索引を更新
             self.updata()
             return self._get_file_or_dir(name, mkdir, updated=True)
         else:
-            raise RuntimeError # 原因不明なエラー
+            raise RuntimeError
 
     def _getr(self, path, mkdir):
         """再帰的にパスを解析"""
 
         Dir.auto_mkdir = mkdir
         Dir.parsing = True
-        names = iter(filter(lambda w: len(w) > 0, self._splitp(path))) # パスを分割
+        # パスを分割
+        names = iter(filter(lambda w: len(w) > 0, self._splitp(path)))
         def f(d=self, n=names.next()): # 再帰関数
             try:
                 n_ = names.next()
@@ -137,14 +144,23 @@ class Dir(object):
 
         return os.path.basename(self.path)
 
-    def ls(self):
+    def ls(self, abs=False):
         """lsコマンドみたいなリスト
+
+        :param abs : bool, default: False
+            True : 絶対パスのリスト
+            False: 名前のみのリスト
 
         :return dirs_and_files: list of str
             [[dirs], [files]]
-
         """
-        return [self.subdir_names, self.filenames]
+
+        if abs:
+            ret = [map(self._getabs, self.subdir_names),
+                   map(self._getabs, self.filenames)]
+        else:
+            ret = [self.subdir_names, self.filenames]
+        return ret
 
     def mkdir(self, name):
         """配下にディレクトリを作成"""
@@ -153,7 +169,7 @@ class Dir(object):
             os.mkdir(self._getabs(name))
             self.updata()
         else:
-            warnings.warn("Directory already exists")
+            warnings.warn(u"directory already exists: {}".foamat(name))
         return self._getabs(name)
 
     def rm(self, name):
@@ -161,7 +177,8 @@ class Dir(object):
 
         if self._exists(name):
             if not os.path.isfile(self._getabs(name)):
-                raise ValueError("'name' must be file name. Not directory name: {}".format(name))
+                raise ValueError(u"'name' must be file name, " \
+                                 u"not directory name: {}".format(name))
             os.remove(self._getabs(name))
             self.updata()
         else:
@@ -172,11 +189,12 @@ class Dir(object):
 
         if self._exists(name):
             if not os.path.isdir(self._getabs(name)):
-                raise ValueError("'name' must be directory name. Not file name: {}".format(name))
+                raise ValueError(u"'name' must be directory name, " \
+                                 u"not file name: {}".format(name))
             os.removedirs(self._getabs(name))
             self.updata()
         else:
-            warnings.warn("Already not exists: {}".format(name))
+            warnings.warn(u"already non-exists: {}".format(name))
 
     def _exists(self, name):
         return os.path.exists(self._getabs(name))
@@ -210,13 +228,6 @@ class Res(Dir):
             """初期化処理"""
             ins = cls._instance = object.__new__(cls)
             super(Res, ins).__init__(root, **kwargs)
-            """
-            ins.bigfile = ins('bigfile')
-            ins.data = ins('data')
-            ins.img = ins('img')
-            ins.misc = ins('misc')
-            ins.sound = ins('sound')
-            """
         return cls._instance
 
 class Tmp(Dir):
@@ -241,8 +252,10 @@ T = Tmp()
 if __name__ == '__main__':
     a = Res()
     b = Tmp()
+    c = Res()
     print a is b
-    print a.ls
+    print a is c
+    print a.ls(True)
     print list(a('bigfile', 'data'))
     print a('data')('acc')()
-    print a('data/gps/af/log.txt', mkdir=False)
+    print a
