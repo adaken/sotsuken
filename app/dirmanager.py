@@ -14,7 +14,8 @@ class Dir(object):
 
     def __init__(self, root, emptyfile=True):
         os.chdir(os.path.split(__file__)[0]) # このモジュールのディレクトリにcd
-        assert os.path.exists(root), "No such directory"
+        if not os.path.exists(root):
+            raise ValueError(u"no such directory")
         self.path = os.path.abspath(root) # 引数の絶対パス
         Dir.permit_empty_file = emptyfile
         self.updata()
@@ -144,7 +145,7 @@ class Dir(object):
 
         return os.path.basename(self.path)
 
-    def ls(self, abs=False):
+    def ls(self, absp=False):
         """lsコマンドみたいなリスト
 
         :param abs : bool, default: False
@@ -155,7 +156,7 @@ class Dir(object):
             [[dirs], [files]]
         """
 
-        if abs:
+        if absp:
             ret = [map(self._getabs, self.subdir_names),
                    map(self._getabs, self.filenames)]
         else:
@@ -253,9 +254,14 @@ if __name__ == '__main__':
     a = Res()
     b = Tmp()
     c = Res()
+    print a
     print a is b
     print a is c
     print a.ls(True)
     print list(a('bigfile', 'data'))
+    print a('data')('acc')
+    print a('data')('acc').path
     print a('data')('acc')()
-    print a
+    print a('/data/acc').filenames
+    print a('data/acc').ls()
+    print a('data/acc/')
