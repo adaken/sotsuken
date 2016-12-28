@@ -6,8 +6,10 @@ from random import randint
 from excelwrapper import ExcelWrapper
 from normalize import standardize, scale_zero_one
 from fft import fftn
+from util import random_idx_gen
 
-def _sample_xlsx(xlsx, sample_cnt, sheetnames, col, min_row, fft_N, overlap, log):
+def _sample_xlsx(xlsx, sample_cnt, sheetnames, col, min_row, fft_N, overlap,
+                 log):
     """Excelを順にサンプリング"""
 
     wb = ExcelWrapper(xlsx)
@@ -35,7 +37,8 @@ def _sample_xlsx(xlsx, sample_cnt, sheetnames, col, min_row, fft_N, overlap, log
         vec_iter = ws.iter_part_col(col, fft_N, (min_row, None), log=log)
 
         if overlap:
-            _vec_iter = ws.iter_part_col(col, fft_N, (min_row + fft_N - overlap, None), log=log)
+            _vec_iter = ws.iter_part_col(col, fft_N, (min_row + fft_N - overlap,
+                                                       None), log=log)
             _iter = iter_alt(vec_iter, _vec_iter)
         else:
             _iter = vec_iter
@@ -50,14 +53,15 @@ def _sample_xlsx(xlsx, sample_cnt, sheetnames, col, min_row, fft_N, overlap, log
             break
     else:
         if not vec_cnt == sample_cnt:
-            raise AssertionError("指定したサンプル回数に対してデータが足りません: {}/{}"
-                                 .format(vec_cnt, sample_cnt))
+            raise ValueError(u"指定したサンプル回数に対してデータが足りません" \
+                             u": {}/{}".format(vec_cnt, sample_cnt))
         else:
             raise RuntimeError
 
     return input_vecs
 
-def _sample_xlsx_random(xlsx, sample_cnt, sheetnames, col, min_row, fft_N, overlap, log):
+def _sample_xlsx_random(xlsx, sample_cnt, sheetnames, col, min_row, fft_N,
+                        overlap, log):
     """Excelをランダムサンプリング"""
 
     wb = ExcelWrapper(xlsx)
@@ -80,12 +84,14 @@ def _sample_xlsx_random(xlsx, sample_cnt, sheetnames, col, min_row, fft_N, overl
     return input_vecs
 
 
-def make_input(xlsx, sample_cnt, sheetnames=None, col=None, min_row=2, fft_N=128, label=None,
-               wf='hanning', normalizing='01', sampling='std', overlap=0, log=False):
+def make_input(xlsx, sample_cnt, sheetnames=None, col=None, min_row=2,
+               fft_N=128, label=None, wf='hanning', normalizing='01',
+               sampling='std', overlap=0, log=False):
 
     """Excelファイルから入力ベクトルを作成
 
-    sheetnamesはリストで、サンプル回数に対して足りないデータはリストの次のシートから読み込む
+    sheetnamesはリストで、サンプル回数に対して足りないデータはリストの次のシート
+    から読み込む
 
     :param xlsx : str
         Excelファイルのパス
@@ -152,25 +158,17 @@ def make_input(xlsx, sample_cnt, sheetnames=None, col=None, min_row=2, fft_N=128
 
     normalizer = scale_zero_one if normalizing == '01' else standardize
     input_vecs = np.array(input_vecs)
-    input_vecs = normalizer(fftn(arrs=input_vecs, fft_N=fft_N, wf=wf))
+    input_vecs = normalizer(fftn(arrs=input_vecs, fft_N=fft_N, wf=wf), axis=1)
 
     if label is not None:
         return input_vecs, [label]*sample_cnt
     return input_vecs
 
-def _random_idx_gen(n):
-    """要素が0からnまでの重複のないランダム値を返すジェネレータ"""
-    vacant_idx = range(n)
-    for i in xrange(n):
-        r = np.random.randint(0, len(vacant_idx))
-        yield vacant_idx[r]
-        del vacant_idx[r]
-
 def random_input_iter(inputs, labels):
     """入力ベクトルとラベルをシャッフルしてイテレート"""
 
     assert len(inputs) == len(labels)
-    r_gen = _random_idx_gen(len(inputs))
+    r_gen = random_idx_gen(len(inputs))
     for r in r_gen:
         yield inputs[r], labels[r]
 
