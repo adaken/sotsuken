@@ -3,7 +3,8 @@
 import simplekml as simk
 
 class KmlWrapper:
-
+    """非推奨 actionkml.AnimeKmlを使ったほうがよい"""
+    
     def __init__(self):
         pass
 
@@ -123,7 +124,7 @@ class KmlWrapper:
 
         # ファイルに出力
         print "kmlを保存中です..."
-        kml.save(save_path, True)
+        kml.savekmz(save_path, True)
         print "保存が完了しました"
 
     def _is_resorce_available(self, res):
