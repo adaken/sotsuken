@@ -22,9 +22,12 @@ def drow_circle(rgb, size, savepath):
     assert isinstance(rgb, (tuple, list))
     assert isinstance(size, (tuple, list))
     assert isinstance(savepath, str)
-    if os.path.exists(savepath): print "すでにファイルが存在するため上書きします: {}".format(savepath)
-    if isinstance(rgb, list): rgb = tuple(rgb)
-    if isinstance(size, list): size = tuple(size)
+    if os.path.exists(savepath):
+        print "overwrite a file: {}".format(savepath)
+    if isinstance(rgb, list):
+        rgb = tuple(rgb)
+    if isinstance(size, list):
+        size = tuple(size)
     im= Image.new('RGBA', size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(im)
     draw.ellipse(((1, 1), size), outline=None, fill=rgb)
