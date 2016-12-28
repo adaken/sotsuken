@@ -12,6 +12,7 @@ res リソース
     
     - data
         - acc 加速度データ
+        - fft FFTされた加速度データ
         - gps GPSデータ
         - kml KMLデータ
         - raw 計測した未加工のExcelデータ
