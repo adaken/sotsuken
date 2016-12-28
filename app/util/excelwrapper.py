@@ -41,7 +41,7 @@ class ExcelWrapper(object):
     @staticmethod
     def _get_letter_index(num_idx, log=False):
         """数字インデックスから文字インデックスを計算(one-based index)"""
-
+        """あとでわかりやすく書く"""
         assert isinstance(num_idx, int), "num_index: {}".format(num_idx)
         assert num_idx > 0
         N = 26
@@ -76,8 +76,8 @@ class ExcelWrapper(object):
             return [itr[i:i+size] for i in xrange(0, l, size)]
 
         digit, offset = search_digit(num_idx, N) # N進数において何桁かを求める
-        pf_idx = num_idx - offset                # digit桁の数列のインデックス(10進数)
-        pfs = conv_radix(pf_idx, N)              # インデックスを素因数分解
+        pf_idx = num_idx - offset # digit桁の数列のインデックス(10進数)
+        pfs = conv_radix(pf_idx, N) # インデックスを素因数分解
         while len(pfs) < digit: pfs.insert(0, 0) # digitに合わせて桁を調整
         ret = ''.join(ExcelWrapper.LETTERS[i] for i in pfs)
         return ret
@@ -105,7 +105,7 @@ class ExcelWrapper(object):
         """
 
         if not sheetname in self.sheetnames:
-            raise ValueError("No such sheet: {}".format(sheetname))
+            raise ValueError("no such sheet: {}".format(sheetname))
 
         return self.Sheet(self.wb, sheetname)
 
@@ -121,13 +121,14 @@ class ExcelWrapper(object):
 
             rows = list(self.iter_rows(row_range, mode='rect'))
             for i in xrange(len(rows)):
-                if all(isinstance(v, unicode) for v in rows[i]): # 1行すべて文字列
+                if all(isinstance(v, unicode) for v in rows[i]): # 1行全部文字列
                     r1, r2 = rows[i+1], rows[i+2]
                     if any(v != None for v in r1 + r2):
                         return i, rows[i]
             return None, None
 
-        def find_letter_by_header(self, headername, headerrow=None, row_range=(1, 10)):
+        def find_letter_by_header(self, headername, headerrow=None,
+                                  row_range=(1, 10)):
             """ヘッダ名から列のレターを探してみる
 
             :param headername : str
@@ -153,7 +154,7 @@ class ExcelWrapper(object):
 
             if header:
                 if headername not in header:
-                    raise ValueError("No such header: {}".format(headername))
+                    raise ValueError(u"no such header: {}".format(headername))
                 idx = header.index(headername) + 1
                 return rowidx, ExcelWrapper._get_letter_index(idx)
 
@@ -175,10 +176,11 @@ class ExcelWrapper(object):
             key_len = len(key)
             assert key_len in (2, 4)
             if key_len == 2:
-                if log: print "{}, {}{}を読み込み中です...".format(self.name, *key)
+                if log: print "reading {1}{2} in {0}".format(self.name, *key)
                 return self.ws['{}{}'.format(*key)]
             elif key_len == 4:
-                if log: print "{}, {}{}:{}{}を読み込み中です...".format(self.name, *key)
+                if log: print "reading {1}{2}:{3}{4} in {0}".format(self.name,
+                                                                    *key)
                 return self.ws['{}{}:{}{}'.format(*key)]
 
         def pickup_cell(self, coord, log=False):
@@ -231,11 +233,14 @@ class ExcelWrapper(object):
             if r2 is None:
                 r2 = self.ws.max_row
             if iter_cell:
-                return (self._select((col, i), log).value for i in xrange(r1, r2 + 1))
+                return (self._select((col, i), log).value
+                        for i in xrange(r1, r2 + 1))
             else:
-                return [cell[0].value for cell in self._select((col, r1, col, r2), log)]
+                return [cell[0].value
+                        for cell in self._select((col, r1, col, r2), log)]
 
-        def get_row(self, row, col_range=('A', None), iter_cell=False, log=False):
+        def get_row(self, row, col_range=('A', None), iter_cell=False,
+                    log=False):
             """1行だけ読み込む
 
             :param row : int
@@ -262,11 +267,14 @@ class ExcelWrapper(object):
                 c2 = ExcelWrapper._get_letter_index(self.ws.max_column)
             if iter_cell:
                 c1, c2 = (ExcelWrapper._get_num_index(c) for c in (c1, c2))
-                return (self._select((ExcelWrapper._get_letter_index(i), row), log).value for i in xrange(c1, c2+1))
+                return (self._select((ExcelWrapper._get_letter_index(i), row),
+                                     log).value for i in xrange(c1, c2+1))
             else:
-                return [cell.value for cell in self._select((c1, row, c2, row), log)[0]]
+                return [cell.value
+                        for cell in self._select((c1, row, c2, row), log)[0]]
 
-        def iter_cols(self, cols, row_range=(1, None), iter_cell=False, log=False, mode='line'):
+        def iter_cols(self, cols, row_range=(1, None), iter_cell=False,
+                      log=False, mode='line'):
             """指定した列のジェネレータ
 
             1列のみ読み込む場合はget_col()の使用を推奨
@@ -321,7 +329,8 @@ class ExcelWrapper(object):
                 for col in ExcelWrapper._letter_idx_gen(cols):
                     yield self.get_col(col, row_range, iter_cell, log)
 
-        def iter_rows(self, rows, col_range=('A', None), iter_cell=False, log=False, mode='line'):
+        def iter_rows(self, rows, col_range=('A', None), iter_cell=False,
+                      log=False, mode='line'):
             """指定した行のジェネレータを生成
 
             1行のみ読み込む場合はget_single_row()の使用を推奨
@@ -374,7 +383,8 @@ class ExcelWrapper(object):
                 for row in xrange(rows[0], rows[1] + 1):
                     yield self.get_row(row, col_range, iter_cell, log)
 
-        def iter_part_col(self, col, length, row_range=(1, None), rest=False, log=False):
+        def iter_part_col(self, col, length, row_range=(1, None), rest=False,
+                          log=False):
             """1列を分割してイテレーション
 
             列colを長さlengthごとにで分割したリストのジェネレータ
@@ -402,8 +412,10 @@ class ExcelWrapper(object):
             assert length > 0
 
             r1 = row_range[0]
-            limit_row = row_range[1] if row_range[1] is not None else self.ws.max_row
-            print limit_row
+            if row_range[1] is not None:
+                limit_row = row_range[1]
+            else:
+                limit_row = self.ws.max_row
             r2 = r1 + length - 1
             is_last = False
             while True:
@@ -423,7 +435,7 @@ class ExcelWrapper(object):
                         break
 
 if __name__ == '__main__':
-    from app.util.timecounter import timecounter
+    from app.util import timecounter
     @timecounter
     def test_get_letter():
         import random
