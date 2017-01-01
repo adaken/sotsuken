@@ -2,14 +2,30 @@
 
 import random
 import time
-import collections
-from itertools import islice
 
 """基本的にbuiltin modules以外を参照しないutil関数郡
 
 importの際の相互参照を防ぐため上記の以外書かないほうが吉
 
 """
+
+def split_nlist(list_, n):
+    """リストをn個のサブリストに分割
+
+    n=2: [1, 2, 3, 4, 5, 6] -> [[1, 2], [3, 4], [5, 6]]
+
+    あまりは切り捨てられる
+    """
+
+    return zip(*[iter(list_)]*n)
+
+def get_iter_len(iterator):
+    """iteratorの長さと元のiteratorを返す"""
+
+    if hasattr(iterator, '__len__'):
+        return len(iterator), iterator
+    tmp = list(iterator)
+    return len(tmp), iter(tmp)
 
 def random_idx_gen(n):
     """要素が0からnまでの重複のないランダム値を返すジェネレータ"""
@@ -33,5 +49,4 @@ def timecounter(func):
     return wrapper
 
 if __name__ == '__main__':
-    for i in islice(xrange(10), 0, None, 2):
-        print i
+    pass

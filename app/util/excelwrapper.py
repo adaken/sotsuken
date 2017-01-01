@@ -22,7 +22,6 @@ class ExcelWrapper(object):
         self.sheetnames = self.wb.sheetnames
 
     def __getitem__(self, key):
-        assert key in self.sheetnames
         return self.get_sheet(key)
 
     @staticmethod

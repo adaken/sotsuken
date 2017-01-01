@@ -40,7 +40,7 @@ def fftn(arrs, fft_N, wf='hanning', savepath=None):
     assert isinstance(wf, str)
     assert wf in ('hanning', 'hamming', 'blackman')
 
-    arrs.astype(np.float32) # 配列の型を変換
+    arrs.astype(np.float64) # 配列の型を変換
 
     dim = arrs.ndim
 

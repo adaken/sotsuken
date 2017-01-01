@@ -4,38 +4,54 @@ from app.util.inputmaker import make_input
 from modsom import SOM
 from app import R, T, L
 import matplotlib.pyplot as plt
+import json
+import numpy as np
+import matplotlib.cm as cm
 
-def som_action():
-    sample_cnt = 90
-    min_row = 2
-    N = 128
-    Xl = namedtuple('Xl', 'path, sheet, col')
-    xls = {'S':Xl(R(r'data\raw\acc_stop_1206.xlsx'), 'Sheet4', 'F'),
-           'B':Xl(R(r'data\raw\walk.xlsx'), 'Sheet4', 'F'),
-           'R':Xl(R(r'data\raw\run_1122.xlsx'), 'Sheet4', 'F'),
-           'J':Xl(R(r'data\raw\jump_128p_174data_fixed.xlsx'), 'Sheet', 'A')}
+def som_json(jsons, labels, label_colors=None, train_cnt=50, mapsize=None):
+    """jsonからsom
 
-    colors = {'S':'blue',
-              'B':'green',
-              'R':'red',
-              'J':'deeppink'}
+    :param jsons : list of str
+        特徴ベクトルのみのjsonのパスのリスト
 
-    in_vecs = []
-    for key, xl in xls.items():
-        vecs, labels = make_input(xlsx=xl.path, sheetnames=[xl.sheet], col=xl.col,
-                                  min_row=min_row, fft_N=N, sample_cnt=sample_cnt,
-                                  label=key, wf='hanning', normalizing='std', sampling='std',
-                                  overlap=0, log=True)
-        vecs = [[key, vec] for vec in vecs]
-        in_vecs += vecs
+    :param labels : list
+        それぞれのjsonに対応するラベル
 
-    som = SOM(shape=(40, 60), input_data=in_vecs, display='gray_scale')
-    map_, labels = som.train(200)
-    plt.imshow(map_, interpolation='nearest')
-    for label, coord in labels:
+    :param label_colors : dict, None
+        ラベルに対応するマップに表示する際の文字色
+    """
+
+    if label_colors is None:
+        len_ = len(labels)
+        label_colors = {str(l): cm.autumn(float(i)/len_)
+                        for i, l in enumerate(labels)}
+
+    input_ = []
+    labels_ = []
+
+    for json_, label in zip(jsons, labels):
+        with open(json_) as fp:
+            features = json.load(fp)
+            input_ += features
+            labels_ += [label] * len(features)
+
+    if mapsize is None:
+        som = SOM(input_, labels_, display='um')
+    else:
+        som = SOM(input_, labels_, shape=mapsize, display='um')
+
+    map_, labels, coords = som.train(train_cnt)
+    plt.imshow(map_, interpolation='nearest', cmap='gray')
+    for label, coord in zip(labels, coords):
         x, y = coord
-        plt.text(x, y, label, color=colors[label])
+        plt.text(x, y, label, color=label_colors[label])
     plt.show()
 
 if __name__ == '__main__':
-    som_action()
+    from app import R
+    som_json([R('data/acc/fft/placekick_acc_128p_52data.json'),
+              R('data/acc/fft/run_acc_128p_132data.json'),
+              R('data/acc/fft/tackle_acc_128p_92data.json'),
+              #R('data/acc/fft/')
+              ],
+             ['P', 'R', 'T'], train_cnt=1000)

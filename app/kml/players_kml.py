@@ -1,10 +1,10 @@
 # coding: utf-8
 
-from app.kml.kmlwrapper import KmlWrapper
+from app.kml.animationkml import SimpleAnimationKml, KmlConfig
 from app.util.excelwrapper import ExcelWrapper
 from app.util.iconmaker import drow_circle
 from collections import namedtuple
-from app import R, T
+from app import R, T, L
 
 if __name__ == '__main__':
 
@@ -22,9 +22,13 @@ if __name__ == '__main__':
                    '5': [0, 0, 255]}
 
     for i, xl in enumerate(xls):
-        save = R(r'data\kml\players\{}.kml').format(i+1)
-        icon_res = drow_circle(icon_colors[xl.id], (8, 8), T(r'players{}.png').format(i+1))
+        save = L(r'{}.kmz', mkdir=False).format(i+1)
+        icon_res = drow_circle(icon_colors[xl.id], (8, 8),
+                               T(r'players{}.png').format(i+1))
         ws = ExcelWrapper(xl.path).get_sheet('Sheet1')
-        times, lons, lats = ws.iter_cols(('A', 'K', 'J'), (9, None), log=True)
-        KmlWrapper().createAnimeKml(save, times, lons, lats,
-                                    icon_res=icon_res, icon_scale=0.3, sampling_step=10)
+        times, lons, lats = ws.iter_cols(('A', 'K', 'J'), (9, None),
+                                         iter_cell=True, log=True)
+        #KmlWrapper().createAnimeKml(save, times, lons, lats, icon_res=icon_res, icon_scale=0.3, sampling_step=10)
+        ak = SimpleAnimationKml(times, lons, lats, icon=icon_res)
+        #cnf = KmlConfig(iconscale=0.2, kmz=True, sampling_step=5)
+        ak(save, kml_cnf=None)

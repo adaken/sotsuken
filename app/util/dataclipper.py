@@ -2,7 +2,7 @@
 
 import openpyxl as px
 from excelwrapper import ExcelWrapper
-from timecounter import timecounter
+from util import timecounter
 from app import R, L, T
 
 @timecounter
