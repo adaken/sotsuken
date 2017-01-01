@@ -4,39 +4,66 @@ import os
 import glob
 import re
 import warnings
+import shutil
 
 class Dir(object):
-    """簡単なディレクトリ操作"""
+    """ディレクトリを表すクラス"""
 
-    parsing = False # パス解析中かどうか
-    permit_empty_file = False # 存在しないファイル名指定を許容するかどうか
-    auto_mkdir = False # 存在しないディレクトリを指定した場合に作成するかどうか
 
-    def __init__(self, root, emptyfile=True):
+    """クラス変数"""
+    permit_empty_file = True # 存在しないファイル名指定を許容するかどうか
+    _auto_mkdir = False # 存在しないディレクトリを指定した場合に作成するかどうか
+    _parsing = False # パス解析中かどうか
+
+    def __init__(self, root):
         os.chdir(os.path.split(__file__)[0]) # このモジュールのディレクトリにcd
         if not os.path.exists(root):
             raise ValueError(u"no such directory")
-        self.path = os.path.abspath(root) # 引数の絶対パス
-        Dir.permit_empty_file = emptyfile
-        self.updata()
+        self.p = os.path.abspath(root) # このインスタンスが表すディレクトリ
 
     def __call__(self, *key, **kwargs):
-        """インスタンスを()で呼び出すとget()にアクセスできる"""
+        """get()へのアクセサ
+
+        インスタンスを()で呼び出すとget()にアクセスできる
+        """
 
         return self.get(*key, **kwargs)
 
-    def updata(self):
-        """索引を更新"""
+    def __str__(self):
+        return "A Dir object represents '{}'".format(self.p)
 
-        # ディレクトリ下のファイルの絶対パスのリストを入手
-        paths = glob.glob(self.path + '\\*')
-        # サブディレクトリ
-        self.subdirs = [Dir(p) for p in paths if os.path.isdir(p)]
-        # サブディレクトリ名リスト
-        self.subdir_names = [n.name for n in self.subdirs]
-        # ファイル名リスト
-        self.filenames = [os.path.basename(p)
-                          for p in paths if os.path.isfile(p)]
+    def __repr__(self):
+        return self.__str__()
+
+    @property
+    def name(self):
+        """このディレクトリの名前"""
+
+        return os.path.basename(self.p)
+
+    @property
+    def subdirs(self):
+        """サブディレクトリのDirオブジェクトのリスト"""
+
+        return [Dir(p) for p in self._lowers if os.path.isdir(p)]
+
+    @property
+    def subdirnames(self):
+        """サブディレクトリの名前のリスト"""
+
+        return [os.path.basename(p) for p in self._lowers if os.path.isdir(p)]
+
+    @property
+    def filenames(self):
+        """配下のファイルの名前のリスト"""
+
+        return [os.path.basename(p) for p in self._lowers if os.path.isfile(p)]
+
+    @property
+    def _lowers(self):
+        """配下のファイル、ディレクトリの絶対パスのリスト"""
+
+        return glob.glob(self.p + '\\*')
 
     def get(self, *args, **kwargs):
         """ディレクトリ配下の絶対パスかDirオブジェクトを入手
@@ -44,74 +71,121 @@ class Dir(object):
         :param name : *args
             指定しないかディレクトリ名かファイル名か相対パス
 
+        :param mkdir : bool, default: False, optional
+            True: 'name'にパスを指定した場合に足りないディレクトリを作成
+
         :return abs_path or dir or iter
             空 -> 自分自身の絶対パス
             ファイル名 -> 絶対パス
             ディレクトリ名 -> Dirオブジェクト
-            相対パス -> 絶対パスかDirオブジェクト
+            パス -> 絶対パスかDirオブジェクト
         """
 
         len_ = len(args)
-        if len_ == 0:
-            return self.path
-        elif len_ == 1:
+        if len_ == 0: # 空
+            return self.p
+        elif len_ == 1: # 引数が1つ
             return self._get_file_or_dir(args[0], **kwargs)
-        else:
+        else: # 引数が複数
             def _gen(*keys):
                 for key in keys:
                     yield self._get_file_or_dir(key, **kwargs)
             return _gen(*args)
 
-    def _get_file_or_dir(self, name, mkdir=False, updated=False):
+    def ls(self, absp=False):
+        """lsコマンドみたいなの
+
+        :param abs : bool, default: False
+            True : 絶対パスのリスト
+            False: 名前のみのリスト
+
+        :return dirs_and_files: list of str
+            [[dirs], [files]]
+        """
+
+        if absp:
+            ret = [map(self._getabs, self.subdirnames),
+                   map(self._getabs, self.filenames)]
+        else:
+            ret = [self.subdirnames, self.filenames]
+        return ret
+
+    def mkdir(self, name):
+        """配下にディレクトリを作成"""
+
+        if not self._exists(name):
+            os.mkdir(self._getabs(name))
+        else:
+            warnings.warn(u"directory already exists: {}".format(name))
+        return self._getabs(name)
+
+    def rm(self, name):
+        """配下のファイルを削除"""
+
+        if self._exists(name):
+            if not os.path.isfile(self._getabs(name)):
+                raise ValueError(u"'name' must be file name, " \
+                                 u"not directory name: {}".format(name))
+            os.remove(self._getabs(name))
+        else:
+            warnings.warn("Already not exists: {}".format(name))
+
+    def rmdir(self, name, ignore=False):
+        """配下のディレクトリを削除"""
+
+        if self._exists(name):
+            if not os.path.isdir(self._getabs(name)):
+                raise ValueError(u"'name' must be directory name, " \
+                                 u"not file name: {}".format(name))
+            if ignore:
+                shutil.rmtree(self._getabs(name))
+            else:
+                os.rmdir(self._getabs(name))
+        else:
+            warnings.warn(u"already non-exists: {}".format(name))
+
+    def _get_file_or_dir(self, name, mkdir=False, isretry=False):
         """名前からファイルの絶対パスかDirオブジェクト"""
 
-        isfile = lambda a: a in self.filenames
-        isdir = lambda a: a in self.subdir_names
-
-        if self._ispath(name):       # パスである
+        if self._ispath(name):         # パスである
             return self._getr(name, mkdir)
-        elif isfile(name):           # ファイルリストにある
+        elif name in self.filenames:   # ファイルリストにある
             return self._getabs(name)
-        elif isdir(name):            # ディレクトリリストにある
+        elif name in self.subdirnames: # ディレクトリリストにある
             return self._getdir(name)
-        elif not self._exists(name): # ファイルシステムに存在しない
+        elif not self._exists(name):   # ファイルシステムに存在しない
             #print "parsing?:", Dir.parsing
-            #print "automkdir?:", Dir.auto_mkdir
+            #print "automkdir?:", Dir._auto_mkdir
             #print "permit_empty_file?", Dir.permit_empty_file
-            if Dir.parsing and Dir.auto_mkdir: # パス解析中かつ自動作成ON
+            if Dir._parsing and Dir._auto_mkdir: # パス解析中かつ自動作成ON
                 self.mkdir(name)
                 return self._getdir(name)
             # パス解析中でないかつ存在しないファイル名もOKである
-            elif (not Dir.parsing) and Dir.permit_empty_file:
-                return self.path + '\\' + name
+            elif (not Dir._parsing) and Dir.permit_empty_file:
+                return self._getabs(name)
             else:
                 raise ValueError(u"no such file or directory: '{}'"
                                  .format(name))
-        elif not updated:
-            # 新しいファイルが作成された可能性があるため、索引を更新
-            self.updata()
-            return self._get_file_or_dir(name, mkdir, updated=True)
+        elif not isretry:
+            return self._get_file_or_dir(name, mkdir, isretry=True) # リトライ
         else:
             raise RuntimeError
 
     def _getr(self, path, mkdir):
         """再帰的にパスを解析"""
 
-        Dir.auto_mkdir = mkdir
-        Dir.parsing = True
+        Dir._auto_mkdir = mkdir
+        Dir._parsing = True
         # パスを分割
         names = iter(filter(lambda w: len(w) > 0, self._splitp(path)))
         def f(d=self, n=names.next()): # 再帰関数
             try:
                 n_ = names.next()
             except StopIteration:
-                Dir.parsing = False
-                Dir.auto_mkdir = False
-            except:
-                Dir.parsing = False
-                Dir.auto_mkdir = False
+                Dir._parsing = False
+                Dir._auto_mkdir = False
             p = d.get(n)
-            if not Dir.parsing: # 解析終了
+            if not Dir._parsing: # 解析終了
                 return p
             return f(p, n_)
         return f() # 再帰実行
@@ -131,71 +205,12 @@ class Dir(object):
     def _getabs(self, name):
         """名前からファイルの絶対パス"""
 
-        return self.path + '\\' + name
+        return self.p + '\\' + name
 
     def _getdir(self, name):
         """名前からDirオブジェクト"""
 
-        i = self.subdir_names.index(name)
-        return self.subdirs[i]
-
-    @property
-    def name(self):
-        """このディレクトリの名前"""
-
-        return os.path.basename(self.path)
-
-    def ls(self, absp=False):
-        """lsコマンドみたいなリスト
-
-        :param abs : bool, default: False
-            True : 絶対パスのリスト
-            False: 名前のみのリスト
-
-        :return dirs_and_files: list of str
-            [[dirs], [files]]
-        """
-
-        if absp:
-            ret = [map(self._getabs, self.subdir_names),
-                   map(self._getabs, self.filenames)]
-        else:
-            ret = [self.subdir_names, self.filenames]
-        return ret
-
-    def mkdir(self, name):
-        """配下にディレクトリを作成"""
-
-        if not self._exists(name):
-            os.mkdir(self._getabs(name))
-            self.updata()
-        else:
-            warnings.warn(u"directory already exists: {}".foamat(name))
-        return self._getabs(name)
-
-    def rm(self, name):
-        """配下のファイルを削除"""
-
-        if self._exists(name):
-            if not os.path.isfile(self._getabs(name)):
-                raise ValueError(u"'name' must be file name, " \
-                                 u"not directory name: {}".format(name))
-            os.remove(self._getabs(name))
-            self.updata()
-        else:
-            warnings.warn("Already not exists: {}".format(name))
-
-    def rmdir(self, name):
-        """配下のディレクトリを削除"""
-
-        if self._exists(name):
-            if not os.path.isdir(self._getabs(name)):
-                raise ValueError(u"'name' must be directory name, " \
-                                 u"not file name: {}".format(name))
-            os.removedirs(self._getabs(name))
-            self.updata()
-        else:
-            warnings.warn(u"already non-exists: {}".format(name))
+        return Dir(self._getabs(name))
 
     def _exists(self, name):
         return os.path.exists(self._getabs(name))
@@ -209,7 +224,7 @@ class Log(Dir):
         """書いちゃダメ"""
         pass
 
-    def __new__(cls, root='..\log', **kwargs):
+    def __new__(cls, root='../log', **kwargs):
         if cls._instance is None:
             ins = cls._instance = object.__new__(cls)
             super(Log, ins).__init__(root, **kwargs)
@@ -224,9 +239,8 @@ class Res(Dir):
         """書いちゃダメ"""
         pass
 
-    def __new__(cls, root=r'..\res', **kwargs):
+    def __new__(cls, root='../res', **kwargs):
         if cls._instance is None:
-            """初期化処理"""
             ins = cls._instance = object.__new__(cls)
             super(Res, ins).__init__(root, **kwargs)
         return cls._instance
@@ -240,28 +254,87 @@ class Tmp(Dir):
         """書いちゃダメ"""
         pass
 
-    def __new__(cls, root=r'..\tmp', **kwargs):
+    def __new__(cls, root='../tmp', **kwargs):
         if cls._instance is None:
             ins = cls._instance = object.__new__(cls)
             super(Tmp, ins).__init__(root, **kwargs)
         return cls._instance
 
-L = Log()
-R = Res()
-T = Tmp()
+L = Log() # ログ用ディレクトリ
+R = Res() # リソースディレクトリ
+T = Tmp() # 一時ファイル用ディレクトリ
 
 if __name__ == '__main__':
-    a = Res()
-    b = Tmp()
-    c = Res()
-    print a
-    print a is b
-    print a is c
-    print a.ls(True)
-    print list(a('bigfile', 'data'))
-    print a('data')('acc')
-    print a('data')('acc').path
-    print a('data')('acc')()
-    print a('/data/acc').filenames
-    print a('data/acc').ls()
-    print a('data/acc/')
+    def test1():
+
+        # singletonか確認
+        dir_ = Dir('../res')
+        print "Dir is not singleton?:", dir_ is not Dir('../res')
+        log = Log()
+        print "Log is singleton?:", log is Log()
+        res = Res()
+        print "Res is singleton?:", res is Res()
+        tmp = Tmp()
+        print "tmp is singleton?:", tmp is Tmp()
+
+    def test2():
+
+        # 無駄に__init__()が呼ばれないか
+        res = Res()
+        fns = res.filenames
+        sns = res.subdirnames
+        a = res('data/gps/player')
+
+    def test3():
+        r = Res() # Dirクラスを継承したResオブジェクト
+
+        # プロパティの確認
+        print "directory name:", r.name
+        print "directory path:", r.p
+        print "names of files and dirs:", r.ls()
+        print "paths of files and dirs:", r.ls(absp=True)
+        print "subdir names:", r.subdirnames
+        print "file names  :", r.filenames
+
+        # ルートパスの取得
+        print "self path:", r()
+        print "self path:", r.p
+
+        # 配下のDirオブジェクトを取得
+        print "subdir object:", r.get('data')
+        print "subdir object:", r('data')
+
+        # 配下のディレクトリのパスを取得
+        print "subdir path  :", r('data').p
+        print "subdir path  :", r('data')()
+        print "subdir path  :", r.get('data').p
+        print "subdir path  :", r('\/data/').p
+
+        # 2階層以上下のパスを取得
+        print "subdir path2 :", r.get('data/gps/players').p
+        print "subdir path2 :", r('data/gps')('players').p
+        print "subdir path2 :", r.get('data').get('gps').p
+        print "subdir path2 :", r('data')('gps')()
+
+        # ディレクトリ操作
+        # 存在しないファイル名を許可しない
+        Dir.permit_empty_file = False
+        # 以下は存在しないファイル名なのでエラー
+        #print L('hoge/fuga/test/test.txt', mkdir=True) # ディレクトリがない場合は作成
+
+        # 許可する
+        Dir.permit_empty_file = True
+        # 以下はエラーがでない
+        print L('hoge/fuga/test/test.txt', mkdir=True) # ディレクトリがない場合は作成
+
+        # ディレクトリ作成
+        L.mkdir('hogefuga')
+
+        # ディレクトリ削除
+        print "before removing:", L.subdirnames
+        L.rmdir('hogefuga')
+        #L('hoge').rmdir('fuga') # ファイルかディレクトリがあるとエラー
+        L.rmdir('hoge', True) # ファイル、ディレクトリがあっても削除
+        print "after removing:",  L.subdirnames
+
+    test3()
