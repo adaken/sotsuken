@@ -61,6 +61,16 @@ def _get_xl_prop(json_):
 
 """json読み込み用関数"""
 
+def iter_inputs_json(inputs_json):
+    """入力ベクトルのgeneratorを返す
+
+    :return generator of tuple(str, list)
+    """
+
+    with open(inputs_json, 'r') as fp:
+        j = json.load(fp)
+        return ((d['label'], d['features']) for d in j)
+
 def iter_gps_json(gps_json, prop=False):
     """GPSデータの各列のgeneratorを返す
 
@@ -242,8 +252,14 @@ if __name__ == '__main__':
         print times.next()
         print type(times.next())
 
-    f1()
+    def iter_test2():
+        inp = iter_inputs_json(R('data/fft/run_acc_128p_132data.json'))
+        print inp.next()
+        print inp.next()
+
+    #f1()
     #main()
     #iter_test()
+    iter_test2()
     #main2()
     #main3()
