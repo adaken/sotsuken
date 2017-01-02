@@ -8,8 +8,8 @@ from normalize import standardize, scale_zero_one
 from fft import fftn
 from util import random_idx_gen
 
-def _sample_xlsx(xlsx, sample_cnt, sheetnames, col, min_row, fft_N, overlap,
-                 log):
+def _sample_xlsx(xlsx, sample_cnt, sheetnames, col, min_row, read_N, fft_N,
+                 overlap, log):
     """Excelを順にサンプリング"""
 
     wb = ExcelWrapper(xlsx)
@@ -34,11 +34,12 @@ def _sample_xlsx(xlsx, sample_cnt, sheetnames, col, min_row, fft_N, overlap,
         if col is None:
             _, col = ws.find_letter_by_header('Magnitude Vector')
 
-        vec_iter = ws.iter_part_col(col, fft_N, (min_row, None), log=log)
+        vec_iter = ws.iter_part_col(col, read_N, (min_row, None), log=log)
 
         if overlap:
-            _vec_iter = ws.iter_part_col(col, fft_N, (min_row + fft_N - overlap,
-                                                       None), log=log)
+            _vec_iter = ws.iter_part_col(col, read_N,
+                                         (min_row + fft_N - overlap, None),
+                                         log=log)
             _iter = iter_alt(vec_iter, _vec_iter)
         else:
             _iter = vec_iter
@@ -60,14 +61,14 @@ def _sample_xlsx(xlsx, sample_cnt, sheetnames, col, min_row, fft_N, overlap,
 
     return input_vecs
 
-def _sample_xlsx_random(xlsx, sample_cnt, sheetnames, col, min_row, fft_N,
-                        overlap, log):
+def _sample_xlsx_random(xlsx, sample_cnt, sheetnames, col, min_row, read_N,
+                        fft_N, overlap, log):
     """Excelをランダムサンプリング"""
 
     wb = ExcelWrapper(xlsx)
     ws = [wb.get_sheet(s) for s in sheetnames]
     n_ws = len(ws) - 1
-    begin_limits = [s.ws.max_row - fft_N for s in ws] # 読み込み開始行の限界
+    begin_limits = [s.ws.max_row - read_N for s in ws] # 読み込み開始行の限界
 
     if sheetnames is None:
         sheetnames = wb.sheetnames
@@ -78,15 +79,15 @@ def _sample_xlsx_random(xlsx, sample_cnt, sheetnames, col, min_row, fft_N,
     input_vecs = []
     for r in (randint(0, n_ws) for i in xrange(sample_cnt)):
         begin = randint(min_row, begin_limits[r])
-        vec = ws[r].get_col(col, (begin, begin + fft_N - 1), log=log)
+        vec = ws[r].get_col(col, (begin, begin + read_N - 1), log=log)
         input_vecs.append(vec)
 
     return input_vecs
 
 
 def make_input(xlsx, sample_cnt, sheetnames=None, col=None, min_row=2,
-               fft_N=128, label=None, wf='hanning', normalizing='01',
-               sampling='std', overlap=0, log=False):
+               read_N=None, fft_N=128, label=None, wf='hanning',
+               normalizing='01', sampling='std', overlap=0, log=False):
 
     """Excelファイルから入力ベクトルを作成
 
@@ -94,7 +95,7 @@ def make_input(xlsx, sample_cnt, sheetnames=None, col=None, min_row=2,
     から読み込む
 
     :param xlsx : str
-        Excelファイルのパス
+        加速度のExcelファイルのパス
 
     :param sample_cnt : int
         欲しい入力ベクトルの数
@@ -105,13 +106,18 @@ def make_input(xlsx, sample_cnt, sheetnames=None, col=None, min_row=2,
 
     :param col : str, default: None
         読み込む列
-        None指定で'Magnitude Vector'列を自動で検索
+        None指定で'Magnitude Vector'の列を自動で検索
 
     :param min_row : int, default: 2
         読み込み開始行
 
+    :param : read_N : int or None, default: None
+        FFTに使う1つのベクトルの長さ
+        = xlsxからループごとに読み込む行数
+        Noneの場合はfft_Nと同じになる
+
     :param fft_N : int, default: 128
-        FFTのポイント数、一度に読み込む行数
+        FFTのポイント数
 
     :param label : str or int, default: None
         指定した場合は長さsample_cntのラベルのリストも返す
@@ -139,14 +145,16 @@ def make_input(xlsx, sample_cnt, sheetnames=None, col=None, min_row=2,
 
     :return input_vectors : ndarray
     :return labels : list
-        長さfft_N/2の2D配列
+        長さfft_N/2の配列の配列
         またはtuple(input_vectors, labels)
     """
 
     assert normalizing in ('01', 'std')
     assert 0 <= overlap < fft_N
 
-    args = (xlsx, sample_cnt, sheetnames, col, min_row, fft_N)
+    if read_N is None:
+        read_N = fft_N
+    args = (xlsx, sample_cnt, sheetnames, col, min_row, read_N, fft_N)
     kwargs = {'overlap': overlap, 'log': log}
 
     if sampling == 'std':
