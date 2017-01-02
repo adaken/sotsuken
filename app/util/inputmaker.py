@@ -111,7 +111,7 @@ def make_input(xlsx, sample_cnt, sheetnames=None, col=None, min_row=2,
     :param min_row : int, default: 2
         読み込み開始行
 
-    :param : read_N : int or None, default: None
+    :param read_N : int or None, default: None
         FFTに使う1つのベクトルの長さ
         = xlsxからループごとに読み込む行数
         Noneの場合はfft_Nと同じになる
