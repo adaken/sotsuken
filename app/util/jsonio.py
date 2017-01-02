@@ -6,6 +6,7 @@ from app.util import ExcelWrapper
 from datetime import datetime
 from time import mktime
 import re
+from itertools import izip_longest
 
 
 """内部関数"""
@@ -32,10 +33,8 @@ def _get_datetime(t):
 def _format_str(jsonstr):
     """jsonstringを整形"""
 
-    #return re.sub(r'], ', r'],\n', jsonstr)
-    reg = '"[\w ]+": '
-    gs = re.findall(reg, jsonstr)
-    for s in gs:
+    gs = re.findall('"[\w ]+": ', jsonstr)
+    for s in set(gs):
         jsonstr = re.sub(s, '\n\t' + s, jsonstr)
     return re.sub('}', '\n}',jsonstr)
 
@@ -102,25 +101,19 @@ def iter_acc_json(acc_json, prop=False):
 def save_inputs_as_json(labels, features, savename):
     """ラベルと特徴ベクトルをjsonで保存
 
-    :param labels : iterable
-    :param features : iterable
+    :param labels : iterable of str or int
+    :param features : iterable of list
     :param savename : str
     """
 
-    list_ = [[l, f] for l, f in zip(labels, features)]
-    with open(savename, 'w') as fp:
-        s = json.dumps(list_, indent=None, sort_keys=False)
-        fp.write(_format_str(s))
-
-def save_features_as_json(features, savename):
-    """特徴ベクトルのみ保存(ラベルなし)
-
-    :param features : list fo list
-    :param savename : str
-    """
+    obj = []
+    for l, f in izip_longest(labels, features):
+        if l is None or f is None:
+            raise ValueError(u"labels and features must be the same lengths")
+        obj.append({'label': l, 'features': f})
 
     with open(savename, 'w') as fp:
-        s = json.dumps(features, indent=None)
+        s = json.dumps(obj, indent=None, sort_keys=None)
         fp.write(_format_str(s))
 
 def save_xlsx_as_json(xlsx, sheet, cols, row_range, savename, header=None,
@@ -217,16 +210,18 @@ if __name__ == '__main__':
     from app.util import make_input
 
     def f1():
-        xls = [#('placekick', R('data/acc/placekick_128p_52data.xlsx'), 52),
-               #('run', R('data/acc/run_acc_128p_132data.xlsx'), 132),
-               #('tackle', R('data/acc/tackle_acc_128p_92data.xlsx'), 92),
+        # 入力ベクトルのjsonを作成
+        xls = [('placekick', R('data/acc/placekick_128p_52data.xlsx'), 52),
+               ('run', R('data/acc/run_acc_128p_132data.xlsx'), 132),
+               ('tackle', R('data/acc/tackle_acc_128p_92data.xlsx'), 92),
                ('dropkick',
                 R('data/acc/dropkick_acc_128p_16data_20161215.xlsx'), 16)]
         for act, xl, cnt in xls:
-            vec = make_input(xl, cnt, log=True)
-            print "shape:", vec.shape
-            save_features_as_json(vec, R('data/acc/fft/{}_acc_128p_{}data.json'
-                                         .format(act, cnt)))
+            vecs, labels = make_input(xl, cnt, label=act, log=True)
+            print "shape:", vecs.shape
+            save_inputs_as_json(labels, vecs.tolist(),
+                                R('data/fft/{}_acc_128p_{}data.json'
+                                  .format(act, cnt)))
 
     def main():
         for xl in R('data/gps/players').ls(True)[1]:
@@ -247,7 +242,8 @@ if __name__ == '__main__':
         print times.next()
         print type(times.next())
 
+    f1()
     #main()
     #iter_test()
     #main2()
-    main3()
+    #main3()
