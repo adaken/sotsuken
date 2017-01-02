@@ -33,12 +33,11 @@ def _format_str(jsonstr):
     """jsonstringを整形"""
 
     #return re.sub(r'], ', r'],\n', jsonstr)
-    reg = '"\w+": '
+    reg = '"[\w ]+": '
     gs = re.findall(reg, jsonstr)
     for s in gs:
         jsonstr = re.sub(s, '\n\t' + s, jsonstr)
     return re.sub('}', '\n}',jsonstr)
-
 
 def _check_overwrite(savename, overwrite, newname):
     """上書きをチェック"""
