@@ -127,8 +127,10 @@ if __name__ == '__main__':
     y = 5 * np.sin(2*np.pi * x * 20) + 3 * np.sin(2*np.pi * x * 50) + 10 * np.sin(2*np.pi * x * 100) + 1 * np.sin(2*np.pi * x * 40)
 
     from app import L
-    arrs = np.array([y, y])
-    print fftn(arrs, N, wf='hanning', savepath=L('fft_result.png'))
+    from app.util import scale_zero_one
+    arrs = np.array([y, 2*y])
+    r = scale_zero_one(fftn(arrs, N, wf='hanning', savepath=L('fft_result.png')), axis=1)
+    print r
 
     """
     print x.size
