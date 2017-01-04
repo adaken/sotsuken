@@ -53,11 +53,14 @@ class Dir(object):
 
         return [os.path.basename(p) for p in self._lowers if os.path.isdir(p)]
 
-    @property
-    def filenames(self):
+    def filenames(self, ext=True):
         """配下のファイルの名前のリスト"""
 
-        return [os.path.basename(p) for p in self._lowers if os.path.isfile(p)]
+        if ext:
+            return [os.path.basename(p)
+                    for p in self._lowers if os.path.isfile(p)]
+        return [os.path.basename(os.path.splitext(p)[0])
+                for p in self._lowers if os.path.isfile(p)]
 
     @property
     def _lowers(self):
