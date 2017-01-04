@@ -53,13 +53,11 @@ class Dir(object):
 
         return [os.path.basename(p) for p in self._lowers if os.path.isdir(p)]
 
-    def filenames(self, ext=True):
+    @property
+    def filenames(self):
         """配下のファイルの名前のリスト"""
 
-        if ext:
-            return [os.path.basename(p)
-                    for p in self._lowers if os.path.isfile(p)]
-        return [os.path.basename(os.path.splitext(p)[0])
+        return [os.path.basename(p)
                 for p in self._lowers if os.path.isfile(p)]
 
     @property
@@ -95,23 +93,33 @@ class Dir(object):
                     yield self._get_file_or_dir(key, **kwargs)
             return _gen(*args)
 
-    def ls(self, absp=False):
+    def ls(self, absp=False, ext=True):
         """lsコマンドみたいなの
 
         :param abs : bool, default: False
             True : 絶対パスのリスト
             False: 名前のみのリスト
 
+        :param ext : bool, default: True
+            True: 拡張子あり
+            False: 拡張子なし
+
         :return dirs_and_files: list of str
             [[dirs], [files]]
         """
 
-        if absp:
-            ret = [map(self._getabs, self.subdirnames),
-                   map(self._getabs, self.filenames)]
-        else:
-            ret = [self.subdirnames, self.filenames]
-        return ret
+        lowers = self._lowers
+        subdirs = [l for l in lowers if os.path.isdir(l)]
+        files = [l for l in lowers if os.path.isfile(l)]
+
+        if not ext:
+            subdirs = [os.path.splitext(s)[0] for s in subdirs]
+            files = [os.path.splitext(f)[0] for f in files]
+        if not absp:
+            subdirs = [os.path.basename(s) for s in subdirs]
+            files = [os.path.basename(f) for f in files]
+
+        return [subdirs, files]
 
     def mkdir(self, name):
         """配下にディレクトリを作成"""
@@ -340,4 +348,13 @@ if __name__ == '__main__':
         L.rmdir('hoge', True) # ファイル、ディレクトリがあっても削除
         print "after removing:",  L.subdirnames
 
+    def ls_test():
+        r = Res()('data/gps')
+        r.ls()
+        print r.ls(True, True)
+        print r.ls(False, False)
+        print r.ls(True, False)
+        print r.ls(False, True)
+
     test3()
+    ls_test()
