@@ -5,7 +5,6 @@ from excelwrapper import ExcelWrapper
 from util import timecounter
 from app import R, L, T
 
-@timecounter
 def clip_xlsx(xlsx, sheetname, savename, col='F', row_range=(1, None), N=128,
            threshold=3.5, interval=1000):
     """突発的な加速度を切り出してExcelに保存
@@ -17,7 +16,7 @@ def clip_xlsx(xlsx, sheetname, savename, col='F', row_range=(1, None), N=128,
         閾値
 
     :param interval : int, default: 1000
-        予測される動作の間隔(ms)
+        予測される動作の間隔(行)
 
     """
 
@@ -26,7 +25,7 @@ def clip_xlsx(xlsx, sheetname, savename, col='F', row_range=(1, None), N=128,
     col_v = ws.get_col(col, row_range, iter_cell=False, log=True)
     ret = [['Magnitude Vector']]
     half = N / 2
-    interval = int(Hz / 1000. * interval)
+    #interval = int(Hz / 1000. * interval)
 
     old = 0
     i = 0
@@ -48,7 +47,20 @@ def clip_xlsx(xlsx, sheetname, savename, col='F', row_range=(1, None), N=128,
     wb.save(savename)
     print "finish"
 
+def clip_xlsx2(xlsx, sheetname, savename, threshold):
+    pass
+
 if __name__ == '__main__':
-    xlsx, sheetname = R('data/raw/placekick/place_1222_fix.xlsx'), 'Sheet2'
-    savename = T('clip/placekick.xlsx', mkdir=True)
-    clip_xlsx(xlsx, sheetname, savename, 'F', (2, None), threshold=4.9, interval=2000)
+    def func1():
+        xlsx, sheetname = R('data/raw/placekick/place_1222_fix.xlsx'), 'Sheet2'
+        savename = T('clip/placekick.xlsx', mkdir=True)
+        clip_xlsx(xlsx, sheetname, savename, 'F', (2, None), threshold=4.9, interval=2000)
+
+    def func2():
+        res = R('data/raw/pass')
+        savename = T('clip').mkdir('pass')
+        for ab, fn in zip(res.ls(True)[1], res.filenames):
+            s =  savename + '\\' + fn
+            clip_xlsx(ab, 'Sheet2', s, 'F', (2, None), 128, 1.6, 200)
+
+    func2()
