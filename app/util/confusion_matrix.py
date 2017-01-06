@@ -1,21 +1,23 @@
 # coding: utf-8
+import numpy as np
 
 class ConfusionMatrix(object):
     """コンフュージョン・マトリクス"""
 
     def __init__(self, n):
-        self.sum_matrix = np.zeros([n]*2, dtype=np.int32)
+        self.sum_matrix = np.zeros([n]*2, dtype=np.float64)
 
     def __call__(self, conf_matrix):
         self.matrix = conf_matrix
         self.sum_matrix += self.matrix
         self.tp = np.diag(self.matrix) # TP(対角項)
+        return self
 
     @property
     def precision(self):
         """適合率"""
         total = self.matrix.sum(axis=1)
-        prec = self.tp / total.astype(np.float32)
+        prec = self.tp / total.astype(np.float64)
         prec[np.isnan(prec)] = 1
         return prec
 
@@ -23,7 +25,7 @@ class ConfusionMatrix(object):
     def recall(self):
         """再現率"""
         total = self.matrix.sum(axis=0)
-        rec = self.tp / total.astype(np.float32)
+        rec = self.tp / total.astype(np.float64)
         rec[np.isnan(rec)] = 1
         return rec
 
