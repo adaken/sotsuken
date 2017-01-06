@@ -6,7 +6,7 @@ from util import timecounter
 from app import R, L, T
 
 def clip_xlsx(xlsx, sheetname, savename, col='F', row_range=(1, None), N=128,
-           threshold=3.5, interval=1000):
+           threshold=3.5, limit=100., interval=1000):
     """突発的な加速度を切り出してExcelに保存
 
     リストを先頭から見ていき、threshold以上の加速度を発見した場合に
@@ -30,7 +30,7 @@ def clip_xlsx(xlsx, sheetname, savename, col='F', row_range=(1, None), N=128,
     old = 0
     i = 0
     while i < len(col_v):
-        if col_v[i] > threshold:
+        if threshold < col_v[i] < limit:
             vec = col_v[i-(half):i+(half)]
             ret += [[elem] for elem in vec]
             print "{}.\tpoint: {},\t{}:{},\tvalue: {},\tinterval: {}".format(len(ret)/N, i+2, i-half, i+half, col_v[i], i-old)
@@ -63,4 +63,13 @@ if __name__ == '__main__':
             s =  savename + '\\' + fn
             clip_xlsx(ab, 'Sheet2', s, 'F', (2, None), 128, 1.6, 200)
 
-    func2()
+    def func3():
+        r = R('data/raw/20170106/pass/fix')
+        savename = T.mkdir('clip').mkdir('pass')
+        for a, f in zip(r.ls(absp=True)[1], r.filenames):
+            s = savename.p + '\\' + f
+            print a
+            print f
+            clip_xlsx(a, 'Sheet2', s, 'F', (2, None), 128, 1.25, 2.0, 300)
+
+    func3()
