@@ -39,7 +39,7 @@ if __name__ == '__main__':
     l = [[20, 0, 0],
          [5, 15, 0],
          [0, 0, 20]]
-    
+
     import numpy as np
     a = np.array(l)
     conf = ConfusionMatrix(3)
@@ -47,4 +47,3 @@ if __name__ == '__main__':
     print conf.precision
     print conf.recall
     print conf.fmeasure
-    
