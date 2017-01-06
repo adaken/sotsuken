@@ -17,7 +17,6 @@ from sklearn.cross_validation import StratifiedKFold
 def kfold(labels, features, k=5):
     skf = StratifiedKFold(labels, n_folds=k, shuffle=False)
 
-    i = 0
     for tr, ts in skf: # k回ループ
         tr_labels, ts_labels = [], []
         ret_tr, ret_ts = [], []
