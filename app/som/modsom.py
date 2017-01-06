@@ -66,6 +66,7 @@ class SOM:
         SOM._validate_shape(shape)
         SOM._validate_display(display)
 
+        """インスタンス変数"""
         self.input_layer = conved_input # 入力層
         self.labels = labels # ラベル
         self.input_num = conved_input.shape[0] # 特徴ベクトルの総数
@@ -81,6 +82,7 @@ class SOM:
 
         """係数"""
         self._param_input_length_ratio = 0.25
+        # 残りの学習回数
         self._life = self.input_num * self._param_input_length_ratio
         self._param_neighbor = 0.25
         self._param_learning_rate = 0.1
@@ -103,7 +105,6 @@ class SOM:
             self._param_learning_rate = learning_rate
         if input_length_ratio:
             self._param_input_length_ratio = input_length_ratio
-            # 残りの学習回数
             self._life = self.input_num * self._param_input_length_ratio
 
     def train(self, n):
@@ -130,7 +131,7 @@ class SOM:
 
         loop_ = float(n * self.input_num)
         loop_p = 0
-        
+
         print "input dimension :", self.input_dim
         print "number of inputs:", self.input_num
         print "number of loops :", int(loop_)
@@ -218,7 +219,7 @@ class SOM:
     @classmethod
     def to_umatrix(cls, map_, range_=1, reverse=False):
         """マップをユニタリ行列に変換
-        
+
         マップのそれぞれのノードについて、近傍とのユークリッド距離の平均を計算
         これによりノードごとに色での階調表現ができる
         ユニタリ行列にすることで視覚的にマップを評価できる
@@ -259,8 +260,8 @@ class SOM:
         imap = np.c_[i_.ravel(), j_.ravel()] # 添字の配列
         i, j = imap.T # それぞれの座標に分ける
         imap3d = imap.reshape(len_i, len_j, 2) # 3次元に変換
-        grs = veudis(i, j, map_, imap3d, range_+1, len_i, len_j)
-        ret = scale_zero_one(grs.reshape(len_i, len_j), None)
+        um = veudis(i, j, map_, imap3d, range_+1, len_i, len_j)
+        ret = scale_zero_one(um.reshape(len_i, len_j), None)
 
         return 1 - ret if not reverse else ret
 

@@ -208,4 +208,7 @@ if __name__ == '__main__':
                            model=R('misc/model/clf2.pkl'),
                            act_icons=act_icons)
 
+    def main2():
+        pass
+        #times, lats, lons =
     main()

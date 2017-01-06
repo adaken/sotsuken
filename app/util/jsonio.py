@@ -61,7 +61,7 @@ def _get_xl_prop(json_):
 
 """json読み込み用関数"""
 
-def iter_inputs_json(inputs_json):
+def iter_inputs_json(inputs_json, trans=False):
     """入力ベクトルのgeneratorを返す
 
     :return generator of tuple(str, list)
@@ -69,13 +69,15 @@ def iter_inputs_json(inputs_json):
 
     with open(inputs_json, 'r') as fp:
         j = json.load(fp)
+        if trans:
+            return (d['label'] for d in j), (d['features'] for d in j)
         return ((d['label'], d['features']) for d in j)
 
 def iter_gps_json(gps_json, prop=False):
     """GPSデータの各列のgeneratorを返す
 
     :return tuple of generators
-        (Time, Latitude, Longitude)
+        (Time_iter, Latitude_iter, Longitude_iter)
         'prop'がTrueの場合は後ろにプロパティの辞書を追加
     """
 
@@ -92,7 +94,7 @@ def iter_acc_json(acc_json, prop=False):
     """加速度データの各列のgeneratorを返す
 
     :return tuple of generators
-        (Time, Magnitude Vector)
+        (Time_iter, Magnitude Vector_iter)
         'prop'がTrueの場合は後ろにプロパティの辞書を追加
     """
 
@@ -221,11 +223,15 @@ if __name__ == '__main__':
 
     def f1():
         # 入力ベクトルのjsonを作成
-        xls = [('placekick', R('data/acc/placekick_128p_52data.xlsx'), 52),
-               ('run', R('data/acc/run_acc_128p_132data.xlsx'), 132),
-               ('tackle', R('data/acc/tackle_acc_128p_92data.xlsx'), 92),
-               ('dropkick',
-                R('data/acc/dropkick_acc_128p_16data_20161215.xlsx'), 16)]
+        xls = [
+            #('placekick', R('data/acc/placekick_128p_52data.xlsx'), 52),
+            #('run', R('data/acc/run_acc_128p_132data.xlsx'), 132),
+            #('tackle', R('data/acc/tackle_acc_128p_92data.xlsx'), 92),
+            #('dropkick',
+            #    R('data/acc/dropkick_acc_128p_16data_20161215.xlsx'), 16),
+            ('pass', R('data/acc/pass_128p_31data.xlsx'), 31)
+            ]
+
         for act, xl, cnt in xls:
             vecs, labels = make_input(xl, cnt, label=act, log=True)
             print "shape:", vecs.shape
@@ -257,9 +263,9 @@ if __name__ == '__main__':
         print inp.next()
         print inp.next()
 
-    #f1()
+    f1()
     #main()
     #iter_test()
-    iter_test2()
+    #iter_test2()
     #main2()
     #main3()
