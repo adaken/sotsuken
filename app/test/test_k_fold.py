@@ -27,7 +27,7 @@ def kfold(labels, features, k=5):
         for j in ts:
             ts_labels.append(labels[j])
             ret_ts.append(features[j])
-        yield ts_labels, ret_tr, ts_labels, ret_ts
+        yield tr_labels, ret_tr, ts_labels, ret_ts
 
 if __name__ == '__main__':
     """データ生成"""
