@@ -93,7 +93,7 @@ class Dir(object):
                     yield self._get_file_or_dir(key, **kwargs)
             return _gen(*args)
 
-    def ls(self, absp=False, ext=True):
+    def ls(self, absp=False, ext=True, reg=None):
         """lsコマンドみたいなの
 
         :param abs : bool, default: False
@@ -103,6 +103,12 @@ class Dir(object):
         :param ext : bool, default: True
             True: 拡張子あり
             False: 拡張子なし
+
+        !!未実装!!
+        :param reg : str or None, default: None
+            正規表現でディレクトリ名、ファイル名をフィルタリング
+            Noneですべてのディレクトリ、ファイルを返す
+            フィルタリングの結果のリストに対して'abs', 'ext'が適用される
 
         :return dirs_and_files: list of str
             [[dirs], [files]]
@@ -128,7 +134,7 @@ class Dir(object):
             os.mkdir(self._getabs(name))
         else:
             warnings.warn(u"directory already exists: {}".format(name))
-        return self._getabs(name)
+        return Dir(self._getabs(name))
 
     def rm(self, name):
         """配下のファイルを削除"""
