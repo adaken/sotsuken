@@ -19,13 +19,16 @@ def kfold(labels, features, k=5):
 
     i = 0
     for tr, ts in skf: # k回ループ
+        tr_labels, ts_labels = [], []
         ret_tr, ret_ts = [], []
         for i in tr:
+            tr_labels.append(labels[i])
             ret_tr.append(features[i])
 
         for j in ts:
+            ts_labels.append(labels[j])
             ret_ts.append(features[j])
-        yield ret_tr, ret_ts
+        yield ts_labels, ret_tr, ts_labels, ret_ts
 
 if __name__ == '__main__':
     """データ生成"""
@@ -52,7 +55,7 @@ if __name__ == '__main__':
     #print "tr_value:", tr[0]
     #print "ts_len:", len(ts[0])
     #print "ts_value:", ts[0]
-    
+
     L.mkdir('kfold')
     print >> file(L('kfold/tr.txt'), 'w'), tr
     print >> file(L('kfold/ts.txt'), 'w'), ts
