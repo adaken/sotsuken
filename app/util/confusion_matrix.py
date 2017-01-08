@@ -8,6 +8,9 @@ class ConfusionMatrix(object):
         self.sum_matrix = np.zeros([n]*2, dtype=np.float64)
 
     def __call__(self, conf_matrix):
+        return self.update(conf_matrix)
+
+    def update(self, conf_matrix):
         self.matrix = conf_matrix
         self.sum_matrix += self.matrix
         self.tp = np.diag(self.matrix) # TP(対角項)
@@ -42,7 +45,6 @@ if __name__ == '__main__':
          [5, 15, 0],
          [0, 0, 20]]
 
-    import numpy as np
     a = np.array(l)
     conf = ConfusionMatrix(3)
     conf(a)

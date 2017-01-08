@@ -128,7 +128,7 @@ class Dir(object):
             os.mkdir(self._getabs(name))
         else:
             warnings.warn(u"directory already exists: {}".format(name))
-        return self._getabs(name)
+        return Dir(self._getabs(name))
 
     def rm(self, name):
         """配下のファイルを削除"""
