@@ -21,7 +21,7 @@ class ConfusionMatrix(object):
         """適合率"""
         total = self.matrix.sum(axis=1)
         prec = self.tp / total.astype(np.float64)
-        prec[np.isnan(prec)] = 1
+        prec[np.isnan(prec)] = 1.
         return prec
 
     @property
@@ -29,7 +29,7 @@ class ConfusionMatrix(object):
         """再現率"""
         total = self.matrix.sum(axis=0)
         rec = self.tp / total.astype(np.float64)
-        rec[np.isnan(rec)] = 1
+        rec[np.isnan(rec)] = 1.
         return rec
 
     @property
@@ -37,7 +37,7 @@ class ConfusionMatrix(object):
         """F値"""
         prec, rec = self.precision, self.recall
         fm = (2 * rec * prec) / (rec + prec)
-        fm[np.isnan(fm)] = 1
+        fm[np.isnan(fm)] = 1.
         return fm
 
 if __name__ == '__main__':
