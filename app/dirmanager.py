@@ -71,6 +71,7 @@ class Dir(object):
 
         :param name : *args
             指定しないかディレクトリ名かファイル名か相対パス
+            複数指定可
 
         :param mkdir : bool, default: False, optional
             True: 'name'にパスを指定した場合に足りないディレクトリを作成
@@ -80,6 +81,7 @@ class Dir(object):
             ファイル名 -> 絶対パス
             ディレクトリ名 -> Dirオブジェクト
             パス -> 絶対パスかDirオブジェクト
+            複数指定した場合はイテレータが返る
         """
 
         len_ = len(args)
