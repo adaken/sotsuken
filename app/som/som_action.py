@@ -52,9 +52,9 @@ def som_json(jsons, labels, label_colors=None, train_cnt=50, mapsize=None):
 if __name__ == '__main__':
     from app import R
     som_json([
-        R('data/fft/placekick_acc_128p_52data.json'),
+        R('data/fft/placekick_acc_128p_101data.json'),
         R('data/fft/run_acc_128p_132data.json'),
-        R('data/fft/tackle_acc_128p_92data.json'),
-        R('data/fft/pass_acc_128p_31data.json')
+        R('data/fft/tackle_acc_128p_111data.json'),
+        R('data/fft/pass_acc_128p_131data.json')
         ],
         ['PKick', 'Run', 'Tackle', 'Pass'], train_cnt=400)

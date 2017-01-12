@@ -64,6 +64,10 @@ def _get_xl_prop(json_):
 def iter_inputs_json(inputs_json, trans=False):
     """入力ベクトルのgeneratorを返す
 
+    :param trans : bool
+        True : ([labels], [features])
+        False: [(label, features)...]
+
     :return generator of tuple(str, list)
     """
 
@@ -224,12 +228,10 @@ if __name__ == '__main__':
     def f1():
         # 入力ベクトルのjsonを作成
         xls = [
-            #('placekick', R('data/acc/placekick_128p_52data.xlsx'), 52),
-            #('run', R('data/acc/run_acc_128p_132data.xlsx'), 132),
-            #('tackle', R('data/acc/tackle_acc_128p_92data.xlsx'), 92),
-            #('dropkick',
-            #    R('data/acc/dropkick_acc_128p_16data_20161215.xlsx'), 16),
-            ('pass', R('data/acc/pass_128p_31data.xlsx'), 31)
+            ('placekick', R('data/acc/placekick_acc_128p_101data.xlsx'), 101),
+            ('run', R('data/acc/run_acc_128p_132data.xlsx'), 132),
+            ('tackle', R('data/acc/tackle_acc_128p_111data.xlsx'), 111),
+            ('pass', R('data/acc/pass_acc_128p_131data.xlsx'), 131)
             ]
 
         for act, xl, cnt in xls:
