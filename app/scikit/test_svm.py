@@ -19,20 +19,19 @@ if __name__ == '__main__':
     """
     教師データ生成
     """
-    Xl = namedtuple('Xl', 'filename, sheet, letter, label, sampling, overlap')
+    Xl = namedtuple('Xl', 'filename, label')
     xls =  (
-         #Xl(R(r'data\acc\dropkick_acc_128p_16data.xlsx'), ['Sheet'], 'A', 'dk', 'std', 0),
-         Xl(R(r'data\acc\place.kick_128p_22data.xlsx'), ['Sheet'], 'A', 'pk', 'std', 0),
-         Xl(R(r'data\acc\run_acc_128p_81data.xlsx'), ['Sheet2'], 'F', 'run', 'std', 0),
-         Xl(R(r'data\acc\tackle_acc_128p_62data.xlsx'), ['Sheet'], 'A', 'tackle', 'std', 0)
+         Xl(R(r'data\acc\pass_128p_131data.xlsx'), 'pass',),
+         Xl(R(r'data\acc\placekick_acc_128p_101data.xlsx'), 'pk'),
+         Xl(R(r'data\acc\run_acc_128p_132data.xlsx'), 'run'),
+         Xl(R(r'data\acc\tackle_acc_128p_111data.xlsx'), 'tackle')
         )
     input_vecs = []
     input_labels = []
     for xl in xls:
-        input_vec, labels = make_input(xlsx=xl.filename, sheetnames=xl.sheet,col=xl.letter,
-                                                min_row=2,fft_N=128, sample_cnt=16,
-                                                label=xl.label,sampling=xl.sampling,
-                                                overlap=xl.overlap,normalizing='01', log=False)
+        input_vec, labels = make_input(xlsx=xl.filename, sheetnames=None,col=None,
+                                                min_row=2,fft_N=128, sample_cnt=80,
+                                                label=xl.label,normalizing='01', log=False)
         map(input_vecs.append, input_vec)
         input_labels += labels
 
@@ -56,10 +55,9 @@ if __name__ == '__main__':
     test_vecs = []
     test_labels = []
     for xl in xls:
-        test_vec, test_label = make_input(xlsx=xl.filename, sheetnames=xl.sheet,col=xl.letter,
-                                                min_row=128*16+1,fft_N=128, sample_cnt=6,
-                                                label=xl.label,sampling=xl.sampling,
-                                                overlap=xl.overlap,normalizing='01', log=False)
+        test_vec, test_label = make_input(xlsx=xl.filename, sheetnames=None,col=None,
+                                                min_row=128*80+1,fft_N=128, sample_cnt=20,
+                                                label=xl.label,normalizing='01', log=False)
         map(test_vecs.append, test_vec)
         test_labels += test_label
 
@@ -98,8 +96,8 @@ if __name__ == '__main__':
     """
     学習モデルのローカル保存
     """
-    joblib.dump(clf, R('misc\model\clf.pkl'))
-    joblib.dump(clf2, R('misc\model\clf2.pkl'))
+    #joblib.dump(clf, R('misc\model\clf.pkl'))
+    #joblib.dump(clf2, R('misc\model\clf2.pkl'))
 
     #confusion matrix（ラベルの分類表。分類性能が高いほど対角線に値が集まる）
     print confusion_matrix(test_labels1, test_pred)
