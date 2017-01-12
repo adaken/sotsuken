@@ -67,16 +67,6 @@ if __name__ == '__main__':
         map(input_vecs.append, input_vec)
         input_labels += labels
 
-    #print len(input_labels)
-    #print len(input_vecs)
-
-    #from sklearn import datasets
-    #iris = datasets.load_iris()
-    #data = iris.data[0:100][:,::2]
-    #print iris.target[0:100]
-
-    #label = np.r_[np.repeat(0,20), np.repeat(1,10)]
-
     k = 5 # 分割数
 
     """
@@ -91,39 +81,19 @@ if __name__ == '__main__':
     i = 0
     # skfよりtr(train),ts(test)listの取り出し
     for tr, ts in skf:
-        #print("%s %s" % (tr, ts))
-        #print tr
-        #print ts
-
+    
         # vecs[tr],labels[tr]をtrain用のlistにまとめる
-
         for j in tr:
-            #print j
-            #for i in xrange(k):
             train_vecs[i].append(input_vecs[j])
             train_labels[i].append(input_labels[j])
-            #print len(train_vecs[i])
-            #print len(train_labels[i])
             if len(train_vecs[i]) == 240 :
                 i += 1
                 break
 
         # vecs[ts],labels[ts]をtest用のlistにまとめる
         for j in ts:
-            #print j
-            #for i in xrange(k):
             test_vecs[i].append(input_vecs[j])
             test_labels[i].append(input_labels[j])
-
-    print len(train_vecs[2])
-    print len(train_vecs[1])
-    #print len(test_vecs[1])
-
-    print len(train_vecs[0])
-    #print len(test_vecs[0])
-
-    #print len(train_labels[0])
-    #print len(test_labels[0])
     """
 
     it = kfold(input_labels, input_vecs, k=5)
@@ -135,44 +105,3 @@ if __name__ == '__main__':
     print "適合率", confm.precision.mean()
     print "再現率", confm.recall.mean()
     print "F値   ", confm.fmeasure.mean()
-
-    """
-    学習分類
-
-    est = svm.SVC(C=1, kernel='rbf', gamma=0.01)    # パラメータ (C-SVC, RBF カーネル, C=1)
-    clf = OneVsRestClassifier(est)  #他クラス分類器One-against-restによる識別
-    clf.fit(tr, tr_labels)
-    test_pred = clf.predict(ts)
-
-
-    clf2 = SVC(C=1, kernel='rbf', gamma=0.01)    # パラメータ (C-SVC, RBF カーネル, C=1)
-    clf2.fit(input_vecs1, input_labels1)
-    test_pred2 = clf2.predict(test_vecs1)  #他クラス分類器One-versus-oneによる識別
-
-
-    学習モデルのローカル保存
-
-    joblib.dump(clf, R('misc\model\clf.pkl'))
-    joblib.dump(clf2, R('misc\model\clf2.pkl'))
-
-
-    #confusion matrix（ラベルの分類表。分類性能が高いほど対角線に値が集まる）
-    print confusion_matrix(test_labels[0], test_pred)
-    #print confusion_matrix(test_labels1, test_pred2)
-
-    #分類結果 適合率 再現率 F値の表示
-    print classification_report(test_labels[0], test_pred)
-    #print classification_report(test_labels1, test_pred2)
-
-    #正答率 分類ラベル/正解ラベル
-    print accuracy_score(test_labels[0], test_pred)
-    #print accuracy_score(test_labels1, test_pred2)
-
-    print test_labels[0]       #分類前ラベル
-    print list(test_pred)   #One-against-restによる識別ラベル
-    #print list(test_pred2)  #One-versus-oneによる識別ラベル
-
-
-    target_names = ['class 0', 'class 1', 'class 2']
-    print(classification_report(test_labels, test_pred, target_names=target_names))
-    """
