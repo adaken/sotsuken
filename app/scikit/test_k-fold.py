@@ -15,6 +15,35 @@ from sklearn.externals import joblib
 import numpy as np
 from app import R, T, L
 from sklearn.cross_validation import StratifiedKFold
+from app.util import ConfusionMatrix
+
+def kfold(labels, features, k=5):
+    skf = StratifiedKFold(labels, n_folds=k, shuffle=False)
+
+    for tr, ts in skf: # k回ループ
+        tr_labels, ts_labels = [], []
+        ret_tr, ret_ts = [], []
+        for i in tr:
+            tr_labels.append(labels[i])
+            ret_tr.append(features[i])
+
+        for j in ts:
+            ts_labels.append(labels[j])
+            ret_ts.append(features[j])
+        yield tr_labels, ret_tr, ts_labels, ret_ts
+
+def train(tr,tr_labels,ts, ts_labels, confm):
+    est = svm.SVC(C=1, kernel='rbf', gamma=0.01)    # パラメータ (C-SVC, RBF カーネル, C=1)
+    clf = OneVsRestClassifier(est)  #他クラス分類器One-against-restによる識別
+    clf.fit(tr, tr_labels)
+    ts_pred = clf.predict(ts)
+    l = confusion_matrix(ts_labels, ts_pred)
+
+    confm(l)
+    print confm.precision
+    print confm.recall
+    print confm.fmeasure
+
 
 if __name__ == '__main__':
     """
@@ -50,6 +79,7 @@ if __name__ == '__main__':
 
     k = 5 # 分割数
 
+    """
     # 分割数に応じたlabelsの分割(labels,分割数,シャッフル)
     skf = StratifiedKFold(input_labels, n_folds=k, shuffle=False)
 
@@ -66,41 +96,55 @@ if __name__ == '__main__':
         #print ts
 
         # vecs[tr],labels[tr]をtrain用のlistにまとめる
+
         for j in tr:
-            print j
+            #print j
             #for i in xrange(k):
             train_vecs[i].append(input_vecs[j])
             train_labels[i].append(input_labels[j])
-            print len(train_vecs[i])
-            print len(train_labels[i])
+            #print len(train_vecs[i])
+            #print len(train_labels[i])
             if len(train_vecs[i]) == 240 :
-                i = 1
-        
+                i += 1
+                break
+
         # vecs[ts],labels[ts]をtest用のlistにまとめる
         for j in ts:
             #print j
             #for i in xrange(k):
             test_vecs[i].append(input_vecs[j])
             test_labels[i].append(input_labels[j])
-        #break
+
+    print len(train_vecs[2])
     print len(train_vecs[1])
-    print len(test_vecs[1])
-    
+    #print len(test_vecs[1])
+
     print len(train_vecs[0])
-    print len(test_vecs[0])
+    #print len(test_vecs[0])
 
-    print len(train_labels[0])
-    print len(test_labels[0])
+    #print len(train_labels[0])
+    #print len(test_labels[0])
+    """
+
+    it = kfold(input_labels, input_vecs, k=5)
+    confm = ConfusionMatrix(3)
+    for tr_labels, tr, ts_labels, ts in it:
+        train(tr, tr_labels, ts,ts_labels, confm)
+
+    confm = ConfusionMatrix(3)(confm.sum_matrix / float(k))
+    print "適合率", confm.precision.mean()
+    print "再現率", confm.recall.mean()
+    print "F値   ", confm.fmeasure.mean()
 
     """
-    教師データの学習分類
-    """
+    学習分類
+
     est = svm.SVC(C=1, kernel='rbf', gamma=0.01)    # パラメータ (C-SVC, RBF カーネル, C=1)
     clf = OneVsRestClassifier(est)  #他クラス分類器One-against-restによる識別
-    clf.fit(train_vecs[0], train_labels[0])
-    test_pred = clf.predict(test_vecs[0])
+    clf.fit(tr, tr_labels)
+    test_pred = clf.predict(ts)
 
-    """
+
     clf2 = SVC(C=1, kernel='rbf', gamma=0.01)    # パラメータ (C-SVC, RBF カーネル, C=1)
     clf2.fit(input_vecs1, input_labels1)
     test_pred2 = clf2.predict(test_vecs1)  #他クラス分類器One-versus-oneによる識別
@@ -110,7 +154,7 @@ if __name__ == '__main__':
 
     joblib.dump(clf, R('misc\model\clf.pkl'))
     joblib.dump(clf2, R('misc\model\clf2.pkl'))
-    """
+
 
     #confusion matrix（ラベルの分類表。分類性能が高いほど対角線に値が集まる）
     print confusion_matrix(test_labels[0], test_pred)
@@ -128,7 +172,7 @@ if __name__ == '__main__':
     print list(test_pred)   #One-against-restによる識別ラベル
     #print list(test_pred2)  #One-versus-oneによる識別ラベル
 
-    """
+
     target_names = ['class 0', 'class 1', 'class 2']
     print(classification_report(test_labels, test_pred, target_names=target_names))
     """
