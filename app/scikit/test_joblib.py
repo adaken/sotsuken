@@ -14,20 +14,19 @@ if __name__ == '__main__':
     """
     テストデータ生成
     """
-    Xl = namedtuple('Xl', 'filename, sheet, letter, label, sampling, overlap')
+    Xl = namedtuple('Xl', 'filename, label')
     xls =  (
-         Xl(R(r'data\raw\run_1122_data.xlsx'), ['Sheet1'], 'F', 'run', 'std', 0),
-         Xl(R(r'data\raw\walk_1122_data.xlsx'), ['Sheet1'], 'F', 'walk', 'std', 0),
-         Xl(R(r'data\raw\jump_128p_174data_fixed.xlsx'), ['Sheet'], 'A', 'jump', 'std', 0),
-        #Xl(R(r'data\skip.xlsx'), 'Sheet4', 'F', 4, 'rand', 0)
+         Xl(R(r'data\acc\pass_acc_128p_131data.xlsx'), 'pass',),
+         Xl(R(r'data\acc\placekick_acc_128p_101data.xlsx'), 'pk'),
+         Xl(R(r'data\acc\run_acc_128p_132data.xlsx'), 'run'),
+         Xl(R(r'data\acc\tackle_acc_128p_111data.xlsx'), 'tackle')
         )
     test_vecs = []
     test_labels = []
     for xl in xls:
-        test_vec, test_label = make_input(xlsx=xl.filename, sheetnames=xl.sheet,col=xl.letter,
-                                                min_row=12802,fft_N=128, sample_cnt=21,
-                                                label=xl.label,sampling=xl.sampling,
-                                                overlap=xl.overlap,normalizing='01', log=False)
+        test_vec, test_label = make_input(xlsx=xl.filename, sheetnames=None,col=None,
+                                                min_row=128*80+1,fft_N=128, sample_cnt=20,
+                                                label=xl.label,normalizing='01', log=False)
         map(test_vecs.append, test_vec)
         test_labels += test_label
 
