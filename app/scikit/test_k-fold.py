@@ -34,7 +34,7 @@ def kfold(labels, features, k=5):
 
 def train(tr,tr_labels,ts, ts_labels, confm):
     est = SVC(C=1000, kernel='rbf', gamma = 0.001)    # パラメータ (C-SVC, RBF カーネル, C=1000)
-    clf = OneVsRestClassifier(est)  #他クラス分類器One-against-restによる識別
+    clf = OneVsRestClassifier(est)  #多クラス分類器One-against-restによる識別
     clf.fit(tr, tr_labels)
     ts_pred = clf.predict(ts)
     l = confusion_matrix(ts_labels, ts_pred)
