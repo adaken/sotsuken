@@ -5,6 +5,7 @@ from excelwrapper import ExcelWrapper
 from util import timecounter
 from app import R, L, T
 import numpy as np
+import warnings
 
 def clip_xlsx(xlsx, sheetname, savename, col='F', row_range=(1, None), N=128,
            threshold=3.5, limit=100., interval=1000):
@@ -129,8 +130,12 @@ def clip_xlsx2(acc, savename, still_min=0, still_max=1.15, still_len=300,
             continue
 
         c, v = clip_activity(j, k)
-        data += [[e] for e in v]
+        if not len(v) == sample_n:
+            warnings.warn(u"less data sample: {}/{}".format(len(v), sample_n))
+            i = k
+            continue
         cnt += 1
+        data += [[e] for e in v]
         print "{:<3d}\t{:>9d}\t{:>7d}\t{:>8d}".format(cnt, j, k-1, c-oldc)
         oldc = c
         i = k
@@ -154,12 +159,13 @@ if __name__ == '__main__':
             clip_xlsx(ab, 'Sheet2', s, 'F', (2, None), 128, 1.6, 200)
 
     def func3():
-        r = R('data/raw/20170106/pass/fix')
-        savename = T.mkdir('clip').mkdir('pass')
+        r = R('data/raw/20170106/tackle/fix')
+        savename = T.mkdir('clip').mkdir('tackle')
         for a, f in zip(r.ls(absp=True)[1], r.filenames):
             acc = ExcelWrapper(a).get_sheet('Sheet2').get_col('F', (2, None), log=True)
             s = savename.p + '\\' + f
-            clip_xlsx2(acc, s, still_max=1.2, act_len=2)
+            print a
+            clip_xlsx2(acc, s, still_max=2.25, act_len=2)
 
     def func4():
         r = R('data/raw/tackle/1215_tackle1_fix.xlsx')
