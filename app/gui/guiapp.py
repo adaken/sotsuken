@@ -64,7 +64,7 @@ class Frame(tk.Frame):
 
         self.labels = []
         map(self.labels.append,
-            (tk.Label(self.f1, width=70, font=('times', 13), pady=2, relief='ridge', textvariable=self.filenames_buff[i]) for i in xrange(5)))
+            (tk.Label(self.f1, width=80, font=('times', 13), pady=2, relief='ridge', textvariable=self.filenames_buff[i]) for i in xrange(5)))
 
         # ラベルの配置
         for i, label in zip(xrange(1, len(self.labels)+1), self.labels):
@@ -180,10 +180,10 @@ class Frame(tk.Frame):
         self.labelname3_entry=tk.Entry(self.lf_labelname_som, textvariable=self.labelname3_buff, width=10).pack()
         self.labelname4_entry=tk.Entry(self.lf_labelname_som, textvariable=self.labelname4_buff, width=10).pack()
         #エントリー(ラベル名)初期値
-        self.labelname1_buff.set('Pkick')
-        self.labelname2_buff.set('Run')
-        self.labelname3_buff.set('Tackle')
-        self.labelname4_buff.set('Pass')
+        self.labelname1_buff.set('Pass')
+        self.labelname2_buff.set('Pkick')
+        self.labelname3_buff.set('Run')
+        self.labelname4_buff.set('Tackle')
         #エントリー(その他)
         self.e_train_cnt_buff=tk.IntVar()
         self.e_train_cnt_buff.set('400')
@@ -429,11 +429,11 @@ class Frame(tk.Frame):
     def make_result_window_svm(self):
         result_window=tk.Toplevel()
         result_window.title('実行結果')
-        t0=st.ScrolledText(result_window).pack()
+        t0=st.ScrolledText(result_window)
+        t0.pack()
         fi=open(r"E:\result_svm.txt","r")
-        t0.delete('1.0', 'end')
         for x in fi:
-            t0.insert('end', x.decode('shift_jis'))
+            t0.insert(tk.END, x.decode('shift_jis'))
         fi.close()
 
 
@@ -515,23 +515,22 @@ class Frame(tk.Frame):
 
             from app import R
 
-            file1=self.filename1_buff.get()
-            file2=self.filename2_buff.get()
-            file3=self.filename3_buff.get()
-            file4=self.filename4_buff.get()
-            ln1=self.labelname1_buff.get()
-            ln2=self.labelname2_buff.get()
-            ln3=self.labelname3_buff.get()
-            ln4=self.labelname4_buff.get()
-            e_tc=self.e_train_cnt_buff.get()
-            som_json([
-                R(file1),
-                R(file2),
-                R(file3),
-                R(file4)
-                ],
-                [ln1, ln2, ln3, ln4], train_cnt=e_tc)
-
+        file1=self.filename1_buff.get()
+        file2=self.filename2_buff.get()
+        file3=self.filename3_buff.get()
+        file4=self.filename4_buff.get()
+        ln1=self.labelname1_buff.get()
+        ln2=self.labelname2_buff.get()
+        ln3=self.labelname3_buff.get()
+        ln4=self.labelname4_buff.get()
+        e_tc=self.e_train_cnt_buff.get()
+        som_json([
+            (file1),
+            (file2),
+            (file3),
+            (file4)
+            ],
+            [ln1, ln2, ln3, ln4], train_cnt=e_tc)
 
 
 if __name__ == '__main__':
