@@ -473,47 +473,7 @@ class Frame(tk.Frame):
         import matplotlib.cm as cm
         from itertools import chain, product, izip
         from app.util.jsonio import iter_inputs_json
-
-        def som_json(jsons, labels, label_colors=None, train_cnt=50, mapsize=None):
-            """jsonからsom
-
-            :param jsons : list of str
-                特徴ベクトルのみのjsonのパスのリスト
-
-            :param labels : list
-                マップに表示するそれぞれのjsonに対応するラベル
-
-            :param label_colors : dict, None
-                ラベルに対応するマップに表示する際の文字色
-            """
-
-            inputs = []
-            for j, label in zip(jsons, labels):
-                _, f_iter  = iter_inputs_json(j, True)
-                inputs = chain(inputs, product(f_iter, [label]))
-
-            if label_colors is None:
-                len_ = len(labels)
-                label_colors = {str(l): cm.autumn(float(i)/len_)
-                                for i, l in enumerate(labels)}
-
-            features, labels = zip(*inputs)
-            features = np.array(features)
-            labels = list(labels)
-
-            if mapsize is None:
-                som = SOM(features, labels, display='um')
-            else:
-                som = SOM(features, labels, shape=mapsize, display='um')
-
-            map_, labels, coords = som.train(train_cnt)
-            plt.imshow(map_, interpolation='nearest', cmap='gray')
-            for label, coord in zip(labels, coords):
-                x, y = coord
-                plt.text(x, y, label, color=label_colors[label])
-            plt.show()
-
-            from app import R
+        from app.som.som_action import som_json
 
         file1=self.filename1_buff.get()
         file2=self.filename2_buff.get()
