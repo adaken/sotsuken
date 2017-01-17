@@ -54,7 +54,7 @@ class Frame(tk.Frame):
                             font = ('times', 10), bg = '#fffafa', fg = '#000000', borderwidth = 4,
                             command = self.select_files)
 
-        self.kml_button = tk.Button(self.f1, text = '変換', relief = 'raised',
+        self.kml_button = tk.Button(self.f1, text = '実行', relief = 'raised',
                             font = ('times', 10), bg = '#fffafa', fg = '#000000', borderwidth = 4,
                             command = self.open_kml)
         #ラベル
