@@ -325,15 +325,16 @@ class Frame(tk.Frame):
         label3=self.e_ln3_skl_buff.get()
         label4=self.e_ln4_skl_buff.get()
 
+
         """
         教師データ生成
         """
         Xl = namedtuple('Xl', 'filename, label')
         xls =  (
-             Xl(R(file1), label1),
-             Xl(R(file2), label2),
-             Xl(R(file3), label3),
-             Xl(R(file4), label4)
+             Xl((file1), label1),
+             Xl((file2), label2),
+             Xl((file3), label3),
+             Xl((file4), label4)
             )
         input_vecs = []
         input_labels = []
@@ -409,26 +410,29 @@ class Frame(tk.Frame):
         #joblib.dump(clf, R('misc\model\clf.pkl'))
         #joblib.dump(clf2, R('misc\model\clf2.pkl'))
 
+        fp = file(r"E:\temp.txt","a")
+
         #confusion matrix（ラベルの分類表。分類性能が高いほど対角線に値が集まる）
-        print confusion_matrix(test_labels1, test_pred)
-        print confusion_matrix(test_labels1, test_pred2)
+        print >> fp,confusion_matrix(test_labels1, test_pred)
+        print >> fp,confusion_matrix(test_labels1, test_pred2)
 
         #分類結果 適合率 再現率 F値の表示
-        print classification_report(test_labels1, test_pred)
-        print classification_report(test_labels1, test_pred2)
+        print >> fp,classification_report(test_labels1, test_pred)
+        print >> fp,classification_report(test_labels1, test_pred2)
 
         #正答率 分類ラベル/正解ラベル
-        print accuracy_score(test_labels1, test_pred)
-        print accuracy_score(test_labels1, test_pred2)
+        print >> fp,accuracy_score(test_labels1, test_pred)
+        print >> fp,accuracy_score(test_labels1, test_pred2)
 
-        print test_labels1       #分類前ラベル
-        print list(test_pred)   #One-against-restによる識別ラベル
-        print list(test_pred2)  #One-versus-oneによる識別ラベル
+        print >> fp,test_labels1       #分類前ラベル
+        print >> fp,list(test_pred)   #One-against-restによる識別ラベル
+        print >> fp,list(test_pred2)  #One-versus-oneによる識別ラベル
 
         """
         target_names = ['class 0', 'class 1', 'class 2']
         print(classification_report(test_labels, test_pred, target_names=target_names))
         """
+
 
 
 
@@ -459,7 +463,7 @@ class Frame(tk.Frame):
     def run_som(self):
         from collections import namedtuple
         from app.util.inputmaker import make_input
-        from modsom import SOM
+        from app.som.modsom import SOM
         from app import R, T, L
         import matplotlib.pyplot as plt
         import json
