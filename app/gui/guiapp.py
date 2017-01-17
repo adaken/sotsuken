@@ -123,10 +123,10 @@ class Frame(tk.Frame):
         self.e_ln3_skl=tk.Entry(self.lf_labelname_skl, textvariable=self.e_ln3_skl_buff, width=10).pack()
         self.e_ln4_skl=tk.Entry(self.lf_labelname_skl, textvariable=self.e_ln4_skl_buff, width=10).pack()
         #エントリー(ラベル名)初期内容
-        self.e_ln1_skl_buff.set('pass')
+        self.e_ln1_skl_buff.set('Pass')
         self.e_ln2_skl_buff.set('Pkick')
-        self.e_ln3_skl_buff.set('run')
-        self.e_ln4_skl_buff.set('tackle')
+        self.e_ln3_skl_buff.set('Run')
+        self.e_ln4_skl_buff.set('Tackle')
 
         #配置(ボタン)
         self.run_skl_button.place(relx=0.47, rely=0.6)
