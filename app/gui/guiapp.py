@@ -425,7 +425,7 @@ class Frame(tk.Frame):
         target_names = ['class 0', 'class 1', 'class 2']
         print(classification_report(test_labels, test_pred, target_names=target_names))
         """
-        self.make_result_window_svm()
+        self.after(500, self.make_result_window_svm)
     def make_result_window_svm(self):
         result_window=tk.Toplevel()
         result_window.title('実行結果')
