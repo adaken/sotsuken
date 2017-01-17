@@ -403,7 +403,7 @@ class Frame(tk.Frame):
         #joblib.dump(clf, R('misc\model\clf.pkl'))
         #joblib.dump(clf2, R('misc\model\clf2.pkl'))
 
-        fp = file(r"E:\Eclipse\pleiades\workspace\Sotsugyo_kenkyu\res\data\result_svm.txt","a")
+        fp = file(r"E:\result_svm.txt","a")
 
         #confusion matrix（ラベルの分類表。分類性能が高いほど対角線に値が集まる）
         print >> fp,confusion_matrix(test_labels1, test_pred)
@@ -429,8 +429,8 @@ class Frame(tk.Frame):
     def make_result_window_svm(self):
         result_window=tk.Toplevel()
         result_window.title('実行結果')
-        t0=st.ScrolledText().pack()
-        f1=open(r"E:\Eclipse\pleiades\workspace\Sotsugyo_kenkyu\res\data\result_svm.txt","r")
+        t0=st.ScrolledText(result_window).pack()
+        f1=open(r"E:\result_svm.txt","r")
         t0.insert(f1)
 
 
