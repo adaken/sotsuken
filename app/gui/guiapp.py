@@ -430,8 +430,11 @@ class Frame(tk.Frame):
         result_window=tk.Toplevel()
         result_window.title('実行結果')
         t0=st.ScrolledText(result_window).pack()
-        f1=open(r"E:\result_svm.txt","r")
-        t0.insert(f1)
+        fi=open(r"E:\result_svm.txt","r")
+        t0.delete('1.0', 'end')
+        for x in fi:
+            t0.insert('end', x.decode('shift_jis'))
+        fi.close()
 
 
 
