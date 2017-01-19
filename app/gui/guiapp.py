@@ -4,6 +4,7 @@ import Tkinter as tk
 import tkFileDialog as tkfd
 import subprocess as sb
 import ScrolledText as st
+import sys, os.path
 from msilib.schema import SelfReg
 
 class Frame(tk.Frame):
@@ -13,16 +14,18 @@ class Frame(tk.Frame):
         self.master.title('TkApp')
         self.filenames = None
         self.filename = None
+        self.fTyp_xlsx=[('Excelファイル', '*.xlsx')]
+        self.fTyp_json=[('jsonファイル', '*.json')]
+        self.iDir=r'E:\Eclipse\pleiades\workspace\Sotsugyo_kenkyu\res\data'
         self.create_menu()
         self.create_kml_widgets()
 
     def create_menu(self):
         self.menu = tk.Menu(root)
         root.configure(menu=self.menu)
-        self.menu.add_command(label='kml作成', command=self.check_frame_kml)
-        self.menu.add_command(label='svm', command=self.check_frame_svm)
-        self.menu.add_command(label='som', command=self.check_frame_som)
-        self.menu.add_command(label='Exit', command=root.quit)
+        self.menu.add_command(label='KML', command=self.check_frame_kml)
+        self.menu.add_command(label='SVM', command=self.check_frame_svm)
+        self.menu.add_command(label='SOM', command=self.check_frame_som)
 
     def check_frame_svm(self):
         if self.f1.winfo_exists() == 1:
@@ -46,82 +49,79 @@ class Frame(tk.Frame):
     def create_kml_widgets(self):
         """kmlのウィジェット"""
 
-        #フレーム
-        self.f1 = tk.LabelFrame(root, relief = 'ridge', width=800, height=300, text='KML', labelanchor=tk.N,
-                           borderwidth = 4, padx=5, pady=5, font=('times', 30), bg = '#fffafa')
+        # フレーム(タイトル)
+        self.f1=tk.LabelFrame(root, relief='ridge', width=800, height=300, text='KML', labelanchor=tk.N,
+                           borderwidth=4, font=('times',30), bg='#fffafa')
+        # ラベルフレーム(lf)
+        lf_files=tk.LabelFrame(self.f1, text='アニメーションで表示したいファイルを選択', labelanchor=tk.NW, bg='#fffafa')
 
-        #ボタン
-        self.select_button = tk.Button(self.f1, text = 'ファイル選択', relief = 'raised',
-                            font = ('times', 10), bg = '#fffafa', fg = '#000000', borderwidth = 4,
-                            command = self.select_files)
+        # ボタン(b)
+        b_select_files = tk.Button(self.f1, text='ファイル選択', relief='raised',font=('times',10), bg='#fffafa', fg='#000000', borderwidth=4,
+                            command = self.select_kml_files)
 
-        self.kml_button = tk.Button(self.f1, text = '実行', relief = 'raised',
-                            font = ('times', 10), bg = '#fffafa', fg = '#000000', borderwidth = 4,
-                            command = self.open_kml)
+        b_run = tk.Button(self.f1, text = '実行', relief='raised',font=('times',10), bg='#fffafa', fg='#000000', borderwidth=4,
+                            command = self.run_make_kml)
 
-        #ラベルのバッファ
+        # ラベル(filenames)
         self.filenames_buff = [tk.StringVar() for i in xrange(5)]
 
         self.labels = []
         map(self.labels.append,
-            (tk.Label(self.f1, width=80, font=('times', 13), pady=2, relief='ridge', textvariable=self.filenames_buff[i]) for i in xrange(5)))
+            (tk.Label(lf_files, width=80, font=('times',13), pady=2, relief='ridge', textvariable=self.filenames_buff[i]) for i in xrange(5)))
 
         # ラベルの配置
         for i, label in zip(xrange(1, len(self.labels)+1), self.labels):
             label.grid(row=i, column=0)
 
-        # ボタンの配置
-        self.select_button.grid(row=6, column=0, pady=5)
-        self.kml_button.grid(row=7, column=0, pady=5)
-        # フレームを配置
+        # ウィジェットの配置
+        lf_files.pack()
+        b_select_files.pack(pady=10)
+        b_run.pack(pady=5)
+        #self.select_button.grid(row=6, column=0, pady=5)
+        #self.kml_button.grid(row=7, column=0, pady=5)
+
         self.f1.pack()
     def create_svm_widgets(self):
         """svmのウィジェット"""
         #フレーム
-        self.f1 = tk.LabelFrame(root, relief = 'ridge', width=800, height=300, text='SVM', labelanchor=tk.N,
-                           borderwidth = 4, padx=5, pady=5, font=('times', 30), bg = '#fffafa')
+        self.f1=tk.LabelFrame(root, relief='ridge', width=800, height=300, text='SVM', labelanchor=tk.N,
+                           borderwidth=4, padx=5, pady=5, font=('times', 30), bg = '#fffafa')
         #ラベルフレーム(lf)
-        self.lf_labelname_skl = tk.LabelFrame(self.f1, text='ラベル名', labelanchor=tk.NW, bg = '#fffafa')
-        self.lf_sheetname_skl = tk.LabelFrame(self.f1, text='Sheet名', labelanchor=tk.NW, bg = '#fffafa')
-        self.lf_filename_skl = tk.LabelFrame(self.f1, text='ファイル名', labelanchor=tk.NW, bg = '#fffafa')
-        self.f_button_skl = tk.Frame(self.f1)
+        lf_labelname=tk.LabelFrame(self.f1, text='ラベル名', labelanchor=tk.NW, bg = '#fffafa')
+        lf_filename =tk.LabelFrame(self.f1, text='ファイル名', labelanchor=tk.NW, bg = '#fffafa')
+        lf_button   =tk.Frame(self.f1)
 
-        #ボタン
-        self.select_fileA = tk.Button(self.f_button_skl, text = 'ファイル選択', relief = 'raised',
-                            bg = '#fffafa', fg = '#000000', borderwidth = 4,
-                            command = self.select_svm_fileA).pack()
-        self.select_fileB = tk.Button(self.f_button_skl, text = 'ファイル選択', relief = 'raised',
-                            bg = '#fffafa', fg = '#000000', borderwidth = 4,
-                            command = self.select_svm_fileB).pack()
-        self.select_fileC = tk.Button(self.f_button_skl, text = 'ファイル選択', relief = 'raised',
-                            bg = '#fffafa', fg = '#000000', borderwidth = 4,
-                            command = self.select_svm_fileC).pack()
-        self.select_fileD = tk.Button(self.f_button_skl, text = 'ファイル選択', relief = 'raised',
-                            bg = '#fffafa', fg = '#000000', borderwidth = 4,
-                            command = self.select_svm_fileD).pack()
-        self.run_skl_button=tk.Button(self.f1, text = '実行', relief = 'raised',
-                            bg = '#fffafa', fg = '#000000', borderwidth = 4,
-                            command = self.run_scikit_learn)
+        #ボタン(b)
+        b_select_fileA=tk.Button(lf_filename, text = 'ファイル選択', relief = 'raised',bg = '#fffafa', borderwidth = 4, font=('normal',10),
+                            command = self.select_svm_fileA).grid(row=0,column=1)
+        b_select_fileB=tk.Button(lf_filename, text = 'ファイル選択', relief = 'raised',bg = '#fffafa', borderwidth = 4, font=('normal',10),
+                            command = self.select_svm_fileB).grid(row=1,column=1)
+        b_select_fileC=tk.Button(lf_filename, text = 'ファイル選択', relief = 'raised',bg = '#fffafa', borderwidth = 4, font=('normal',10),
+                            command = self.select_svm_fileC).grid(row=2,column=1)
+        b_select_fileD=tk.Button(lf_filename, text = 'ファイル選択', relief = 'raised',bg = '#fffafa', borderwidth = 4, font=('normal',10),
+                            command = self.select_svm_fileD).grid(row=3,column=1)
+        b_run_svm     =tk.Button(self.f1, text = '実行', relief = 'raised',bg = '#fffafa', fg = '#000000', borderwidth = 4,
+                            command = self.run_svm)
 
         #ラベル(ファイル名)
         self.filenameA_buff=tk.StringVar()
         self.filenameB_buff=tk.StringVar()
         self.filenameC_buff=tk.StringVar()
         self.filenameD_buff=tk.StringVar()
-        self.filenameA_label=tk.Label(self.lf_filename_skl, relief='ridge', textvariable=self.filenameA_buff, width=80).pack()
-        self.filenameB_label=tk.Label(self.lf_filename_skl, relief='ridge', textvariable=self.filenameB_buff, width=80).pack()
-        self.filenameC_label=tk.Label(self.lf_filename_skl, relief='ridge', textvariable=self.filenameC_buff, width=80).pack()
-        self.filenameD_label=tk.Label(self.lf_filename_skl, relief='ridge', textvariable=self.filenameD_buff, width=80).pack()
+        filenameA=tk.Label(lf_filename, textvariable=self.filenameA_buff, width=65, font=('times',13), relief='ridge').grid(row=0,column=0)
+        filenameB=tk.Label(lf_filename, textvariable=self.filenameB_buff, width=65, font=('times',13), relief='ridge').grid(row=1,column=0)
+        filenameC=tk.Label(lf_filename, textvariable=self.filenameC_buff, width=65, font=('times',13), relief='ridge').grid(row=2,column=0)
+        filenameD=tk.Label(lf_filename, textvariable=self.filenameD_buff, width=65, font=('times',13), relief='ridge').grid(row=3,column=0)
 
         #エントリー(ラベル名)
         self.e_ln1_skl_buff=tk.StringVar()
         self.e_ln2_skl_buff=tk.StringVar()
         self.e_ln3_skl_buff=tk.StringVar()
         self.e_ln4_skl_buff=tk.StringVar()
-        self.e_ln1_skl=tk.Entry(self.lf_labelname_skl, textvariable=self.e_ln1_skl_buff, width=10).pack()
-        self.e_ln2_skl=tk.Entry(self.lf_labelname_skl, textvariable=self.e_ln2_skl_buff, width=10).pack()
-        self.e_ln3_skl=tk.Entry(self.lf_labelname_skl, textvariable=self.e_ln3_skl_buff, width=10).pack()
-        self.e_ln4_skl=tk.Entry(self.lf_labelname_skl, textvariable=self.e_ln4_skl_buff, width=10).pack()
+        e_ln1=tk.Entry(lf_labelname, textvariable=self.e_ln1_skl_buff, width=10,font=('times',13)).pack(pady=2)
+        e_ln2=tk.Entry(lf_labelname, textvariable=self.e_ln2_skl_buff, width=10,font=('times',13)).pack(pady=2)
+        e_ln3=tk.Entry(lf_labelname, textvariable=self.e_ln3_skl_buff, width=10,font=('times',13)).pack(pady=2)
+        e_ln4=tk.Entry(lf_labelname, textvariable=self.e_ln4_skl_buff, width=10,font=('times',13)).pack(pady=2)
         #エントリー(ラベル名)初期内容
         self.e_ln1_skl_buff.set('Pass')
         self.e_ln2_skl_buff.set('Pkick')
@@ -129,11 +129,11 @@ class Frame(tk.Frame):
         self.e_ln4_skl_buff.set('Tackle')
 
         #配置(ボタン)
-        self.run_skl_button.place(relx=0.47, rely=0.6)
+        b_run_svm.place(relx=0.47, rely=0.7)
         #配置(フレーム)
-        self.lf_labelname_skl.place(relx=0.05, rely=0.1)
-        self.lf_filename_skl.place(relx=0.15, rely=0.1)
-        self.f_button_skl.place(relx=0.9, rely=0.1)
+        lf_labelname.place(relx=0, rely=0.1)
+        lf_filename.place(relx=0.1, rely=0.1)
+        lf_button.place(relx=0.9, rely=0.16)
         self.f1.pack()
     def create_som_widgets(self):
         """somのウィジェット"""
@@ -149,14 +149,14 @@ class Frame(tk.Frame):
         self.lf_train_cnt=tk.LabelFrame(self.f1, text='学習回数', labelanchor=tk.NW, bg = '#fffafa')
 
         #ボタン(ファイル選択)
-        self.select_file1 = tk.Button(self.lf_button_som, text = 'ファイル選択', relief = 'raised', bg = '#fffafa',
-                            borderwidth = 4, command = self.select_som_file1).pack()
-        self.select_file2 = tk.Button(self.lf_button_som, text = 'ファイル選択', relief = 'raised', bg = '#fffafa',
-                            borderwidth = 4, command = self.select_som_file2).pack()
-        self.select_file3 = tk.Button(self.lf_button_som, text = 'ファイル選択', relief = 'raised', bg = '#fffafa',
-                            borderwidth = 4, command = self.select_som_file3).pack()
-        self.select_file4 = tk.Button(self.lf_button_som, text = 'ファイル選択', relief = 'raised', bg = '#fffafa',
-                            borderwidth = 4, command = self.select_som_file4).pack()
+        self.select_file1 = tk.Button(self.lf_filename_som, text = 'ファイル選択', relief='raised', bg = '#fffafa', font=('normal',10),
+                            borderwidth = 4, command = self.select_som_file1).grid(row=0, column=1)
+        self.select_file2 = tk.Button(self.lf_filename_som, text = 'ファイル選択', relief='raised', bg = '#fffafa', font=('normal',10),
+                            borderwidth = 4, command = self.select_som_file2).grid(row=1, column=1)
+        self.select_file3 = tk.Button(self.lf_filename_som, text = 'ファイル選択', relief='raised', bg = '#fffafa', font=('normal',10),
+                            borderwidth = 4, command = self.select_som_file3).grid(row=2, column=1)
+        self.select_file4 = tk.Button(self.lf_filename_som, text = 'ファイル選択', relief='raised', bg = '#fffafa', font=('normal',10),
+                            borderwidth = 4, command = self.select_som_file4).grid(row=3, column=1)
         #ボタン(実行)
         self.run_som_button = tk.Button(self.f1, text = '実行', relief = 'raised',
                             bg = '#fffafa', fg = '#000000', borderwidth = 4, command = self.run_som)
@@ -165,20 +165,20 @@ class Frame(tk.Frame):
         self.filename2_buff=tk.StringVar()
         self.filename3_buff=tk.StringVar()
         self.filename4_buff=tk.StringVar()
-        self.filename1_label=tk.Label(self.lf_filename_som, textvariable=self.filename1_buff, width=80, relief='ridge').pack()
-        self.filename2_label=tk.Label(self.lf_filename_som, textvariable=self.filename2_buff, width=80, relief='ridge').pack()
-        self.filename3_label=tk.Label(self.lf_filename_som, textvariable=self.filename3_buff, width=80, relief='ridge').pack()
-        self.filename4_label=tk.Label(self.lf_filename_som, textvariable=self.filename4_buff, width=80, relief='ridge').pack()
+        self.filename1_label=tk.Label(self.lf_filename_som, textvariable=self.filename1_buff, width=65, font=('times',13), relief='ridge').grid(row=0, column=0)
+        self.filename2_label=tk.Label(self.lf_filename_som, textvariable=self.filename2_buff, width=65, font=('times',13), relief='ridge').grid(row=1, column=0)
+        self.filename3_label=tk.Label(self.lf_filename_som, textvariable=self.filename3_buff, width=65, font=('times',13), relief='ridge').grid(row=2, column=0)
+        self.filename4_label=tk.Label(self.lf_filename_som, textvariable=self.filename4_buff, width=65, font=('times',13), relief='ridge').grid(row=3, column=0)
 
         #エントリー(ラベル名)
         self.labelname1_buff=tk.StringVar()
         self.labelname2_buff=tk.StringVar()
         self.labelname3_buff=tk.StringVar()
         self.labelname4_buff=tk.StringVar()
-        self.labelname1_entry=tk.Entry(self.lf_labelname_som, textvariable=self.labelname1_buff, width=10).pack()
-        self.labelname2_entry=tk.Entry(self.lf_labelname_som, textvariable=self.labelname2_buff, width=10).pack()
-        self.labelname3_entry=tk.Entry(self.lf_labelname_som, textvariable=self.labelname3_buff, width=10).pack()
-        self.labelname4_entry=tk.Entry(self.lf_labelname_som, textvariable=self.labelname4_buff, width=10).pack()
+        self.labelname1_entry=tk.Entry(self.lf_labelname_som, textvariable=self.labelname1_buff, width=10, font=('times',13)).pack(pady=2)
+        self.labelname2_entry=tk.Entry(self.lf_labelname_som, textvariable=self.labelname2_buff, width=10, font=('times',13)).pack(pady=2)
+        self.labelname3_entry=tk.Entry(self.lf_labelname_som, textvariable=self.labelname3_buff, width=10, font=('times',13)).pack(pady=2)
+        self.labelname4_entry=tk.Entry(self.lf_labelname_som, textvariable=self.labelname4_buff, width=10, font=('times',13)).pack(pady=2)
         #エントリー(ラベル名)初期値
         self.labelname1_buff.set('Pass')
         self.labelname2_buff.set('Pkick')
@@ -190,29 +190,25 @@ class Frame(tk.Frame):
         self.e_train_cnt=tk.Entry(self.lf_train_cnt, textvariable=self.e_train_cnt_buff, width=10).pack()
 
         #ウィジェット配置
-        self.lf_labelname_som.place(relx=0.05, rely=0.1)
-        self.lf_filename_som.place(relx=0.15, rely=0.1)
+        self.lf_labelname_som.place(relx=0, rely=0.1)
+        self.lf_filename_som.place(relx=0.10, rely=0.1)
         self.lf_button_som.place(relx=0.9, rely=0.1)
-        self.lf_train_cnt.place(relx=0.45, rely=0.6)
-        self.run_som_button.place(relx=0.47, rely=0.8)
+        self.lf_train_cnt.place(relx=0.45, rely=0.7)
+        self.run_som_button.place(relx=0.47, rely=0.9)
         #フレーム配置
         self.f1.pack()
 
 
 
-    def select_files(self): #kml関連
-        """ファイルを選択"""
-
-        fTyp_xlsx = [('Excelファイル', '*.xlsx')]
-        iDir = r'E:/work'
-        filenames = tkfd.askopenfilenames(filetypes=fTyp_xlsx, initialdir=iDir)
+    def select_kml_files(self): #kml関連
+        filenames = tkfd.askopenfilenames(filetypes=self.fTyp_xlsx, initialdir=self.iDir)
         print "filenames:", filenames
         self.filenames =  filenames
 
         # ラベルに選択ファイル名をセット
         for i, filename in zip(xrange(len(self.filenames_buff)), filenames):
             self.filenames_buff[i].set(filename)
-    def open_kml(self):
+    def run_make_kml(self):
         """Please wait..."""
         text1 = ["Please wait..."]*5
         for i, filename in zip(xrange(len(self.filenames_buff)), text1):
@@ -249,7 +245,7 @@ class Frame(tk.Frame):
             print "completed!"
 
             #GoogleEarthで表示
-            sb.Popen(["C:\Program Files (x86)\Google\Google Earth\client\googleearth.exe", kml])
+            #sb.Popen(["C:\Program Files (x86)\Google\Google Earth\client\googleearth.exe", kml])
 
             self.after(500, self.change_complete)
     def change_complete(self):
@@ -271,31 +267,19 @@ class Frame(tk.Frame):
 
 
 
-    def select_svm_fileA(self): #svm関連
-        fTyp_xlsx=[('Excelファイル', '*.xlsx')]
-        iDir=r'E:\Eclipse\pleiades\workspace\Sotsugyo_kenkyu\res\data'
-        filenameA=tkfd.askopenfilename(filetypes=fTyp_xlsx, initialdir=iDir)
-        #self.filename=filename1
+    def select_svm_fileA(self):
+        filenameA=tkfd.askopenfilename(filetypes=self.fTyp_xlsx, initialdir=self.iDir)
         self.filenameA_buff.set(filenameA)
     def select_svm_fileB(self):
-        fTyp_xlsx=[('Excelファイル', '*.xlsx')]
-        iDir=r'E:\Eclipse\pleiades\workspace\Sotsugyo_kenkyu\res\data'
-        filenameB=tkfd.askopenfilename(filetypes=fTyp_xlsx, initialdir=iDir)
-        #self.filename=filename2
+        filenameB=tkfd.askopenfilename(filetypes=self.fTyp_xlsx, initialdir=self.iDir)
         self.filenameB_buff.set(filenameB)
     def select_svm_fileC(self):
-        fTyp_xlsx=[('Excelファイル', '*.xlsx')]
-        iDir=r'E:\Eclipse\pleiades\workspace\Sotsugyo_kenkyu\res\data'
-        filenameC=tkfd.askopenfilename(filetypes=fTyp_xlsx, initialdir=iDir)
-        #self.filename=filename3
+        filenameC=tkfd.askopenfilename(filetypes=self.fTyp_xlsx, initialdir=self.iDir)
         self.filenameC_buff.set(filenameC)
     def select_svm_fileD(self):
-        fTyp_xlsx=[('Excelファイル', '*.xlsx')]
-        iDir=r'E:\Eclipse\pleiades\workspace\Sotsugyo_kenkyu\res\data'
-        filenameD=tkfd.askopenfilename(filetypes=fTyp_xlsx, initialdir=iDir)
-        #self.filename=filename3
+        filenameD=tkfd.askopenfilename(filetypes=self.fTyp_xlsx, initialdir=self.iDir)
         self.filenameD_buff.set(filenameD)
-    def run_scikit_learn(self):
+    def run_svm(self):
 
         from app.util.inputmaker import make_input
         from collections import namedtuple
@@ -439,28 +423,16 @@ class Frame(tk.Frame):
 
 
     def select_som_file1(self): #som関連
-        fTyp_xlsx=[('jsonファイル', '*.json')]
-        iDir=r'E:\Eclipse\pleiades\workspace\Sotsugyo_kenkyu\res\data'
-        filename1=tkfd.askopenfilename(filetypes=fTyp_xlsx, initialdir=iDir)
-        #self.filename=filename3
+        filename1=tkfd.askopenfilename(filetypes=self.fTyp_json, initialdir=self.iDir)
         self.filename1_buff.set(filename1)
     def select_som_file2(self):
-        fTyp_xlsx=[('jsonファイル', '*.json')]
-        iDir=r'E:\Eclipse\pleiades\workspace\Sotsugyo_kenkyu\res\data'
-        filename2=tkfd.askopenfilename(filetypes=fTyp_xlsx, initialdir=iDir)
-        #self.filename=filename3
+        filename2=tkfd.askopenfilename(filetypes=self.fTyp_json, initialdir=self.iDir)
         self.filename2_buff.set(filename2)
     def select_som_file3(self):
-        fTyp_xlsx=[('jsonファイル', '*.json')]
-        iDir=r'E:\Eclipse\pleiades\workspace\Sotsugyo_kenkyu\res\data'
-        filename3=tkfd.askopenfilename(filetypes=fTyp_xlsx, initialdir=iDir)
-        #self.filename=filename3
+        filename3=tkfd.askopenfilename(filetypes=self.fTyp_json, initialdir=self.iDir)
         self.filename3_buff.set(filename3)
     def select_som_file4(self):
-        fTyp_xlsx=[('jsonファイル', '*.json')]
-        iDir=r'E:\Eclipse\pleiades\workspace\Sotsugyo_kenkyu\res\data'
-        filename4=tkfd.askopenfilename(filetypes=fTyp_xlsx, initialdir=iDir)
-        #self.filename=filename3
+        filename4=tkfd.askopenfilename(filetypes=self.fTyp_json, initialdir=self.iDir)
         self.filename4_buff.set(filename4)
     def run_som(self):
         from collections import namedtuple
