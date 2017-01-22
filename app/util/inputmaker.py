@@ -34,7 +34,7 @@ def _sample_xlsx(xlsx, sample_cnt, sheetnames, col, min_row, read_N, fft_N,
         if col is None:
             _, col = ws.find_letter_by_header('Magnitude Vector')
 
-        vec_iter = ws.iter_part_col(col, read_N, (min_row, None), log=log)
+        vec_iter = ws.iter_part_col(col, fft_N, (min_row, None), log=log)
 
         if overlap:
             _vec_iter = ws.iter_part_col(col, read_N,
@@ -45,7 +45,7 @@ def _sample_xlsx(xlsx, sample_cnt, sheetnames, col, min_row, read_N, fft_N,
             _iter = vec_iter
 
         for vec in _iter:
-            input_vecs.append(vec)
+            input_vecs.append(vec[:read_N])
             vec_cnt += 1
             if vec_cnt == sample_cnt:
                 is_full = True
@@ -87,7 +87,7 @@ def _sample_xlsx_random(xlsx, sample_cnt, sheetnames, col, min_row, read_N,
 
 def make_input(xlsx, sample_cnt, sheetnames=None, col=None, min_row=2,
                read_N=None, fft_N=128, label=None, wf='hanning',
-               normalizing='01', sampling='std', overlap=0, log=False):
+               normalizing=None, sampling='std', overlap=0, log=False):
 
     """Excelファイルから入力ベクトルを作成
 
@@ -130,6 +130,7 @@ def make_input(xlsx, sample_cnt, sheetnames=None, col=None, min_row=2,
         入力ベクトルの正規化方法
         '01'  -> 各ベクトルの要素を0-1の間に丸める
         'std' -> 各ベクトルの要素を平均0、分散1にする
+        None  -> 正規化しない
 
     :param sampling : str, default: 'std'
         サンプリング方法
@@ -149,7 +150,7 @@ def make_input(xlsx, sample_cnt, sheetnames=None, col=None, min_row=2,
         またはtuple(input_vectors, labels)
     """
 
-    assert normalizing in ('01', 'std')
+    assert normalizing in ('01', 'std', None)
     assert 0 <= overlap < fft_N
 
     if read_N is None:
@@ -164,9 +165,13 @@ def make_input(xlsx, sample_cnt, sheetnames=None, col=None, min_row=2,
     else:
         raise ValueError
 
-    normalizer = scale_zero_one if normalizing == '01' else standardize
+    normalizer = scale_zero_one if normalizing=='01' \
+    else standardize if normalizing=='std' \
+    else lambda a, axis: a
+
     input_vecs = np.array(input_vecs)
-    input_vecs = normalizer(fftn(arrs=input_vecs, fft_N=fft_N, wf=wf), axis=1)
+    input_vecs = normalizer(fftn(arrs=input_vecs, fft_N=fft_N, wf=wf, fs=100),
+                            axis=None)
 
     if label is not None:
         return input_vecs, [label]*sample_cnt

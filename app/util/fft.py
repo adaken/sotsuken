@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 plt.hold(False)
 
-def fftn(arrs, fft_N, wf='hanning', savepath=None):
+def fftn(arrs, fft_N, wf='hanning', savepath=None, fs=None, freq=False):
     """高速フーリエ変換を行う
 
     2D配列の場合はfft_iter()より高速
@@ -18,15 +18,26 @@ def fftn(arrs, fft_N, wf='hanning', savepath=None):
 
     :param wf : str, default: 'hanning'
         使用する窓関数
-        'hanning', 'hamming', 'blackman'
+        Noneは窓関数を使用しない
+        'hanning', 'hamming', 'blackman', None
 
     :param savepath : str, default: None
         指定したパスにグラフを保存する
         arrsが2Dの場合は最初の配列のみグラフを保存
 
+    :param fs : float, default: None
+        サンプリング周波数
+        Noneの場合は'arrs'の長さと同じ
+
+    :param frec : bool, default: False
+        Trueの場合は戻り値に周波数リストが加わる
+
     :return fftmags : ndarray
         FFTされた配列(絶対値)
-        配列1つの長さはfft_N/2になる
+        配列1つの長さはfft_N/2-1になる
+
+    :return fftfreq : ndarray
+        周波数スペクトルのX軸
 
     """
 
@@ -36,69 +47,86 @@ def fftn(arrs, fft_N, wf='hanning', savepath=None):
         arrs = np.array(arrs)
 
     assert arrs.ndim in (1, 2)
-    assert isinstance(fft_N, int)
-    assert isinstance(wf, str)
-    assert wf in ('hanning', 'hamming', 'blackman')
+    assert wf in ('hanning', 'hamming', 'blackman', None)
 
     arrs.astype(np.float64) # 配列の型を変換
 
-    dim = arrs.ndim
+    if fs is None:
+        fs = float(arrs.shape[-1])
+    fn = fs / 2    # ナイキスト周波数
 
     #arrs -= np.mean(arrs) # DC成分を除去
 
     # 窓関数を適用
     if   wf == 'hanning':
-        w_arrs = arrs * np.hanning(fft_N)
+        w_arrs = arrs * np.hanning(arrs.shape[-1])
     elif wf == 'hamming':
-        w_arrs = arrs * np.hamming(fft_N)
+        w_arrs = arrs * np.hamming(arrs.shape[-1])
     elif wf == 'blackman':
-        w_arrs = arrs * np.blackman(fft_N)
-
-    sp = 1 / float(fft_N)                         # サンプリング間隔
-    fftdata = np.fft.fft(w_arrs)                  # FFT
-    fftdata /= fft_N / 2                          # 正規化
-    fftfreq = np.fft.fftfreq(fft_N, sp)[:fft_N/2] # 周波数のリスト
-
-    if dim == 1:
-        fftmags = np.abs(fftdata[:fft_N/2]) # スペクトルの絶対値
+        w_arrs = arrs * np.blackman(arrs.shape[-1])
     else:
-        fftmags = np.abs(fftdata[:, :fft_N/2])
+        w_arrs = arrs
+        wf = 'non'
+
+    print "sampling rate  : {}Hz".format(fs)
+    print "nyquist freq   : {}Hz".format(fn)
+    print "freq resolution: {}Hz".format(fs/float(fft_N))
+    print "fft point  :", fft_N
+    print "window func:", wf
+
+    fftdata = np.fft.fft(w_arrs, fft_N) # FFT
+    fftmags = np.abs(fftdata)  # パワースペクトル
+    #fftmags /= fft_N          # 正規化
+    fftfreq = fs / float(fft_N) * np.arange(fft_N) # 周波数
+    fftfreq = fftfreq[1:fft_N/2]
+
+    if arrs.ndim == 1:
+        fftmags = fftmags[1:fft_N/2] # 0番目はDC成分なので除く
+    else:
+        fftmags = fftmags[:, 1:fft_N/2]
 
     if savepath is not None:
-        if dim == 1:
-            a, w, f = arrs, w_arrs, fftmags
+        if arrs.ndim == 1:
+            a, w, m = arrs, w_arrs, fftmags
         else:
-            a, w, f = arrs[0], w_arrs[0], fftmags[0]
+            a, w, m = arrs[0], w_arrs[0], fftmags[0]
 
         # グラフ
-        x = np.arange(0, fft_N)
         fig = plt.figure()
-        ax1 = fig.add_subplot(221)
-        ax2 = fig.add_subplot(222)
-        ax3 = fig.add_subplot(223)
+        ax1 = fig.add_subplot(311)
+        ax2 = fig.add_subplot(312)
+        ax3 = fig.add_subplot(313)
+
+        x = np.arange(0, arrs.shape[-1])
+        lim = [None, arrs.shape[-1], None, None]
 
         # 元の波形
         ax1.plot(x, a)
-        ax1.set_title("original")
-        ax1.set_xlabel("x")
-        ax1.set_ylabel("y")
+        ax1.grid()
+        ax1.set_title("Original")
+        ax1.set_xlabel("Time")
+        ax1.set_ylabel("Amplitude")
+        ax1.axis(lim)
 
         # 窓関数を適用した波形
         ax2.plot(x, w)
-        ax2.set_title("%s_window" % wf)
-        ax2.set_xlabel("x")
-        ax2.set_ylabel("y")
+        ax2.grid()
+        ax2.set_title("{} window".format(wf.capitalize()))
+        ax2.set_xlabel("Time")
+        ax2.set_ylabel("Amplitude")
+        ax2.axis(lim)
 
         # FFTした波形
-        ax3.plot(fftfreq, f)
-        ax3.set_title("fft")
-        ax3.set_xlabel("freq[Hz]")
-        ax3.set_ylabel("amp")
+        ax3.plot(fftfreq, m)
+        ax3.grid()
+        ax3.set_title("FFT")
+        ax3.set_xlabel("Freqency[Hz]")
+        ax3.set_ylabel("Power")
+        ax3.axis([None, fn, None, None])
 
         fig.tight_layout()
         fig.savefig(savepath)
-
-    return fftmags
+    return (fftmags, fftfreq) if freq else fftmags
 
 def fft_iter(arrs, fft_N, wf='hunning'):
     """FFTした配列を返すイテレータ
@@ -118,27 +146,20 @@ def fft_iter(arrs, fft_N, wf='hunning'):
         yield fftn(arrs=a, fft_N=fft_N, wf=wf)
 
 if __name__ == '__main__':
+    from app import R, T, L
 
-    # テスト用sin波形
+    def func1():
+        x = 3 * np.sin(2*np.pi*20) * np.linspace(0, 1, 100)
 
-    N = 256
-    x = np.linspace(0, 1, N)
-    f = 20
-    y = 5 * np.sin(2*np.pi * x * 20) + 3 * np.sin(2*np.pi * x * 50) + 10 * np.sin(2*np.pi * x * 100) + 1 * np.sin(2*np.pi * x * 40)
-
-    from app import L
-    from app.util import scale_zero_one
-    arrs = np.array([y, 2*y])
-    r = scale_zero_one(fftn(arrs, N, wf='hanning', savepath=L('fft_result.png')), axis=1)
-    print r
-
-    """
-    print x.size
-    plt.plot(y)
-    #plt.show()
-
-    w = 'hunning'
-    fftmag, fig = fft(arr=y, fft_points=N, out_fig=True, window=w)
-    print fftmag
-    fig.savefig(r"E:\work\fig\sin\sin_{}.png".format(w))
-    """
+    def fucn2():
+        k = 1000
+        fs = 44.1*k # サンプリング周波数
+        ts = 1 / fs # サンプリング周期
+        t = 110 # データ数
+        N = 4096 # fftポイント
+        amp = np.array([2, 3, 6, 10])[:, np.newaxis] # 振幅
+        af = np.array([20*k, 10*k, 5*k, fs*k-15*k])[:, np.newaxis] * 2*np.pi # 角周波数
+        # f(t) は sin
+        ft = np.sum(amp * np.vectorize(np.sin)(af * np.arange(0, t*ts, ts)), axis=0)
+        m = fftn(ft, N, savepath=L('fft_test_result_rmdc.png'), fs=fs)
+    fucn2()

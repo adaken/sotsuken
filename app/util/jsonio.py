@@ -235,7 +235,7 @@ if __name__ == '__main__':
             ]
 
         for act, xl, cnt in xls:
-            vecs, labels = make_input(xl, cnt, label=act, log=True)
+            vecs, labels = make_input(xl, cnt, label=act, log=True, normalizing=None)
             print "shape:", vecs.shape
             save_inputs_as_json(labels, vecs.tolist(),
                                 R('data/fft/{}_acc_128p_{}data.json'
