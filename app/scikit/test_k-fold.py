@@ -33,8 +33,8 @@ def kfold(labels, features, k=5):
         yield tr_labels, ret_tr, ts_labels, ret_ts
 
 def train(tr,tr_labels,ts, ts_labels, confm):
-    est = svm.SVC(C=1, kernel='rbf', gamma=0.01)    # パラメータ (C-SVC, RBF カーネル, C=1)
-    clf = OneVsRestClassifier(est)  #他クラス分類器One-against-restによる識別
+    est = SVC(C=1000, kernel='rbf', gamma = 0.001)    # パラメータ (C-SVC, RBF カーネル, C=1000)
+    clf = OneVsRestClassifier(est)  #多クラス分類器One-against-restによる識別
     clf.fit(tr, tr_labels)
     ts_pred = clf.predict(ts)
     l = confusion_matrix(ts_labels, ts_pred)
@@ -49,25 +49,27 @@ if __name__ == '__main__':
     """
     データ生成
     """
-    Xl = namedtuple('Xl', 'filename, sheet, letter, label, sampling, overlap')
+    Xl = namedtuple('Xl', 'filename, label')
     xls =  (
-         Xl(R(r'data\raw\run_1122_data.xlsx'), ['Sheet1'], 'F', 'run', 'std', 0),
-         Xl(R(r'data\raw\walk_1122_data.xlsx'), ['Sheet1'], 'F', 'walk', 'std', 0),
-         Xl(R(r'data\raw\jump_128p_174data_fixed.xlsx'), ['Sheet'], 'A', 'jump', 'std', 0),
+         Xl(R(r'data\acc\pass_acc_128p_131data.xlsx'), 'pass',),
+         Xl(R(r'data\acc\placekick_acc_128p_101data.xlsx'), 'pk'),
+         Xl(R(r'data\acc\run_acc_128p_132data.xlsx'), 'run'),
+         Xl(R(r'data\acc\tackle_acc_128p_111data.xlsx'), 'tackle')
         )
     input_vecs = []
     input_labels = []
     for xl in xls:
-        input_vec, labels = make_input(xlsx=xl.filename, sheetnames=xl.sheet,col=xl.letter,
+        input_vec, labels = make_input(xlsx=xl.filename, sheetnames=None,col=None,
                                                 min_row=2,fft_N=128, sample_cnt=100,
-                                                label=xl.label,sampling=xl.sampling,
-                                                overlap=xl.overlap,normalizing='01', log=False)
+                                                label=xl.label,normalizing='01', log=False)
         #input_vecs.append(input_vec)
         #input_labels.append(labels)
         map(input_vecs.append, input_vec)
         input_labels += labels
 
     k = 5 # 分割数
+    class_n = len(xls) # クラス数：自動取得
+
 
     """
     # 分割数に応じたlabelsの分割(labels,分割数,シャッフル)
@@ -81,7 +83,7 @@ if __name__ == '__main__':
     i = 0
     # skfよりtr(train),ts(test)listの取り出し
     for tr, ts in skf:
-    
+
         # vecs[tr],labels[tr]をtrain用のlistにまとめる
         for j in tr:
             train_vecs[i].append(input_vecs[j])
@@ -96,12 +98,17 @@ if __name__ == '__main__':
             test_labels[i].append(input_labels[j])
     """
 
-    it = kfold(input_labels, input_vecs, k=5)
-    confm = ConfusionMatrix(3)
+    # 分割数に応じたlabels,vecsの分割(labels,vecs,分割数)
+    it = kfold(input_labels, input_vecs, k=k)
+
+    # ConfusionMatrixの表示
+    confm = ConfusionMatrix(class_n)
+
+    # 分割検定の実施
     for tr_labels, tr, ts_labels, ts in it:
         train(tr, tr_labels, ts,ts_labels, confm)
 
-    confm = ConfusionMatrix(3)(confm.sum_matrix / float(k))
+    confm = ConfusionMatrix(class_n)(confm.sum_matrix / float(k))
     print "適合率", confm.precision.mean()
     print "再現率", confm.recall.mean()
     print "F値   ", confm.fmeasure.mean()

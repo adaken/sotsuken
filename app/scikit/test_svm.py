@@ -2,9 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-from sklearn import svm
 from app.util.inputmaker import make_input
-import random
 from collections import namedtuple
 from sklearn.metrics import confusion_matrix
 from sklearn.multiclass import OneVsRestClassifier
@@ -21,25 +19,25 @@ if __name__ == '__main__':
     """
     Xl = namedtuple('Xl', 'filename, label')
     xls =  (
-         Xl(R(r'data\acc\pass_128p_131data.xlsx'), 'pass',),
-         Xl(R(r'data\acc\placekick_acc_128p_101data.xlsx'), 'pk'),
+         Xl(R(r'data\acc\pass_acc_128p_131data.xlsx'), 'pass',),
+         Xl(R(r'data\acc\placekick_acc_128p_101data.xlsx'), 'pkick'),
          Xl(R(r'data\acc\run_acc_128p_132data.xlsx'), 'run'),
          Xl(R(r'data\acc\tackle_acc_128p_111data.xlsx'), 'tackle')
         )
-    input_vecs = []
-    input_labels = []
+    tr_vecs = []
+    tr_labels = []
     for xl in xls:
-        input_vec, labels = make_input(xlsx=xl.filename, sheetnames=None,col=None,
+        tr_vec, tr_label = make_input(xlsx=xl.filename, sheetnames=None,col=None,
                                                 min_row=2,fft_N=128, sample_cnt=80,
                                                 label=xl.label,normalizing='01', log=False)
-        map(input_vecs.append, input_vec)
-        input_labels += labels
+        map(tr_vecs.append, tr_vec)
+        tr_labels += tr_label
 
     from app.util.inputmaker import random_input_iter
-    input_vecs1, input_labels1 = [], []
-    for i, j in random_input_iter(input_vecs, input_labels):
-        input_vecs1.append(i)
-        input_labels1.append(j)
+    tr_vecs_rand, tr_labels_rand = [], []
+    for i, j in random_input_iter(tr_vecs, tr_labels):
+        tr_vecs_rand.append(i)
+        tr_labels_rand.append(j)
 
     """
     tmp = np.c_[input_vec, labels]
@@ -52,26 +50,26 @@ if __name__ == '__main__':
     """
     テストデータ生成
     """
-    test_vecs = []
-    test_labels = []
+    ts_vecs = []
+    ts_labels = []
     for xl in xls:
-        test_vec, test_label = make_input(xlsx=xl.filename, sheetnames=None,col=None,
+        ts_vec, ts_label = make_input(xlsx=xl.filename, sheetnames=None,col=None,
                                                 min_row=128*80+1,fft_N=128, sample_cnt=20,
                                                 label=xl.label,normalizing='01', log=False)
-        map(test_vecs.append, test_vec)
-        test_labels += test_label
+        map(ts_vecs.append, ts_vec)
+        ts_labels += ts_label
 
-    test_vecs1, test_labels1 = [], []
-    for i, j in random_input_iter(test_vecs, test_labels):
-        test_vecs1.append(i)
-        test_labels1.append(j)
+    ts_vecs_rand, ts_labels_rand = [], []
+    for i, j in random_input_iter(ts_vecs, ts_labels):
+        ts_vecs_rand.append(i)
+        ts_labels_rand.append(j)
 
-    print "input_vec_len    :", len(input_vecs)
-    #print "input_vec_shape  :", input_vecs.shape
-    print "labels_len       :", len(input_labels)
-    print "test_vec_len     :", len(test_vecs)
-    #print "test_vec_shape   :", test_vecs.shape
-    print "test_labels      :", len(test_labels)
+    print "tr_vecs_len     :", len(tr_vecs)
+    #print "tr_vecs_shape  :", tr_vecs.shape
+    print "tr_labels_len   :", len(tr_labels)
+    print "ts_vecs_len     :", len(ts_vecs)
+    #print "ts_vecs_shape  :", ts_vecs.shape
+    print "ts_labels       :", len(ts_labels)
 
     """
     tmpt = np.c_[test_vec, test_labels]
@@ -84,14 +82,15 @@ if __name__ == '__main__':
     """
     教師データの学習分類
     """
-    est = svm.SVC(C=1, kernel='rbf', gamma=0.01)    # パラメータ (C-SVC, RBF カーネル, C=1)
-    clf = OneVsRestClassifier(est)  #他クラス分類器One-against-restによる識別
-    clf.fit(input_vecs1, input_labels1)
-    test_pred = clf.predict(test_vecs1)
+    # test_gridsearchを参照
+    est = SVC(C=1, kernel='rbf', gamma = 0.1)    # パラメータ (C-SVC, RBF カーネル, C=1000)
+    clf = OneVsRestClassifier(est)  #多クラス分類器One-against-restによる識別
+    clf.fit(tr_vecs_rand, tr_labels_rand)
+    pred = clf.predict(ts_vecs_rand)
 
-    clf2 = SVC(C=1, kernel='rbf', gamma=0.01)    # パラメータ (C-SVC, RBF カーネル, C=1)
-    clf2.fit(input_vecs1, input_labels1)
-    test_pred2 = clf2.predict(test_vecs1)  #他クラス分類器One-versus-oneによる識別
+    clf2 = SVC(C=1, kernel='rbf', gamma = 0.1)    # パラメータ (C-SVC, RBF カーネル, C=1000)
+    clf2.fit(tr_vecs_rand, tr_labels_rand)
+    pred2 = clf2.predict(ts_vecs_rand)  #多クラス分類器One-versus-oneによる識別
 
     """
     学習モデルのローカル保存
@@ -100,22 +99,24 @@ if __name__ == '__main__':
     #joblib.dump(clf2, R('misc\model\clf2.pkl'))
 
     #confusion matrix（ラベルの分類表。分類性能が高いほど対角線に値が集まる）
-    print confusion_matrix(test_labels1, test_pred)
-    print confusion_matrix(test_labels1, test_pred2)
-
+    print confusion_matrix(ts_labels_rand, pred)
+    print classification_report(ts_labels_rand, pred)
+    print accuracy_score(ts_labels_rand, pred)
+    
     #分類結果 適合率 再現率 F値の表示
-    print classification_report(test_labels1, test_pred)
-    print classification_report(test_labels1, test_pred2)
-
+    
+    print confusion_matrix(ts_labels_rand, pred2)
+    print classification_report(ts_labels_rand, pred2)
+    
     #正答率 分類ラベル/正解ラベル
-    print accuracy_score(test_labels1, test_pred)
-    print accuracy_score(test_labels1, test_pred2)
+    
+    print accuracy_score(ts_labels_rand, pred2)
 
-    print test_labels1       #分類前ラベル
-    print list(test_pred)   #One-against-restによる識別ラベル
-    print list(test_pred2)  #One-versus-oneによる識別ラベル
+    print ts_labels_rand       #分類前ラベル
+    print list(pred)   #One-against-restによる識別ラベル
+    print list(pred2)  #One-versus-oneによる識別ラベル
 
     """
     target_names = ['class 0', 'class 1', 'class 2']
-    print(classification_report(test_labels, test_pred, target_names=target_names))
+    print(classification_report(ts_labels, pred, target_names=target_names))
     """

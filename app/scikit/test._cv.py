@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 
-from sklearn import svm
 from app.util.inputmaker import make_input
 import random
 from collections import namedtuple
@@ -21,33 +20,33 @@ if __name__ == '__main__':
     """
     教師データ生成
     """
-    Xl = namedtuple('Xl', 'filename, sheet, letter, label, sampling, overlap')
+    Xl = namedtuple('Xl', 'filename, label')
     xls =  (
-         Xl(R(r'data\raw\run_1122_data.xlsx'), ['Sheet1'], 'F', 'run', 'std', 0),
-         Xl(R(r'data\raw\walk_1122_data.xlsx'), ['Sheet1'], 'F', 'walk', 'std', 0),
-         Xl(R(r'data\raw\jump_128p_174data_fixed.xlsx'), ['Sheet'], 'A', 'jump', 'std', 0),
+         Xl(R(r'data\acc\pass_acc_128p_131data.xlsx'), 'pass',),
+         Xl(R(r'data\acc\placekick_acc_128p_101data.xlsx'), 'pk'),
+         Xl(R(r'data\acc\run_acc_128p_132data.xlsx'), 'run'),
+         Xl(R(r'data\acc\tackle_acc_128p_111data.xlsx'), 'tackle')
         )
-    input_vecs = []
-    input_labels = []
+    tr_vecs = []
+    tr_labels = []
     for xl in xls:
-        input_vec, labels = make_input(xlsx=xl.filename, sheetnames=xl.sheet,col=xl.letter,
+        tr_vec, tr_label = make_input(xlsx=xl.filename, sheetnames=None,col=None,
                                                 min_row=2,fft_N=128, sample_cnt=100,
-                                                label=xl.label,sampling=xl.sampling,
-                                                overlap=xl.overlap,normalizing='01', log=False)
-        map(input_vecs.append, input_vec)
-        input_labels += labels
+                                                label=xl.label,normalizing='01', log=False)
+        map(tr_vecs.append, tr_vec)
+        tr_labels += tr_label
 
     from app.util.inputmaker import random_input_iter
-    input_vecs1, input_labels1 = [], []
-    for i, j in random_input_iter(input_vecs, input_labels):
-        input_vecs1.append(i)
-        input_labels1.append(j)
+    tr_vecs_rand, tr_labels_rand = [], []
+    for i, j in random_input_iter(tr_vecs, tr_labels):
+        tr_vecs_rand.append(i)
+        tr_labels_rand.append(j)
 
     """
     教師データの学習分類
     """
-    clf = svm.SVC(kernel='linear', C=1)
-    scores = cross_validation.cross_val_score(clf, input_vecs1, input_labels1, cv=5)
+    clf = SVC(C=1000, kernel='rbf', gamma = 0.001)
+    scores = cross_validation.cross_val_score(clf, tr_vecs_rand, tr_labels_rand, cv=5)
 
     print scores
     print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))

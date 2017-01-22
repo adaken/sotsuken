@@ -29,7 +29,7 @@ if __name__ == '__main__':
     test_vecs = [list(vec[1]) for vec in test_data]
 
     clf = joblib.load('E:\clf.pkl')
-    test_pred = clf.predict(test_vecs)  #他クラス分類器One-versus-oneによる識別
+    test_pred = clf.predict(test_vecs)  #多クラス分類器One-versus-oneによる識別
 
     #confusion matrix（ラベルの分類表。分類性能が高いほど対角線に値が集まる）
     print confusion_matrix(test_labels, test_pred)
