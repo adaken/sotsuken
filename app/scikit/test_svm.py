@@ -20,7 +20,7 @@ if __name__ == '__main__':
     Xl = namedtuple('Xl', 'filename, label')
     xls =  (
          Xl(R(r'data\acc\pass_acc_128p_131data.xlsx'), 'pass',),
-         Xl(R(r'data\acc\placekick_acc_128p_101data.xlsx'), 'pk'),
+         Xl(R(r'data\acc\placekick_acc_128p_101data.xlsx'), 'pkick'),
          Xl(R(r'data\acc\run_acc_128p_132data.xlsx'), 'run'),
          Xl(R(r'data\acc\tackle_acc_128p_111data.xlsx'), 'tackle')
         )
@@ -83,12 +83,12 @@ if __name__ == '__main__':
     教師データの学習分類
     """
     # test_gridsearchを参照
-    est = SVC(C=1000, kernel='rbf', gamma = 0.001)    # パラメータ (C-SVC, RBF カーネル, C=1000)
+    est = SVC(C=1, kernel='rbf', gamma = 0.1)    # パラメータ (C-SVC, RBF カーネル, C=1000)
     clf = OneVsRestClassifier(est)  #多クラス分類器One-against-restによる識別
     clf.fit(tr_vecs_rand, tr_labels_rand)
     pred = clf.predict(ts_vecs_rand)
 
-    clf2 = SVC(C=1000, kernel='rbf', gamma = 0.001)    # パラメータ (C-SVC, RBF カーネル, C=1000)
+    clf2 = SVC(C=1, kernel='rbf', gamma = 0.1)    # パラメータ (C-SVC, RBF カーネル, C=1000)
     clf2.fit(tr_vecs_rand, tr_labels_rand)
     pred2 = clf2.predict(ts_vecs_rand)  #多クラス分類器One-versus-oneによる識別
 
@@ -100,14 +100,16 @@ if __name__ == '__main__':
 
     #confusion matrix（ラベルの分類表。分類性能が高いほど対角線に値が集まる）
     print confusion_matrix(ts_labels_rand, pred)
-    print confusion_matrix(ts_labels_rand, pred2)
-
-    #分類結果 適合率 再現率 F値の表示
     print classification_report(ts_labels_rand, pred)
-    print classification_report(ts_labels_rand, pred2)
-
-    #正答率 分類ラベル/正解ラベル
     print accuracy_score(ts_labels_rand, pred)
+    
+    #分類結果 適合率 再現率 F値の表示
+    
+    print confusion_matrix(ts_labels_rand, pred2)
+    print classification_report(ts_labels_rand, pred2)
+    
+    #正答率 分類ラベル/正解ラベル
+    
     print accuracy_score(ts_labels_rand, pred2)
 
     print ts_labels_rand       #分類前ラベル
