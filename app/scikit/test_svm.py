@@ -83,12 +83,12 @@ if __name__ == '__main__':
     教師データの学習分類
     """
     # test_gridsearchを参照
-    est = SVC(C=1, kernel='rbf', gamma = 0.1)    # パラメータ (C-SVC, RBF カーネル, C=1000)
+    est = SVC(C=1000, kernel='sigmoid', gamma = 0.0001)    # パラメータ (C-SVC, RBF カーネル, C=1000)
     clf = OneVsRestClassifier(est)  #多クラス分類器One-against-restによる識別
     clf.fit(tr_vecs_rand, tr_labels_rand)
     pred = clf.predict(ts_vecs_rand)
 
-    clf2 = SVC(C=1, kernel='rbf', gamma = 0.1)    # パラメータ (C-SVC, RBF カーネル, C=1000)
+    clf2 = SVC(C=1000, kernel='sigmoid', gamma = 0.0001)    # パラメータ (C-SVC, RBF カーネル, C=1000)
     clf2.fit(tr_vecs_rand, tr_labels_rand)
     pred2 = clf2.predict(ts_vecs_rand)  #多クラス分類器One-versus-oneによる識別
 
