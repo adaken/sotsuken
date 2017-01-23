@@ -37,6 +37,7 @@ if __name__ == '__main__':
     def make(N, wf, rn):
         for xl in xls:
             invecs = _sample_xlsx(xl.path, sample_cnt, xl.sheets, xl.col, 2, rn, N, 0, True)
+            invecs /= np.max(invecs, axis=1)[:, np.newaxis]
             yield xl.label, fftn(invecs, N, wf=wf, fs=100, freq=True)
 
     plt.hold(True)

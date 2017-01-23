@@ -2,6 +2,7 @@
 
 import openpyxl as px
 import re
+from openpyxl.utils.cell import ROW_RANGE
 
 class ExcelWrapper(object):
     """
@@ -123,7 +124,7 @@ class ExcelWrapper(object):
                 if all(isinstance(v, unicode) for v in rows[i]): # 1行全部文字列
                     r1, r2 = rows[i+1], rows[i+2]
                     if any(v != None for v in r1 + r2):
-                        return i, rows[i]
+                        return i+1, rows[i]
             return None, None
 
         def find_letter_by_header(self, headername, headerrow=None,
@@ -155,7 +156,7 @@ class ExcelWrapper(object):
                 if headername not in header:
                     raise ValueError(u"no such header: {}".format(headername))
                 idx = header.index(headername) + 1
-                return rowidx, ExcelWrapper._get_letter_index(idx)
+                return ExcelWrapper._get_letter_index(idx), rowidx
 
 
         def find_letters_by_header(self, *args, **kwargs):
@@ -168,7 +169,8 @@ class ExcelWrapper(object):
             ret = []
             for n in args:
                 ret.append(self.find_letter_by_header(n, **kwargs))
-            return tuple(ret)
+            headers, rowidxs = zip(*ret)
+            return headers, rowidxs[0]
 
         def _select(self, key, log=False):
             """min_col, min_row, max_col, max_row"""
@@ -409,7 +411,10 @@ class ExcelWrapper(object):
             assert isinstance(row_range, tuple)
             assert len(row_range) == 2
             assert length > 0
+            from app.util import split_nlist
+            return split_nlist(self.get_col(col, row_range), length)
 
+            """
             r1 = row_range[0]
             if row_range[1] is not None:
                 limit_row = row_range[1]
@@ -432,6 +437,7 @@ class ExcelWrapper(object):
                         continue
                     else:
                         break
+            """
 
 if __name__ == '__main__':
     from app.util import timecounter

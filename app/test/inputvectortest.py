@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 plt.hold(False)
 
 if __name__ == '__main__':
-    train_cnt = 500
+    train_cnt = 300
     map_size = (40, 50)
     sample_cnt = 100
 
@@ -16,22 +16,25 @@ if __name__ == '__main__':
     xls = [Xl(R('data/raw/invectest/jump.xlsx'), ['Sheet'], 'A', 'jump'),
            Xl(R('data/raw/invectest/run.xlsx'), ['Sheet6', 'Sheet5', 'Sheet4'], 'F', 'run'),
            Xl(R('data/raw/invectest/walk.xlsx'), ['Sheet4', 'Sheet1'], 'F', 'walk')]
-    
+
     xls = [Xl(R('data/acc/pass_acc_128p_131data.xlsx'), ['Sheet1'], 'A', 'pass'),
-           Xl(R('data/acc/placekick_acc_128p_101data.xlsx'), ['Sheet1'], 'A', 'placekick'),
+           Xl(R('data/acc/placekick_acc_128p_101data.xlsx'), ['Sheet1'], 'A', 'pkick'),
            Xl(R('data/acc/run_acc_128p_132data.xlsx'), ['Sheet1'], 'A', 'run'),
-           Xl(R('data/acc/tackle_acc_128p_111data.xlsx'), ['Sheet1'], 'A', 'tackle')]
-    
+           Xl(R('data/acc/tackle_acc_128p_111data.xlsx'), ['Sheet1'], 'A', 'tackle'),
+           Xl(R('data/raw/invectest/walk.xlsx'), ['Sheet4', 'Sheet1'], 'F', 'walk')]
+
     fc = {'jump': [0, 1, 0],
           'run': [1, 0, 0],
           'walk': [0, 0, 1]}
 
     fc = {'pass': [1, 0, 1],
-          'placekick': [1, 0, 0],
+          'pkick': [0, 0, 1],
           'run': [0, 1, 0],
-          'tackle': [0, 0, 1]}
+          'tackle': [1, 0, 0],
+          'walk': [0, 1, 1]}
 
-    read_N = [32, 64, 96, 128]
+    #read_N = [32, 64, 96, 128]
+    read_N = [96, 128]
     fft_n = [128]
     wind_f = ['hanning']
 
@@ -44,7 +47,7 @@ if __name__ == '__main__':
             labels += l
         return invec, labels
 
-    for i in xrange(7):
+    for i in xrange(2):
         for N in fft_n:
             for wf in wind_f:
                 for rn in read_N:
@@ -53,7 +56,7 @@ if __name__ == '__main__':
                     map_, labels_, coords = som.train(train_cnt)
                     plt.imshow(map_, cmap='gray', interpolation='nearest')
                     for l, (c1, c2) in zip(labels_, coords):
-                        s = T('{}_invectest4_act/test_{}p_{}_{}veclen.png'.format(i, N, wf, rn), mkdir=True)
+                        s = T('invectest6_act_divide_on_max/{}_test_{}p_{}_{}veclen.png'.format(i, N, wf, rn), mkdir=True)
                         plt.text(c1, c2, l, color=fc[l], va='center', ha='center')
                     plt.axis('off')
                     plt.savefig(s)

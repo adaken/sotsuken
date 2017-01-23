@@ -7,6 +7,7 @@ from excelwrapper import ExcelWrapper
 from normalize import standardize, scale_zero_one
 from fft import fftn
 from util import random_idx_gen
+from app import L
 
 def _sample_xlsx(xlsx, sample_cnt, sheetnames, col, min_row, read_N, fft_N,
                  overlap, log):
@@ -20,6 +21,17 @@ def _sample_xlsx(xlsx, sample_cnt, sheetnames, col, min_row, read_N, fft_N,
     if sheetnames is None:
         sheetnames = wb.sheetnames
 
+    if sample_cnt is None:
+        sample_cnt = 0
+        if overlap:
+            for s in sheetnames:
+                max_ = (wb[s].ws.max_row - min_row - (fft_N - overlap)) / (fft_N - overlap)
+                sample_cnt += max_
+        else:
+            for s in sheetnames:
+                max_ = (wb[s].ws.max_row - min_row) / fft_N
+                sample_cnt += max_
+
     def iter_alt(iter1, iter2):
         """交互にイテレート"""
         for i1, i2 in it.izip_longest(iter1, iter2):
@@ -32,12 +44,12 @@ def _sample_xlsx(xlsx, sample_cnt, sheetnames, col, min_row, read_N, fft_N,
         ws = wb.get_sheet(sheetname)
 
         if col is None:
-            _, col = ws.find_letter_by_header('Magnitude Vector')
+            col, _ = ws.find_letter_by_header('Magnitude Vector')
 
         vec_iter = ws.iter_part_col(col, fft_N, (min_row, None), log=log)
 
         if overlap:
-            _vec_iter = ws.iter_part_col(col, read_N,
+            _vec_iter = ws.iter_part_col(col, fft_N,
                                          (min_row + fft_N - overlap, None),
                                          log=log)
             _iter = iter_alt(vec_iter, _vec_iter)
@@ -54,8 +66,7 @@ def _sample_xlsx(xlsx, sample_cnt, sheetnames, col, min_row, read_N, fft_N,
             break
     else:
         if not vec_cnt == sample_cnt:
-            raise ValueError(u"指定したサンプル回数に対してデータが足りません" \
-                             u": {}/{}".format(vec_cnt, sample_cnt))
+            raise ValueError("指定したサンプル回数に対してデータが足りません: {}/{}".format(vec_cnt, sample_cnt))
         else:
             raise RuntimeError
 
@@ -97,7 +108,7 @@ def make_input(xlsx, sample_cnt, sheetnames=None, col=None, min_row=2,
     :param xlsx : str
         加速度のExcelファイルのパス
 
-    :param sample_cnt : int
+    :param sample_cnt : int or None, default: None
         欲しい入力ベクトルの数
 
     :param sheetnames : iterable of str or None
@@ -170,6 +181,7 @@ def make_input(xlsx, sample_cnt, sheetnames=None, col=None, min_row=2,
     else lambda a, axis: a
 
     input_vecs = np.array(input_vecs)
+    #input_vecs /= np.max(input_vecs, axis=1)[:, np.newaxis]
     input_vecs = normalizer(fftn(arrs=input_vecs, fft_N=fft_N, wf=wf, fs=100),
                             axis=None)
 
