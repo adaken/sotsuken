@@ -33,7 +33,7 @@ def kfold(labels, features, k=5):
         yield tr_labels, ret_tr, ts_labels, ret_ts
 
 def train(tr,tr_labels,ts, ts_labels, confm):
-    clf = SVC(C=1000, kernel='sigmoid', gamma = 0.0001)    # パラメータ (C-SVC, RBF カーネル, C=1000)
+    clf = SVC(C=1, kernel='rbf', gamma = 0.1)    # パラメータ (C-SVC, RBF カーネル, C=1000)
     #clf = OneVsRestClassifier(est)  #多クラス分類器One-against-restによる識別
     clf.fit(tr, tr_labels)
     ts_pred = clf.predict(ts)
@@ -52,7 +52,7 @@ if __name__ == '__main__':
     Xl = namedtuple('Xl', 'filename, label')
     xls =  (
          Xl(R(r'data\acc\pass_acc_128p_131data.xlsx'), 'pass',),
-         Xl(R(r'data\acc\placekick_acc_128p_101data.xlsx'), 'pk'),
+         Xl(R(r'data\acc\placekick_acc_128p_101data.xlsx'), 'pkick'),
          Xl(R(r'data\acc\run_acc_128p_132data.xlsx'), 'run'),
          Xl(R(r'data\acc\tackle_acc_128p_111data.xlsx'), 'tackle')
         )
