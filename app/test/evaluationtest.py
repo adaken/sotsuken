@@ -8,6 +8,14 @@ from app.kml.animationkml import AnimationKml, KmlConfig
 
 
 def test():
+    cnf = KmlConfig(iconscale=1, sampling_step=3, kmz=True)
+    icon = lambda l, i: l + '_{}.png'.format(i)
+    model = R('misc/model/Linear_V.pkl')
+    m = os.path.splitext(os.path.basename(model))[0]
+    readn = 128
+    overlap = 0
+    iconbase = R('img/icons/').p
+
     def accgps():
         gpsxls = R('data/gps/eval').ls(absp=True)[1]
         accxls = R('data/acc/eval').ls(absp=True)[1]
@@ -20,9 +28,9 @@ def test():
         def acc(ax, sheet):
             #ws = ExcelWrapper(ax)[sheet]
             #letter, rowidx = ws.find_letter_by_header('Magnitude Vector')
-            a = make_input(xlsx=ax, sample_cnt=None, fft_N=128, read_N=75,
+            a = make_input(xlsx=ax, sample_cnt=None, fft_N=128, read_N=readn,
                            sheetnames=[sheet],
-                           normalizing='01', overlap=0)
+                           normalizing='01', overlap=overlap)
             return a
             #return list(ws.iter_part_col(letter, 128, (rowidx+1, None)))
 
@@ -32,11 +40,6 @@ def test():
             times, lats, lons = timecoord(gx, 'Sheet1')
             acc_ = acc(ax, 'Sheet2')
             yield i, times, lats, lons, acc_
-
-    cnf = KmlConfig(iconscale=1, sampling_step=5, kmz=True)
-    icon = lambda l, i: l + '_{}.png'.format(i)
-    model = R('misc/model/Linear_A.pkl')
-    iconbase = R('img/icons/').p
 
     def icons(i):
         return {'run':    iconbase + '\\' + icon('run', i),
@@ -50,9 +53,9 @@ def test():
         feats = acc
         print len(times), len(lats), len(lons), len(acc)
         anime_kml = AnimationKml(times, lats, lons)
-        make_kml_with_acts(L('evaltest/test_new_75len{}.kmz'.format(i), mkdir=True),
+        make_kml_with_acts(L('evaltest/test_new_{}_{}len_{}_{}overlap.kmz'.format(m, readn, i, overlap), mkdir=True),
                            anime_kml, kml_cnf=cnf, features=feats,
-                           model=model, act_icons=icons(i))
+                           model=model, act_icons=icons(i), sample_n=readn - overlap)
 
 if __name__ == '__main__':
     test()
