@@ -9,7 +9,7 @@ from datetime import timedelta
 from sklearn.externals import joblib
 
 def make_kml_with_acts(savename, anime_kml, kml_cnf, features, model,
-                       act_icons=None):
+                       act_icons=None, sample_n=128):
     """アクションを使用したkmlを作成
 
     :param savename : str
@@ -22,7 +22,7 @@ def make_kml_with_acts(savename, anime_kml, kml_cnf, features, model,
 
     acts = make_acts(features, model) # アクションのiterator
     len_, acts = get_iter_len(acts)
-    acts = adjust_acts(acts, len_) # 長さを調整
+    acts = adjust_acts(acts, len_, sample_n) # 長さを調整
 
     # kml作成
     ak = ActionAnimationKml.from_anime_kml(anime_kml, acts=acts,

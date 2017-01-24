@@ -71,6 +71,7 @@ def fftn(arrs, fft_N, wf='hanning', savepath=None, fs=None, freq=False):
     print "sampling rate  : {}Hz".format(fs)
     print "nyquist freq   : {}Hz".format(fn)
     print "freq resolution: {}Hz".format(fs/float(fft_N))
+    print "data length:", w_arrs.shape[-1]
     print "fft point  :", fft_N
     print "window func:", wf
 

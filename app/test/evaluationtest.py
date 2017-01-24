@@ -20,7 +20,8 @@ def test():
         def acc(ax, sheet):
             #ws = ExcelWrapper(ax)[sheet]
             #letter, rowidx = ws.find_letter_by_header('Magnitude Vector')
-            a = make_input(xlsx=ax, sample_cnt=None, sheetnames=[sheet],
+            a = make_input(xlsx=ax, sample_cnt=None, fft_N=128, read_N=75,
+                           sheetnames=[sheet],
                            normalizing='01', overlap=0)
             return a
             #return list(ws.iter_part_col(letter, 128, (rowidx+1, None)))
@@ -34,21 +35,22 @@ def test():
 
     cnf = KmlConfig(iconscale=1, sampling_step=5, kmz=True)
     icon = lambda l, i: l + '_{}.png'.format(i)
-    model = R('misc/model/RbfAgainst.pkl')
+    model = R('misc/model/Linear_A.pkl')
     iconbase = R('img/icons/').p
 
     def icons(i):
         return {'run':    iconbase + '\\' + icon('run', i),
                 'pkick':  iconbase + '\\' + icon('pkick', i),
                 'tackle': iconbase + '\\' + icon('tackle', i),
-                'pass':   iconbase + '\\' + icon('pass', i)}
+                'pass':   iconbase + '\\' + icon('pass', i),
+                'walk':   iconbase + '\\' + icon('walk', i)}
 
     for i, times, lats, lons, acc in accgps():
         #feats = fftn(acc, fft_N=128, wf='hanning', fs=100)
         feats = acc
         print len(times), len(lats), len(lons), len(acc)
         anime_kml = AnimationKml(times, lats, lons)
-        make_kml_with_acts(L('evaltest/test{}.kmz'.format(i), mkdir=True),
+        make_kml_with_acts(L('evaltest/test_new_75len{}.kmz'.format(i), mkdir=True),
                            anime_kml, kml_cnf=cnf, features=feats,
                            model=model, act_icons=icons(i))
 
