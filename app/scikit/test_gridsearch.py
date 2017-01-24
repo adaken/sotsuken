@@ -41,7 +41,7 @@ if __name__ == '__main__':
     for xl in xls:
         tr_vec, tr_label = make_input(xlsx=xl.filename, sheetnames=None,col=None,
                                                 min_row=2,fft_N=128, sample_cnt=80,
-                                                label=xl.label,normalizing='01', log=False)
+                                                label=xl.label,normalizing='01', log=False,read_N=96)
         map(tr_vecs.append, tr_vec)
         tr_labels += tr_label
 

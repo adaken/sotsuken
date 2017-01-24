@@ -30,7 +30,7 @@ if __name__ == '__main__':
     for xl in xls:
         tr_vec, tr_label = make_input(xlsx=xl.filename, sheetnames=None,col=None,
                                                 min_row=2,fft_N=128, sample_cnt=80,
-                                                label=xl.label,normalizing='01', log=False)
+                                                label=xl.label,normalizing='01', log=False,read_N=96)
         map(tr_vecs.append, tr_vec)
         tr_labels += tr_label
 
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     for xl in xls:
         ts_vec, ts_label = make_input(xlsx=xl.filename, sheetnames=None,col=None,
                                                 min_row=128*80+1,fft_N=128, sample_cnt=20,
-                                                label=xl.label,normalizing='01', log=False)
+                                                label=xl.label,normalizing='01', log=False,read_N=96)
         map(ts_vecs.append, ts_vec)
         ts_labels += ts_label
 
@@ -84,20 +84,20 @@ if __name__ == '__main__':
     教師データの学習分類
     """
     # test_gridsearchを参照
-    est = SVC(C=1000, kernel='linear')    # パラメータ (C-SVC, RBF カーネル, C=1000)
+    est = SVC(C=1000, kernel='rbf',gamma=0.001)    # パラメータ (C-SVC, RBF カーネル, C=1000)
     clf = OneVsRestClassifier(est)  #多クラス分類器One-against-restによる識別
     clf.fit(tr_vecs_rand, tr_labels_rand)
     pred = clf.predict(ts_vecs_rand)
 
-    clf2 = SVC(C=1000, kernel='linear')    # パラメータ (C-SVC, RBF カーネル, C=1000)
+    clf2 = SVC(C=1000, kernel='rbf',gamma=0.001)    # パラメータ (C-SVC, RBF カーネル, C=1000)
     clf2.fit(tr_vecs_rand, tr_labels_rand)
     pred2 = clf2.predict(ts_vecs_rand)  #多クラス分類器One-versus-oneによる識別
 
     """
     学習モデルのローカル保存
     """
-    joblib.dump(clf, R('misc\model\Linear_A.pkl'))
-    joblib.dump(clf2, R('misc\model\Linear_V.pkl'))
+    joblib.dump(clf, R('misc\model\Rbf_A_96p.pkl'))
+    joblib.dump(clf2, R('misc\model\Rbf_V_96p.pkl'))
 
     #confusion matrix（ラベルの分類表。分類性能が高いほど対角線に値が集まる）
     print confusion_matrix(ts_labels_rand, pred)
