@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 plt.hold(False)
 
 if __name__ == '__main__':
-    train_cnt = 300
+    train_cnt = 500
     map_size = (40, 50)
     sample_cnt = 100
 
@@ -34,7 +34,7 @@ if __name__ == '__main__':
           'walk': [0, 1, 1]}
 
     #read_N = [32, 64, 96, 128]
-    read_N = [96, 128]
+    read_N = [128]
     fft_n = [128]
     wind_f = ['hanning']
 
@@ -56,7 +56,7 @@ if __name__ == '__main__':
                     map_, labels_, coords = som.train(train_cnt)
                     plt.imshow(map_, cmap='gray', interpolation='nearest')
                     for l, (c1, c2) in zip(labels_, coords):
-                        s = T('invectest6_act_divide_on_max/{}_test_{}p_{}_{}veclen.png'.format(i, N, wf, rn), mkdir=True)
+                        s = T('invectest_divide_by_max/{}_test_{}p_{}_{}veclen_{}loop.png'.format(i, N, wf, rn, train_cnt), mkdir=True)
                         plt.text(c1, c2, l, color=fc[l], va='center', ha='center')
                     plt.axis('off')
                     plt.savefig(s)

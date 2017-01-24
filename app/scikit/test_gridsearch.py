@@ -33,7 +33,8 @@ if __name__ == '__main__':
          Xl(R(r'data\acc\pass_acc_128p_131data.xlsx'), 'pass',),
          Xl(R(r'data\acc\placekick_acc_128p_101data.xlsx'), 'pk'),
          Xl(R(r'data\acc\run_acc_128p_132data.xlsx'), 'run'),
-         Xl(R(r'data\acc\tackle_acc_128p_111data.xlsx'), 'tackle')
+         Xl(R(r'data\acc\tackle_acc_128p_111data.xlsx'), 'tackle'),
+         Xl(R(r'data/raw/invectest/walk.xlsx'), 'walk')
         )
     tr_vecs = []
     tr_labels = []
