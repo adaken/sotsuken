@@ -15,21 +15,23 @@ if __name__ == '__main__':
     xls = [Xl(R('data/raw/invectest/jump.xlsx'), ['Sheet'], 'A', 'jump'),
            Xl(R('data/raw/invectest/run.xlsx'), ['Sheet6', 'Sheet5', 'Sheet4'], 'F', 'run'),
            Xl(R('data/raw/invectest/walk.xlsx'), ['Sheet4', 'Sheet1'], 'F', 'walk')]
-    
+
+    fc = {'jump': [1, 0, 0],
+          'run': [0, 1, 0],
+          'walk': [0, 0, 1]}
+ 
+    """
     xls = [Xl(R('data/acc/pass_acc_128p_131data.xlsx'), ['Sheet1'], 'A', 'pass'),
            Xl(R('data/acc/placekick_acc_128p_101data.xlsx'), ['Sheet1'], 'A', 'placekick'),
            Xl(R('data/acc/run_acc_128p_132data.xlsx'), ['Sheet1'], 'A', 'run'),
            Xl(R('data/acc/tackle_acc_128p_111data.xlsx'), ['Sheet1'], 'A', 'tackle')]
     
-    fc = {'jump': [0, 1, 0],
-          'run': [1, 0, 0],
-          'walk': [0, 0, 1]}
-    
     fc = {'pass': [1, 0, 1],
           'placekick': [1, 0, 0],
           'run': [0, 1, 0],
           'tackle': [0, 0, 1]}
-
+    """
+    
     read_N = [32, 64, 96, 128]
     fft_n = [128]
     wind_f = ['hanning']
@@ -51,5 +53,5 @@ if __name__ == '__main__':
                 for name, (fftdata, freq) in make(N, wf, rn):
                     plt.plot(freq, fftdata[0], color=fc[name], label=name)
                 plt.legend()
-                s = T('spectrumtest3/spectorum_{}p_{}-wf_{}-len.png'.format(N, wf, rn), mkdir=True)
+                s = T('spectrumtest7/spectorum_{}p_{}-wf_{}-len.png'.format(N, wf, rn), mkdir=True)
                 plt.savefig(s)
