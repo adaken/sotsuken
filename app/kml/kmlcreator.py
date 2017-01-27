@@ -9,7 +9,7 @@ from datetime import timedelta
 from sklearn.externals import joblib
 
 def make_kml_with_acts(savename, anime_kml, kml_cnf, features, model,
-                       act_icons=None, sample_n=128):
+                       act_icons=None, sample_n=128, subfeat=None):
     """アクションを使用したkmlを作成
 
     :param savename : str
@@ -30,13 +30,14 @@ def make_kml_with_acts(savename, anime_kml, kml_cnf, features, model,
     ak.to_animatable(savename, kml_cnf)
     print "saved kml at {}".format(savename)
 
-def make_acts(features, model):
+def make_acts(features, model, subfeat=None):
     """特徴ベクトルを訓練されたモデルで予測"""
-
+    
     clf = joblib.load(model) # モデルをロード
-    return clf.predict(features) # 多クラス分類器による識別
+    labels = clf.predict(features) # 多クラス分類器による識別
+    return labels
 
-def adjust_acts(acts, gps_len, sample_num=128, gps_hz=15, acc_hz=100):
+def adjust_acts(acts, gps_len, sample_num, gps_hz=15, acc_hz=100):
     """アクションのリストの長さをGPSデータと調整してイテレート
 
     :param acts : iterable

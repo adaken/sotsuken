@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     Xl = namedtuple('Xl', 'path, sheets, col, label')
 
-    """
+    
     xls = [Xl(R('data/raw/invectest/jump.xlsx'), ['Sheet'], 'A', 'jump'),
            Xl(R('data/raw/invectest/run.xlsx'), ['Sheet6', 'Sheet5', 'Sheet4'], 'F', 'run'),
            Xl(R('data/raw/invectest/walk.xlsx'), ['Sheet4', 'Sheet1'], 'F', 'walk')]
@@ -35,7 +35,7 @@ if __name__ == '__main__':
           'run': [0, 1, 0],
           'tackle': [1, 0, 0],
           'walk': [0, 1, 1]}
-
+    """
 
     #read_N = [32, 64, 96, 128]
     read_N = [32, 64, 96, 128]
@@ -59,7 +59,7 @@ if __name__ == '__main__':
                 map_, labels_, coords = som.train(train_cnt)
                 plt.imshow(map_, cmap='gray', interpolation='nearest')
                 for l, (c1, c2) in zip(labels_, coords):
-                    s = T('invectest/{}_{}pfft_{}-w_{}veclen.png'
+                    s = T('invectest/test_{}_{}pfft_{}-w_{}veclen.png'
                           .format(i, N, wf, rn), mkdir=True)
                     plt.text(c1, c2, l, color=fc[l], va='center', ha='center')
                 plt.axis('off')

@@ -33,7 +33,7 @@ def kfold(labels, features, k=5):
         yield tr_labels, ret_tr, ts_labels, ret_ts
 
 def train(tr,tr_labels,ts, ts_labels, confm):
-    clf = SVC(C=1000, kernel='poly',gamma=0.0001,degree=2)    # パラメータ (C-SVC, RBF カーネル, C=1000)
+    clf = SVC(C=1, kernel='rbf',gamma=0.1)    # パラメータ (C-SVC, RBF カーネル, C=1000)
     #clf = OneVsRestClassifier(est)  #多クラス分類器One-against-restによる識別
     clf.fit(tr, tr_labels)
     ts_pred = clf.predict(ts)
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     for xl in xls:
         input_vec, labels = make_input(xlsx=xl.filename, sheetnames=None,col=None,
                                                 min_row=2,fft_N=128, sample_cnt=100,
-                                                label=xl.label,normalizing='01', log=False)
+                                                label=xl.label,normalizing='01', log=False,read_N=128)
         #input_vecs.append(input_vec)
         #input_labels.append(labels)
         map(input_vecs.append, input_vec)

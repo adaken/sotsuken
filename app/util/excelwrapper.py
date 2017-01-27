@@ -157,7 +157,8 @@ class ExcelWrapper(object):
                     raise ValueError(u"no such header: {}".format(headername))
                 idx = header.index(headername) + 1
                 return ExcelWrapper._get_letter_index(idx), rowidx
-
+            else:
+                raise ValueError("no header row")
 
         def find_letters_by_header(self, *args, **kwargs):
             """ヘッダ名から列のレターを探してみる
