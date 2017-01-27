@@ -13,23 +13,24 @@ def _sample_xlsx(xlsx, sample_cnt, sheetnames, col, min_row, read_N, fft_N,
                  overlap, log):
     """Excelを順にサンプリング"""
 
-    wb = ExcelWrapper(xlsx)
-    input_vecs = []
-    is_full = False
-    vec_cnt = 0
-
+    wb = ExcelWrapper(xlsx) # ワークブック
     if sheetnames is None:
-        sheetnames = wb.sheetnames
+        sheetnames = wb.sheetnames # すべてのシート
+    sheets = [wb[s] for s in sheetnames] # ワークシート
+    input_vecs = [] # 戻り値
+    is_full = False # sample_cntだけサンプリングできたかどうか
+    vec_cnt = 0
 
     if sample_cnt is None:
         sample_cnt = 0
         if overlap:
-            for s in sheetnames:
-                max_ = (wb[s].ws.max_row - min_row - (fft_N - overlap)) / (fft_N - overlap)
+            for s in sheets:
+                max_ = (s.ws.max_row - min_row - (fft_N - overlap)) \
+                / (fft_N - overlap)
                 sample_cnt += max_
         else:
-            for s in sheetnames:
-                max_ = (wb[s].ws.max_row - min_row) / fft_N
+            for s in sheets:
+                max_ = (s.ws.max_row - min_row) / fft_N
                 sample_cnt += max_
 
     def iter_alt(iter1, iter2):
@@ -40,13 +41,12 @@ def _sample_xlsx(xlsx, sample_cnt, sheetnames, col, min_row, read_N, fft_N,
             if i2 is not None:
                 yield i2
 
-    for sheetname in sheetnames:
-        ws = wb.get_sheet(sheetname)
-
+    for ws in sheets:
         if col is None:
             col, _ = ws.find_letter_by_header('Magnitude Vector')
 
-        vec_iter = ws.iter_part_col(col, fft_N, (min_row, None), log=log)
+        # 128ごとに分割してイテレート(だめなコード)
+        vec_iter = ws.iter_part_col(col, 128, (min_row, None), log=log)
 
         if overlap:
             _vec_iter = ws.iter_part_col(col, fft_N,
@@ -56,8 +56,15 @@ def _sample_xlsx(xlsx, sample_cnt, sheetnames, col, min_row, read_N, fft_N,
         else:
             _iter = vec_iter
 
+        def cut(vec, n):
+            m = len(vec) / 2
+            n = n / 2
+            return vec[m-n:m+n]
+
         for vec in _iter:
-            input_vecs.append(vec[:read_N])
+            #input_vecs.append(vec[:read_N])
+            v = cut(vec, read_N)
+            input_vecs.append(v)
             vec_cnt += 1
             if vec_cnt == sample_cnt:
                 is_full = True
@@ -69,8 +76,7 @@ def _sample_xlsx(xlsx, sample_cnt, sheetnames, col, min_row, read_N, fft_N,
             raise ValueError("指定したサンプル回数に対してデータが足りません: {}/{}".format(vec_cnt, sample_cnt))
         else:
             raise RuntimeError
-
-    return input_vecs
+    return np.array(input_vecs)
 
 def _sample_xlsx_random(xlsx, sample_cnt, sheetnames, col, min_row, read_N,
                         fft_N, overlap, log):
@@ -179,8 +185,7 @@ def make_input(xlsx, sample_cnt, sheetnames=None, col=None, min_row=2,
     normalizer = scale_zero_one if normalizing=='01' \
     else standardize if normalizing=='std' \
     else lambda a, axis: a
-
-    input_vecs = np.array(input_vecs)
+    print input_vecs.shape
     input_vecs /= np.max(input_vecs, axis=1)[:, np.newaxis] # 最大値で割る
     input_vecs = normalizer(fftn(arrs=input_vecs, fft_N=fft_N, wf=wf, fs=100),
                             axis=None)

@@ -12,7 +12,7 @@ def test():
     icon = lambda l, i: l + '_{}.png'.format(i)
     model = R('misc/model/Linear_A.pkl')
     m = os.path.splitext(os.path.basename(model))[0]
-    readn = 128
+    readn = 32
     overlap = 0
     iconbase = R('img/icons/').p
 
