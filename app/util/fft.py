@@ -76,6 +76,7 @@ def fftn(arrs, fft_N, wf='hanning', savepath=None, fs=None, freq=False):
     print "window func:", wf
 
     fftdata = np.fft.fft(w_arrs, fft_N) # FFT
+    print "fft length :", fftdata.shape[-1]
     fftmags = np.abs(fftdata)  # パワースペクトル
     #fftmags /= fft_N          # 正規化
     fftfreq = fs / float(fft_N) * np.arange(fft_N) # 周波数

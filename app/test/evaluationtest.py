@@ -12,8 +12,8 @@ def test():
     icon = lambda l, i: l + '_{}.png'.format(i)
     model = R('misc/model/Linear_V.pkl')
     m = os.path.splitext(os.path.basename(model))[0]
-    readn = 128
-    overlap = 64
+    readn = 32
+    overlap = 0
     iconbase = R('img/icons/').p
 
     def accgps():
