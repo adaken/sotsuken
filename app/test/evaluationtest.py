@@ -10,10 +10,10 @@ from app.kml.animationkml import AnimationKml, KmlConfig
 def test():
     cnf = KmlConfig(iconscale=1, sampling_step=3, kmz=True)
     icon = lambda l, i: l + '_{}.png'.format(i)
-    model = R('misc/model/Linear_A.pkl')
+    model = R('misc/model/Linear_V.pkl')
     m = os.path.splitext(os.path.basename(model))[0]
     readn = 128
-    overlap = 0
+    overlap = 64
     iconbase = R('img/icons/').p
 
     def accgps():
