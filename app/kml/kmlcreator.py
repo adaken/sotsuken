@@ -7,6 +7,7 @@ from collections import namedtuple
 from kmlwrapper import KmlWrapper
 from datetime import timedelta
 from sklearn.externals import joblib
+from app import R, T, L
 
 def make_kml_with_acts(savename, anime_kml, kml_cnf, features, model,
                        act_icons=None, sample_n=128, subfeat=None):
@@ -30,12 +31,38 @@ def make_kml_with_acts(savename, anime_kml, kml_cnf, features, model,
     ak.to_animatable(savename, kml_cnf)
     print "saved kml at {}".format(savename)
 
-def make_acts(features, model, subfeat=None):
+def make_acts(features, model):
     """特徴ベクトルを訓練されたモデルで予測"""
-    
+
     clf = joblib.load(model) # モデルをロード
     labels = clf.predict(features) # 多クラス分類器による識別
     return labels
+
+def pred(X, model):
+    clf = joblib.load(model)
+    P = clf.predict(X)
+    return P
+
+def make_acts2(X, vs='VS', p=16):
+    """
+    :param X : 2Dndarray
+        入力ベクトル
+    :param vs : str
+        'VS' or 'Against'
+    """
+
+    mm = {'instantaneous':R('misc/model/Line_I_V_16p.pkl')}
+    P = pred(X, mm['instantaneous']) # 瞬間的な動作として予測
+    inst_s = set(P) # 予測された瞬間的な動作のセット
+    for s in inst_s:
+        mm[s+'-vs-continuous'] = R('misc/model/Line_{}_{}_Cont_{}p.pkl'
+                                   .format(s.capitalize(), vs, p))
+    print "P-set:", inst_s
+    for s, m in ((s, mm[s+'-vs-continuous']) for s in inst_s):
+        mask = P==s
+        P[mask] = pred(P[mask], m)
+    return P
+
 
 def adjust_acts(acts, gps_len, sample_num, gps_hz=15, acc_hz=100):
     """アクションのリストの長さをGPSデータと調整してイテレート

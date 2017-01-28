@@ -45,7 +45,6 @@ def _sample_xlsx(xlsx, sample_cnt, sheetnames, col, min_row, exfs, read_N, fft_N
         if col is None:
             col, _ = ws.find_letter_by_header('Magnitude Vector')
 
-        # 128ごとに分割してイテレート(だめなコード)
         vec_iter = ws.iter_part_col(col, exfs, (min_row, None), log=log)
 
         if overlap:
