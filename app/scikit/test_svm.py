@@ -12,7 +12,6 @@ from sklearn.metrics import classification_report
 from sklearn.externals import joblib
 import numpy as np
 from app import R, T, L
-from math import gamma
 
 if __name__ == '__main__':
     """
@@ -20,8 +19,8 @@ if __name__ == '__main__':
     """
     Xl = namedtuple('Xl', 'filename, label')
     xls =  (
-         Xl(R(r'data\acc\pass_acc_128p_131data.xlsx'), 'pass',),
-         Xl(R(r'data\acc\placekick_acc_128p_101data.xlsx'), 'pkick'),
+         #Xl(R(r'data\acc\pass_acc_128p_131data.xlsx'), 'pass',),
+         #Xl(R(r'data\acc\placekick_acc_128p_101data.xlsx'), 'pkick'),
          Xl(R(r'data\acc\run_acc_128p_132data.xlsx'), 'run'),
          Xl(R(r'data\acc\tackle_acc_128p_111data.xlsx'), 'tackle'),
          Xl(R(r'data/raw/invectest/walk.xlsx'), 'walk')
@@ -31,8 +30,8 @@ if __name__ == '__main__':
     for xl in xls:
         print "read", xl.label
         tr_vec, tr_label = make_input(xlsx=xl.filename, sheetnames=None,col=None,
-                                      min_row=2,fft_N=32, sample_cnt=80,
-                                      label=xl.label,normalizing='01', log=False, read_N=32)
+                                      min_row=2,fft_N=16, sample_cnt=80,
+                                      label=xl.label,normalizing='01', log=False, read_N=16)
         map(tr_vecs.append, tr_vec)
         tr_labels += tr_label
 
@@ -57,8 +56,8 @@ if __name__ == '__main__':
     ts_labels = []
     for xl in xls:
         ts_vec, ts_label = make_input(xlsx=xl.filename, sheetnames=None,col=None,
-                                                min_row=128*80+1,fft_N=32, sample_cnt=20,
-                                                label=xl.label,normalizing='01', log=False,read_N=32)
+                                                min_row=128*80+1,fft_N=16, sample_cnt=20,
+                                                label=xl.label,normalizing='01', log=False,read_N=16)
         map(ts_vecs.append, ts_vec)
         ts_labels += ts_label
 
@@ -86,20 +85,20 @@ if __name__ == '__main__':
     教師データの学習分類
     """
     # test_gridsearchを参照
-    est = SVC(C=1, kernel='rbf',gamma=0.1)    # パラメータ (C-SVC, RBF カーネル, C=1000)
+    est = SVC(C=100, kernel='linear')    # パラメータ (C-SVC, RBF カーネル, C=1000)
     clf = OneVsRestClassifier(est)  #多クラス分類器One-against-restによる識別
     clf.fit(tr_vecs_rand, tr_labels_rand)
     pred = clf.predict(ts_vecs_rand)
 
-    clf2 = SVC(C=1, kernel='rbf',gamma=0.1)    # パラメータ (C-SVC, RBF カーネル, C=1000)
+    clf2 = SVC(C=100, kernel='linear')    # パラメータ (C-SVC, RBF カーネル, C=1000)
     clf2.fit(tr_vecs_rand, tr_labels_rand)
     pred2 = clf2.predict(ts_vecs_rand)  #多クラス分類器One-versus-oneによる識別
 
     """
     学習モデルのローカル保存
     """
-    joblib.dump(clf, R('misc\model\Def_A_32p.pkl'))
-    joblib.dump(clf2, R('misc\model\Def_V_32p.pkl'))
+    joblib.dump(clf, R('misc\model\Line_Tackle_Against_Cont_16p.pkl'))
+    joblib.dump(clf2, R('misc\model\Line_Tackle_VS_Cont_16p.pkl'))
 
     #One-against-oneの結果
     #confusion matrix（ラベルの分類表。分類性能が高いほど対角線に値が集まる）
@@ -109,12 +108,12 @@ if __name__ == '__main__':
     #正答率 分類ラベル/正解ラベル
     print accuracy_score(ts_labels_rand, pred)
     print   #改行
-    
+
     #One-versus-oneの結果
     print confusion_matrix(ts_labels_rand, pred2)
     print classification_report(ts_labels_rand, pred2)
     print accuracy_score(ts_labels_rand, pred2)
-    
+
     print ts_labels_rand       #分類前ラベル
     print list(pred)   #One-against-restによる識別ラベル
     print list(pred2)  #One-versus-oneによる識別ラベル
