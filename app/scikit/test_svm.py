@@ -26,7 +26,6 @@ if __name__ == '__main__':
          Xl(R(r'data/raw/invectest/walk.xlsx'), 'walk')
         )
     N = 32
-    
     tr_vecs = []
     tr_labels = []
     for xl in xls:
