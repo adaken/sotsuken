@@ -77,8 +77,9 @@ if __name__ == '__main__':
     def func2():
         from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
         from app.kml.kmlcreator import make_acts2
-        X, L = make(32, 'hanning', 32)
-        P = make_acts2(np.array(X), vs='Against', p=32)
+        n = 16
+        X, L = make(n, 'hanning', n)
+        P = make_acts2(np.array(X), vs='VS', p=n)
         print P
         print accuracy_score(L, P)
         print classification_report(L, P)
