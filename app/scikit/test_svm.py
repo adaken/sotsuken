@@ -20,18 +20,20 @@ if __name__ == '__main__':
     Xl = namedtuple('Xl', 'filename, label')
     xls =  (
          #Xl(R(r'data\acc\pass_acc_128p_131data.xlsx'), 'pass',),
-         #Xl(R(r'data\acc\placekick_acc_128p_101data.xlsx'), 'pkick'),
+         Xl(R(r'data\acc\placekick_acc_128p_101data.xlsx'), 'pkick'),
          Xl(R(r'data\acc\run_acc_128p_132data.xlsx'), 'run'),
-         Xl(R(r'data\acc\tackle_acc_128p_111data.xlsx'), 'tackle'),
+         #Xl(R(r'data\acc\tackle_acc_128p_111data.xlsx'), 'tackle'),
          Xl(R(r'data/raw/invectest/walk.xlsx'), 'walk')
         )
+    N = 32
+    
     tr_vecs = []
     tr_labels = []
     for xl in xls:
         print "read", xl.label
         tr_vec, tr_label = make_input(xlsx=xl.filename, sheetnames=None,col=None,
-                                      min_row=2,fft_N=16, sample_cnt=80,
-                                      label=xl.label,normalizing='01', log=False, read_N=16)
+                                      min_row=2,fft_N=N, sample_cnt=80,
+                                      label=xl.label,normalizing='01', log=False, read_N=N)
         map(tr_vecs.append, tr_vec)
         tr_labels += tr_label
 
@@ -56,8 +58,8 @@ if __name__ == '__main__':
     ts_labels = []
     for xl in xls:
         ts_vec, ts_label = make_input(xlsx=xl.filename, sheetnames=None,col=None,
-                                                min_row=128*80+1,fft_N=16, sample_cnt=20,
-                                                label=xl.label,normalizing='01', log=False,read_N=16)
+                                                min_row=128*80+1,fft_N=N, sample_cnt=20,
+                                                label=xl.label,normalizing='01', log=False,read_N=N)
         map(ts_vecs.append, ts_vec)
         ts_labels += ts_label
 
@@ -97,8 +99,8 @@ if __name__ == '__main__':
     """
     学習モデルのローカル保存
     """
-    joblib.dump(clf, R('misc\model\Line_Tackle_Against_Cont_16p.pkl'))
-    joblib.dump(clf2, R('misc\model\Line_Tackle_VS_Cont_16p.pkl'))
+    joblib.dump(clf, R('misc\model\Line_Pkick_Against_Cont_{}p.pkl'.format(N)))
+    joblib.dump(clf2, R('misc\model\Line_Pkick_VS_Cont_{}p.pkl'.format(N)))
 
     #One-against-oneの結果
     #confusion matrix（ラベルの分類表。分類性能が高いほど対角線に値が集まる）
