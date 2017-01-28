@@ -51,16 +51,16 @@ def make_acts2(X, vs='VS', p=16):
         'VS' or 'Against'
     """
 
-    mm = {'instantaneous':R('misc/model/Line_I_V_16p.pkl')}
+    mm = {'instantaneous':R('misc/model/Line_Inst_V_{}p.pkl'.format(p))}
     P = pred(X, mm['instantaneous']) # 瞬間的な動作として予測
     inst_s = set(P) # 予測された瞬間的な動作のセット
+    print "P-set:", inst_s
     for s in inst_s:
         mm[s+'-vs-continuous'] = R('misc/model/Line_{}_{}_Cont_{}p.pkl'
                                    .format(s.capitalize(), vs, p))
-    print "P-set:", inst_s
     for s, m in ((s, mm[s+'-vs-continuous']) for s in inst_s):
         mask = P==s
-        P[mask] = pred(P[mask], m)
+        P[mask] = pred(X[mask], m)
     return P
 
 
@@ -239,4 +239,4 @@ if __name__ == '__main__':
     def main2():
         pass
         #times, lats, lons =
-    main()
+    #main()
