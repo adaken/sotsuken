@@ -13,14 +13,16 @@ if __name__ == '__main__':
     sample_cnt = 100
 
     Xl = namedtuple('Xl', 'path, sheets, col, label')
+
+    
     xls = [Xl(R('data/raw/invectest/jump.xlsx'), ['Sheet'], 'A', 'jump'),
            Xl(R('data/raw/invectest/run.xlsx'), ['Sheet6', 'Sheet5', 'Sheet4'], 'F', 'run'),
            Xl(R('data/raw/invectest/walk.xlsx'), ['Sheet4', 'Sheet1'], 'F', 'walk')]
-    
+
     fc = {'jump': [1, 0, 0],
           'run': [0, 1, 0],
           'walk': [0, 0, 1]}
-    
+
     """
     xls = [Xl(R('data/acc/pass_acc_128p_131data.xlsx'), ['Sheet1'], 'A', 'pass'),
            Xl(R('data/acc/placekick_acc_128p_101data.xlsx'), ['Sheet1'], 'A', 'pkick'),
@@ -35,9 +37,9 @@ if __name__ == '__main__':
           'walk': [0, 1, 1]}
     """
 
+    #read_N = [32, 64, 96, 128]
     read_N = [32, 64, 96, 128]
-    #read_N = [32, 64, 96]
-    fft_n = [128]
+    fft_N =  [32, 64, 96, 128]
     wind_f = ['hanning']
 
     def make(N, wf, rn):
@@ -49,16 +51,20 @@ if __name__ == '__main__':
             labels += l
         return invec, labels
 
+    def do(i):
+        for wf in wind_f:
+            for N, rn in zip(fft_N, read_N):
+                invec, labels = make(N, wf, rn)
+                som = SOM(invec, labels, map_size)
+                map_, labels_, coords = som.train(train_cnt)
+                plt.imshow(map_, cmap='gray', interpolation='nearest')
+                for l, (c1, c2) in zip(labels_, coords):
+                    s = T('invectest/test_{}_{}pfft_{}-w_{}veclen.png'
+                          .format(i, N, wf, rn), mkdir=True)
+                    plt.text(c1, c2, l, color=fc[l], va='center', ha='center')
+                plt.axis('off')
+                plt.savefig(s)
+
     for i in xrange(2):
-        for N in fft_n:
-            for wf in wind_f:
-                for rn in read_N:
-                    invec, labels = make(N, wf, rn)
-                    som = SOM(invec, labels, map_size)
-                    map_, labels_, coords = som.train(train_cnt)
-                    plt.imshow(map_, cmap='gray', interpolation='nearest')
-                    for l, (c1, c2) in zip(labels_, coords):
-                        s = T('invectest7_act_divide_on_max/{}_test_{}p_{}_{}veclen.png'.format(i, N, wf, rn), mkdir=True)
-                        plt.text(c1, c2, l, color=fc[l], va='center', ha='center')
-                    plt.axis('off')
-                    plt.savefig(s)
+        do(i)
+

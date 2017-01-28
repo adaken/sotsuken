@@ -10,9 +10,11 @@ from app.kml.animationkml import AnimationKml, KmlConfig
 def test():
     cnf = KmlConfig(iconscale=1, sampling_step=3, kmz=True)
     icon = lambda l, i: l + '_{}.png'.format(i)
-    model = R('misc/model/Linear_A.pkl')
-    m = os.path.splitext(os.path.basename(model))[0]
-    readn = 128
+    model = R('misc/model/Def_V_32p.pkl')
+    modelname = os.path.splitext(os.path.basename(model))[0]
+    exfs = 32
+    read_N = 32
+    fft_N = 32
     overlap = 0
     iconbase = R('img/icons/').p
 
@@ -28,8 +30,10 @@ def test():
         def acc(ax, sheet):
             #ws = ExcelWrapper(ax)[sheet]
             #letter, rowidx = ws.find_letter_by_header('Magnitude Vector')
-            a = make_input(xlsx=ax, sample_cnt=None, fft_N=128, read_N=readn,
-                           sheetnames=[sheet],
+            print "xl:", ax
+            print "sh:", sheet
+            a = make_input(xlsx=ax, sample_cnt=None, exfs=exfs, fft_N=fft_N,
+                           read_N=read_N, sheetnames=[sheet],
                            normalizing='01', overlap=overlap)
             return a
             #return list(ws.iter_part_col(letter, 128, (rowidx+1, None)))
@@ -53,9 +57,10 @@ def test():
         feats = acc
         print len(times), len(lats), len(lons), len(acc)
         anime_kml = AnimationKml(times, lats, lons)
-        make_kml_with_acts(L('evaltest/test_new_{}_{}len_{}_{}overlap.kmz'.format(m, readn, i, overlap), mkdir=True),
+        make_kml_with_acts(T('evaltest/{}_{}-model_{}-vec_{}p-fft_{}-ovlap.kmz'
+                             .format(i, modelname, read_N, fft_N, overlap), mkdir=True),
                            anime_kml, kml_cnf=cnf, features=feats,
-                           model=model, act_icons=icons(i), sample_n=readn - overlap)
+                           model=model, act_icons=icons(i), sample_n=read_N - overlap)
 
 if __name__ == '__main__':
     test()

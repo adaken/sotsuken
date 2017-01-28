@@ -12,6 +12,7 @@ from sklearn.metrics import classification_report
 from sklearn.externals import joblib
 import numpy as np
 from app import R, T, L
+from math import gamma
 
 if __name__ == '__main__':
     """
@@ -28,9 +29,10 @@ if __name__ == '__main__':
     tr_vecs = []
     tr_labels = []
     for xl in xls:
+        print "read", xl.label
         tr_vec, tr_label = make_input(xlsx=xl.filename, sheetnames=None,col=None,
-                                                min_row=2,fft_N=128, sample_cnt=80,
-                                                label=xl.label,normalizing='01', log=False,read_N=96)
+                                      min_row=2,fft_N=32, sample_cnt=80,
+                                      label=xl.label,normalizing='01', log=False, read_N=32)
         map(tr_vecs.append, tr_vec)
         tr_labels += tr_label
 
@@ -55,8 +57,8 @@ if __name__ == '__main__':
     ts_labels = []
     for xl in xls:
         ts_vec, ts_label = make_input(xlsx=xl.filename, sheetnames=None,col=None,
-                                                min_row=128*80+1,fft_N=128, sample_cnt=20,
-                                                label=xl.label,normalizing='01', log=False,read_N=96)
+                                                min_row=128*80+1,fft_N=32, sample_cnt=20,
+                                                label=xl.label,normalizing='01', log=False,read_N=32)
         map(ts_vecs.append, ts_vec)
         ts_labels += ts_label
 
@@ -84,35 +86,35 @@ if __name__ == '__main__':
     教師データの学習分類
     """
     # test_gridsearchを参照
-    est = SVC(C=1000, kernel='rbf',gamma=0.001)    # パラメータ (C-SVC, RBF カーネル, C=1000)
+    est = SVC(C=1, kernel='rbf',gamma=0.1)    # パラメータ (C-SVC, RBF カーネル, C=1000)
     clf = OneVsRestClassifier(est)  #多クラス分類器One-against-restによる識別
     clf.fit(tr_vecs_rand, tr_labels_rand)
     pred = clf.predict(ts_vecs_rand)
 
-    clf2 = SVC(C=1000, kernel='rbf',gamma=0.001)    # パラメータ (C-SVC, RBF カーネル, C=1000)
+    clf2 = SVC(C=1, kernel='rbf',gamma=0.1)    # パラメータ (C-SVC, RBF カーネル, C=1000)
     clf2.fit(tr_vecs_rand, tr_labels_rand)
     pred2 = clf2.predict(ts_vecs_rand)  #多クラス分類器One-versus-oneによる識別
 
     """
     学習モデルのローカル保存
     """
-    joblib.dump(clf, R('misc\model\Rbf_A_96p.pkl'))
-    joblib.dump(clf2, R('misc\model\Rbf_V_96p.pkl'))
+    joblib.dump(clf, R('misc\model\Def_A_32p.pkl'))
+    joblib.dump(clf2, R('misc\model\Def_V_32p.pkl'))
 
+    #One-against-oneの結果
     #confusion matrix（ラベルの分類表。分類性能が高いほど対角線に値が集まる）
     print confusion_matrix(ts_labels_rand, pred)
-    print classification_report(ts_labels_rand, pred)
-    print accuracy_score(ts_labels_rand, pred)
-    
     #分類結果 適合率 再現率 F値の表示
+    print classification_report(ts_labels_rand, pred)
+    #正答率 分類ラベル/正解ラベル
+    print accuracy_score(ts_labels_rand, pred)
+    print   #改行
     
+    #One-versus-oneの結果
     print confusion_matrix(ts_labels_rand, pred2)
     print classification_report(ts_labels_rand, pred2)
-    
-    #正答率 分類ラベル/正解ラベル
-    
     print accuracy_score(ts_labels_rand, pred2)
-
+    
     print ts_labels_rand       #分類前ラベル
     print list(pred)   #One-against-restによる識別ラベル
     print list(pred2)  #One-versus-oneによる識別ラベル
