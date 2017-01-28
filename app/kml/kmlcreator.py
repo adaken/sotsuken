@@ -51,7 +51,7 @@ def make_acts2(X, vs='VS', p=16):
         'VS' or 'Against'
     """
 
-    mm = {'instantaneous':R('misc/model/Line_Inst_V_{}p.pkl'.format(p))}
+    mm = {'instantaneous':R('misc/model/Line_Inst_{}_{}p.pkl'.format(vs, p))}
     P = pred(X, mm['instantaneous']) # 瞬間的な動作として予測
     inst_s = set(P) # 予測された瞬間的な動作のセット
     print "P-set:", inst_s
