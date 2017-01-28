@@ -27,8 +27,8 @@ if __name__ == '__main__':
                                T(r'players{}.png').format(i+1))
         ws = ExcelWrapper(xl.path).get_sheet('Sheet1')
         times, lons, lats = ws.iter_cols(('A', 'K', 'J'), (9, None),
-                                         iter_cell=True, log=True)
+                                         iter_cell=False, log=True)
         #KmlWrapper().createAnimeKml(save, times, lons, lats, icon_res=icon_res, icon_scale=0.3, sampling_step=10)
-        ak = SimpleAnimationKml(times, lons, lats, icon=icon_res)
+        ak = SimpleAnimationKml(times, lats, lons, icon=icon_res)
         #cnf = KmlConfig(iconscale=0.2, kmz=True, sampling_step=5)
-        ak(save, kml_cnf=None)
+        ak(save, kml_cnf=KmlConfig(iconscale=0.5, sampling_step=5, kmz=True))

@@ -412,9 +412,9 @@ class ExcelWrapper(object):
             assert len(row_range) == 2
             assert length > 0
             from app.util import split_nlist
-            return split_nlist(self.get_col(col, row_range), length)
+            #return split_nlist(self.get_col(col, row_range), length)
 
-            """
+
             r1 = row_range[0]
             if row_range[1] is not None:
                 limit_row = row_range[1]
@@ -437,7 +437,6 @@ class ExcelWrapper(object):
                         continue
                     else:
                         break
-            """
 
 if __name__ == '__main__':
     from app.util import timecounter
