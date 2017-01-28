@@ -5,6 +5,7 @@ from app.som.modsom import SOM
 from collections import namedtuple
 from app import R, T, L
 import matplotlib.pyplot as plt
+import numpy as np
 plt.hold(False)
 
 if __name__ == '__main__':
@@ -26,9 +27,9 @@ if __name__ == '__main__':
     """
     xls = [
         Xl(R('data/acc/pass_acc_128p_131data.xlsx'), ['Sheet1'], 'A', 'pass'),
-        #Xl(R('data/acc/placekick_acc_128p_101data.xlsx'), ['Sheet1'], 'A', 'pkick'),
-        #Xl(R('data/acc/run_acc_128p_132data.xlsx'), ['Sheet1'], 'A', 'run'),
-        #Xl(R('data/acc/tackle_acc_128p_111data.xlsx'), ['Sheet1'], 'A', 'tackle'),
+        Xl(R('data/acc/placekick_acc_128p_101data.xlsx'), ['Sheet1'], 'A', 'pkick'),
+        Xl(R('data/acc/run_acc_128p_132data.xlsx'), ['Sheet1'], 'A', 'run'),
+        Xl(R('data/acc/tackle_acc_128p_111data.xlsx'), ['Sheet1'], 'A', 'tackle'),
         Xl(R('data/raw/invectest/walk.xlsx'), ['Sheet4', 'Sheet1'], 'F', 'walk')
         ]
 
@@ -69,6 +70,18 @@ if __name__ == '__main__':
                 plt.axis('off')
                 plt.savefig(s)
 
-    for i in xrange(1):
-        do(i)
+    def func1():
+        for i in xrange(1):
+            do(i)
 
+    def func2():
+        from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+        from app.kml.kmlcreator import make_acts2
+        X, L = make(32, 'hanning', 32)
+        P = make_acts2(np.array(X), vs='Against', p=32)
+        print P
+        print accuracy_score(L, P)
+        print classification_report(L, P)
+        print confusion_matrix(L, P)
+
+    func2()
