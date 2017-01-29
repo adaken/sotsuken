@@ -10,13 +10,13 @@ from app.kml.animationkml import AnimationKml, KmlConfig
 def test():
     cnf = KmlConfig(iconscale=1, sampling_step=3, kmz=True)
     icon = lambda l, i: l + '_{}.png'.format(i)
-    model = R('misc/model/Rbf_5class_VS_32p.pkl')
+    model = R('misc/model/rbf_1k_1k-_VS_64p.pkl')
     #model = 'mod_Against_16_p.pkl'
     modelname = os.path.splitext(os.path.basename(model))[0]
-    exfs = 32
-    read_N = 32
-    fft_N = 32
-    overlap = 0
+    exfs = 64
+    read_N = 64
+    fft_N = 64
+    overlap =32
     iconbase = R('img/icons/').p
 
     def accgps():
