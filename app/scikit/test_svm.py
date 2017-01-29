@@ -21,11 +21,11 @@ if __name__ == '__main__':
     xls =  (
          #Xl(R(r'data\acc\pass_acc_128p_131data.xlsx'), 'pass',),
          Xl(R(r'data\acc\placekick_acc_128p_101data.xlsx'), 'pkick'),
-         Xl(R(r'data\acc\run_acc_128p_132data.xlsx'), 'run'),
-         #Xl(R(r'data\acc\tackle_acc_128p_111data.xlsx'), 'tackle'),
-         Xl(R(r'data/raw/invectest/walk.xlsx'), 'walk')
+         #Xl(R(r'data\acc\run_acc_128p_132data.xlsx'), 'run'),
+         Xl(R(r'data\acc\tackle_acc_128p_111data.xlsx'), 'tackle'),
+         #Xl(R(r'data/raw/invectest/walk.xlsx'), 'walk')
         )
-    N = 32
+    N = 64
     tr_vecs = []
     tr_labels = []
     for xl in xls:
@@ -98,8 +98,8 @@ if __name__ == '__main__':
     """
     学習モデルのローカル保存
     """
-    joblib.dump(clf, R('misc\model\Line_Pkick_Against_Cont_{}p.pkl'.format(N)))
-    joblib.dump(clf2, R('misc\model\Line_Pkick_VS_Cont_{}p.pkl'.format(N)))
+    #joblib.dump(clf, R('misc\model\Line_Pkick_Against_Cont_{}p.pkl'.format(N)))
+    #joblib.dump(clf2, R('misc\model\Line_Pkick_VS_Cont_{}p.pkl'.format(N)))
 
     #One-against-oneの結果
     #confusion matrix（ラベルの分類表。分類性能が高いほど対角線に値が集まる）
