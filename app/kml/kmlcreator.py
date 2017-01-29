@@ -22,6 +22,7 @@ def make_kml_with_acts(savename, anime_kml, kml_cnf, features, model,
     """
 
     acts = make_acts(features, model) # アクションのiterator
+    #acts = make_acts2(features, vs='VS', p=32) # アクションのiterator
     len_, acts = get_iter_len(acts)
     acts = adjust_acts(acts, len_, sample_n) # 長さを調整
 
@@ -52,6 +53,7 @@ def make_acts2(X, vs='VS', p=16):
     """
 
     mm = {'instantaneous':R('misc/model/Line_Inst_{}_{}p.pkl'.format(vs, p))}
+    print "xshape:", X.shape
     P = pred(X, mm['instantaneous']) # 瞬間的な動作として予測
     inst_s = set(P) # 予測された瞬間的な動作のセット
     print "P-set:", inst_s

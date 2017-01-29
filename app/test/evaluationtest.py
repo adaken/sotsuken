@@ -10,7 +10,8 @@ from app.kml.animationkml import AnimationKml, KmlConfig
 def test():
     cnf = KmlConfig(iconscale=1, sampling_step=3, kmz=True)
     icon = lambda l, i: l + '_{}.png'.format(i)
-    model = R('misc/model/Def_V_32p.pkl')
+    model = R('misc/model/Rbf_5class_VS_32p.pkl')
+    #model = 'mod_Against_16_p.pkl'
     modelname = os.path.splitext(os.path.basename(model))[0]
     exfs = 32
     read_N = 32
@@ -34,8 +35,8 @@ def test():
             print "sh:", sheet
             a = make_input(xlsx=ax, sample_cnt=None, exfs=exfs, fft_N=fft_N,
                            read_N=read_N, sheetnames=[sheet],
-                           normalizing='01', overlap=overlap)
-            return a
+                           normalizing=None, overlap=overlap)
+            return scale_zero_one(a)
             #return list(ws.iter_part_col(letter, 128, (rowidx+1, None)))
 
         for gx, ax in zip(gpsxls, accxls):
@@ -57,7 +58,7 @@ def test():
         feats = acc
         print len(times), len(lats), len(lons), len(acc)
         anime_kml = AnimationKml(times, lats, lons)
-        make_kml_with_acts(T('evaltest/{}_{}-model_{}-vec_{}p-fft_{}-ovlap.kmz'
+        make_kml_with_acts(T('evaltest/mkact3/{}_{}-model_{}-vec_{}p-fft_{}-ovlap.kmz'
                              .format(i, modelname, read_N, fft_N, overlap), mkdir=True),
                            anime_kml, kml_cnf=cnf, features=feats,
                            model=model, act_icons=icons(i), sample_n=read_N - overlap)

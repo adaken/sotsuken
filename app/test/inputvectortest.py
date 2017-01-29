@@ -10,7 +10,7 @@ plt.hold(False)
 
 if __name__ == '__main__':
     train_cnt = 200
-    map_size = (40, 50)
+    map_size = (40, 40)
     sample_cnt = 100
 
     Xl = namedtuple('Xl', 'path, sheets, col, label')
@@ -48,12 +48,20 @@ if __name__ == '__main__':
 
     def make(N, wf, rn):
         invec, labels = [], []
-        for xl in xls:
+        fig, ax = plt.subplots(nrows=2, ncols=3)
+        ax = ax.ravel()
+        for x, xl in enumerate(xls):
             i, l = make_input(xl.path, sample_cnt, xl.sheets, col=xl.col,
                               read_N=rn, fft_N=N, wf=wf, label=xl.label,
-                              exfs=128, normalizing='01')
+                              exfs=128, normalizing=None)
             invec += i.tolist()
             labels += l
+            ax[x].set_title(xl.label)
+            ax[x].hold(True)
+            for j in i:
+                ax[x].plot(j)
+        invec = scale_zero_one(np.array(invec), None)
+        fig.savefig(r'E:\test{}-rn.png'.format(rn))
         return invec, labels
 
     def do(i):
@@ -62,13 +70,14 @@ if __name__ == '__main__':
                 invec, labels = make(N, wf, rn)
                 som = SOM(invec, labels, map_size)
                 map_, labels_, coords = som.train(train_cnt)
-                plt.imshow(map_, cmap='gray', interpolation='nearest')
+                fig, ax = plt.subplots(1, 1)
+                ax.imshow(map_, cmap='gray', interpolation='nearest')
                 for l, (c1, c2) in zip(labels_, coords):
-                    s = T('invectest-inst-vs-cont/test_{}_{}pfft_{}-w_{}-len_{}-loop.png'
+                    s = T('invectest_grad/test2_{}_{}pfft_{}-w_{}-len_{}-loop.png'
                           .format(i, N, wf, rn, train_cnt), mkdir=True)
-                    plt.text(c1, c2, l, color=fc[l], va='center', ha='center')
-                plt.axis('off')
-                plt.savefig(s)
+                    ax.text(c1, c2, l, color=fc[l], va='center', ha='center')
+                ax.axis('off')
+                fig.savefig(s)
 
     def func1():
         for i in xrange(1):
@@ -77,7 +86,7 @@ if __name__ == '__main__':
     def func2():
         from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
         from app.kml.kmlcreator import make_acts2
-        n = 16
+        n = 32
         X, L = make(n, 'hanning', n)
         P = make_acts2(np.array(X), vs='VS', p=n)
         print P

@@ -36,8 +36,9 @@ class ConfusionMatrix(object):
     def fmeasure(self):
         """F値"""
         prec, rec = self.precision, self.recall
-        fm = (2 * rec * prec) / (rec + prec)
-        fm[np.isnan(fm)] = 1.
+        rp = rec + prec
+        fm = (2 * rec * prec) / rp
+        fm[np.isnan(fm)] = 0.
         return fm
 
 if __name__ == '__main__':

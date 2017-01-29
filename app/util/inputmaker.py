@@ -190,17 +190,20 @@ def make_input(xlsx, sample_cnt, sheetnames=None, col=None, min_row=2,
     normalizer = scale_zero_one if normalizing=='01' \
     else standardize if normalizing=='std' \
     else lambda a, axis: a
-    input_vecs /= np.max(input_vecs, axis=1)[:, np.newaxis] # 最大値で割る
+    #input_vecs /= np.max(input_vecs, axis=1)[:, np.newaxis] # 最大値で割る
     input_vecs = normalizer(fftn(arrs=input_vecs, fft_N=fft_N, wf=wf, fs=100), axis=None)
+
     """
+    # test
     inp, freq = fftn(arrs=input_vecs, fft_N=fft_N, wf=wf, fs=100, freq=True)
     inp = normalizer(inp, axis=None)
-    import matplotlib.pyplot as plt
-    plt.hold(True)
-    plt.plot(freq, inp[0])
-    for i in xrange(400, 700):
-        plt.plot(inp[i])
-    plt.show()
+    inp = inp - inp.mean()
+    input_vecs = np.gradient(inp, axis=1)
+    #import matplotlib.pyplot as plt
+    #plt.hold(True)
+    #plt.plot(freq, inp[0])
+    #for i in xrange(100): plt.plot(inp[i])
+    #plt.show()
     """
 
     if label is not None:
