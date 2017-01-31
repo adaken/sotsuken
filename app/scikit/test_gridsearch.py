@@ -47,6 +47,7 @@ if __name__ == '__main__':
         map(tr_vecs.append, tr_vec)
         tr_labels += tr_label
     scale_zero_one(np.array(tr_vecs))
+
     from app.util.inputmaker import random_input_iter
     tr_vecs_rand, tr_labels_rand = [], []
     for i, j in random_input_iter(tr_vecs, tr_labels):

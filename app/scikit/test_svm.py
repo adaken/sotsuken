@@ -27,7 +27,6 @@ if __name__ == '__main__':
          Xl(R(r'data/raw/invectest/walk.xlsx'), 'walk')
         )
     N = 64
-
     tr_vecs = []
     tr_labels = []
     for xl in xls:
@@ -104,9 +103,8 @@ if __name__ == '__main__':
     """
     学習モデルのローカル保存
     """
-
-    #joblib.dump(clf, R('misc\model\Rbf_5class_A_{}p.pkl'.format(N)))
-    #joblib.dump(clf2, R('misc\model\Rbf_5class_V_{}p.pkl'.format(N)))
+    joblib.dump(clf, R('misc/model/rbf_1k_1k-_A_{}p.pkl'.format(N)))
+    joblib.dump(clf2, R('misc/model/rbf_1k_1k-_VS_{}p.pkl'.format(N)))
 
     #One-against-oneの結果
     #confusion matrix（ラベルの分類表。分類性能が高いほど対角線に値が集まる）
