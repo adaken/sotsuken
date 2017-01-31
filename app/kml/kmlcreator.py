@@ -8,9 +8,10 @@ from kmlwrapper import KmlWrapper
 from datetime import timedelta
 from sklearn.externals import joblib
 from app import R, T, L
+import numpy as np
 
 def make_kml_with_acts(savename, anime_kml, kml_cnf, features, model,
-                       act_icons=None, sample_n=128, subfeat=None):
+                       act_icons=None, sample_n=128):
     """アクションを使用したkmlを作成
 
     :param savename : str
@@ -27,6 +28,16 @@ def make_kml_with_acts(savename, anime_kml, kml_cnf, features, model,
     acts = adjust_acts(acts, len_, sample_n) # 長さを調整
 
     # kml作成
+    ak = ActionAnimationKml.from_anime_kml(anime_kml, acts=acts,
+                                           act_icons=act_icons)
+    ak.to_animatable(savename, kml_cnf)
+    print "saved kml at {}".format(savename)
+
+def make_kml_with_acts2(savename, anime_kml, kml_cnf, X, subX, model=None,
+                        submodel=None, act_icons=None, sample_n=128):
+    acts = make_acts3(X, subX, model, submodel)
+    len_, acts = get_iter_len(acts)
+    acts = adjust_acts(acts, len_, sample_n)
     ak = ActionAnimationKml.from_anime_kml(anime_kml, acts=acts,
                                            act_icons=act_icons)
     ak.to_animatable(savename, kml_cnf)
@@ -65,6 +76,24 @@ def make_acts2(X, vs='VS', p=16):
         P[mask] = pred(X[mask], m)
     return P
 
+def make_acts3(X, subX, model=None, submodel=None, prevail=('walk', 'run')):
+    if model is None:
+        model = R("misc/model/Linear_5class_V_32p.pkl")
+    if submodel is None:
+        submodel = R("misc/model/Linear_5class_V_64p.pkl")
+
+    clf, subclf = joblib.load(model), joblib.load(submodel)
+    P, subP = clf.predict(X), subclf.predict(subX)
+    m = np.any([P == i for i in prevail], axis=0)
+    m2 = np.any([subP == i for i in prevail], axis=0)
+    #print "maskshape:\n", m.shape
+    #print "pred     :\n", P
+    #print "mask     :\n", m
+    print "P is C:\n", P[m]
+    print "subP is C:\n", subP[m2]
+    P[m2] = subP[m2]
+    #subP[m] = P[m]
+    return P
 
 def adjust_acts(acts, gps_len, sample_num, gps_hz=15, acc_hz=100):
     """アクションのリストの長さをGPSデータと調整してイテレート

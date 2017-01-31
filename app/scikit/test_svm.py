@@ -27,6 +27,7 @@ if __name__ == '__main__':
          Xl(R(r'data/raw/invectest/walk.xlsx'), 'walk')
         )
     N = 64
+
     tr_vecs = []
     tr_labels = []
     for xl in xls:
@@ -91,12 +92,12 @@ if __name__ == '__main__':
     教師データの学習分類
     """
     # test_gridsearchを参照
-    est = SVC(C=1000, kernel='rbf',gamma=0.001)    # パラメータ (C-SVC, RBF カーネル, C=1000)
+    est = SVC(C=1000, kernel='linear',gamma=0.001)    # パラメータ (C-SVC, RBF カーネル, C=1000)
     clf = OneVsRestClassifier(est)  #多クラス分類器One-against-restによる識別
     clf.fit(tr_vecs_rand, tr_labels_rand)
     pred = clf.predict(ts_vecs_rand)
 
-    clf2 = SVC(C=1000, kernel='rbf',gamma=0.001)    # パラメータ (C-SVC, RBF カーネル, C=1000)
+    clf2 = SVC(C=1000, kernel='linear',gamma=0.001)    # パラメータ (C-SVC, RBF カーネル, C=1000)
     clf2.fit(tr_vecs_rand, tr_labels_rand)
     pred2 = clf2.predict(ts_vecs_rand)  #多クラス分類器One-versus-oneによる識別
 
@@ -104,8 +105,8 @@ if __name__ == '__main__':
     学習モデルのローカル保存
     """
 
-    joblib.dump(clf, R('misc\model\Rbf_5class_A_{}p.pkl'.format(N)))
-    joblib.dump(clf2, R('misc\model\Rbf_5class_VS_{}p.pkl'.format(N)))
+    #joblib.dump(clf, R('misc\model\Rbf_5class_A_{}p.pkl'.format(N)))
+    #joblib.dump(clf2, R('misc\model\Rbf_5class_V_{}p.pkl'.format(N)))
 
     #One-against-oneの結果
     #confusion matrix（ラベルの分類表。分類性能が高いほど対角線に値が集まる）
@@ -121,9 +122,9 @@ if __name__ == '__main__':
     print classification_report(ts_labels_rand, pred2)
     print accuracy_score(ts_labels_rand, pred2)
 
-    print ts_labels_rand       #分類前ラベル
-    print list(pred)   #One-against-restによる識別ラベル
-    print list(pred2)  #One-versus-oneによる識別ラベル
+    print "分類前:", ["{:^6}".format(p) for p in ts_labels_rand] #分類前ラベル
+    print "OAR   :", ["{:^6}".format(p) for p in pred]   #One-against-restによる識別ラベル
+    print "OVO   :", ["{:^6}".format(p) for p in pred2]  #One-versus-oneによる識別ラベル
 
     """
     target_names = ['class 0', 'class 1', 'class 2']

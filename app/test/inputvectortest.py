@@ -9,8 +9,8 @@ import numpy as np
 plt.hold(False)
 
 if __name__ == '__main__':
-    train_cnt = 200
-    map_size = (40, 40)
+    train_cnt = 500
+    map_size = (40, 50)
     sample_cnt = 100
 
     Xl = namedtuple('Xl', 'path, sheets, col, label')
@@ -39,11 +39,10 @@ if __name__ == '__main__':
           'tackle': [1, 0, 0],
           'walk': [0, 1, 1]}
 
-
     #read_N = [32, 64, 96, 128]
-    read_N = [16, 32]
+    read_N = [96]
     #fft_N =  [32, 64, 96, 128]
-    fft_N = [16, 32]
+    fft_N =  [128]
     wind_f = ['hanning']
 
     def make(N, wf, rn):
@@ -73,7 +72,7 @@ if __name__ == '__main__':
                 fig, ax = plt.subplots(1, 1)
                 ax.imshow(map_, cmap='gray', interpolation='nearest')
                 for l, (c1, c2) in zip(labels_, coords):
-                    s = T('invectest_grad/test2_{}_{}pfft_{}-w_{}-len_{}-loop.png'
+                    s = T('invectest/nmfix_{}_{}pfft_{}-w_{}-len_{}-loop.png'
                           .format(i, N, wf, rn, train_cnt), mkdir=True)
                     ax.text(c1, c2, l, color=fc[l], va='center', ha='center')
                 ax.axis('off')
@@ -94,4 +93,4 @@ if __name__ == '__main__':
         print classification_report(L, P)
         print confusion_matrix(L, P)
 
-    func2()
+    func1()

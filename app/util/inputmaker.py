@@ -25,12 +25,12 @@ def _sample_xlsx(xlsx, sample_cnt, sheetnames, col, min_row, exfs, read_N, fft_N
         sample_cnt = 0
         if overlap:
             for s in sheets:
-                max_ = (s.ws.max_row - min_row - (fft_N - overlap)) \
-                / (fft_N - overlap)
+                max_ = (s.ws.max_row - min_row) / read_N
+                max_ += (s.ws.max_row - (min_row + read_N - overlap)) / read_N
                 sample_cnt += max_
         else:
             for s in sheets:
-                max_ = (s.ws.max_row - min_row) / fft_N
+                max_ = (s.ws.max_row - min_row) / read_N
                 sample_cnt += max_
 
     def iter_alt(iter1, iter2):
@@ -45,11 +45,12 @@ def _sample_xlsx(xlsx, sample_cnt, sheetnames, col, min_row, exfs, read_N, fft_N
         if col is None:
             col, _ = ws.find_letter_by_header('Magnitude Vector')
 
+        # リストを要素をexfs個もつリストのリストに
         vec_iter = ws.iter_part_col(col, exfs, (min_row, None), log=log)
 
         if overlap:
-            _vec_iter = ws.iter_part_col(col, fft_N,
-                                         (min_row + fft_N - overlap, None),
+            _vec_iter = ws.iter_part_col(col, exfs,
+                                         (min_row + read_N - overlap, None),
                                          log=log)
             _iter = iter_alt(vec_iter, _vec_iter)
         else:
