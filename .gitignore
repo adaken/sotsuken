@@ -1,5 +1,9 @@
-*.pyc
 .checkstyle
 .git/
 .settings/
-svm/libsvm-3.21/
+*.pyc
+app/test/anytest.py
+tmp/
+log/
+res/bigfile/
+

@@ -1,0 +1,30 @@
+app ソースコード
+
+    - test 適当な実験などに使う
+        
+        - anytest.py gitignoreされる
+
+log ログ
+
+res リソース
+
+    - bigfile 50MB以上のデータ gitignoreされる
+    
+    - data
+        - acc 加速度データ
+        - fft FFTされた加速度データ
+        - gps GPSデータ
+        - kml KMLデータ
+        - raw 計測した未加工のExcelデータ
+        
+    - img 画像データ
+        - icon アイコンなど
+        
+    - misc 雑多なもの
+        -model svmなどの学習済みモデルファイル
+    
+    - sound 効果音, 音楽データ
+
+tmp 一時ファイルディレクトリ
+
+  
