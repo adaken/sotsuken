@@ -92,6 +92,7 @@ def make_acts3(X, subX, model=None, submodel=None, prevail=('walk', 'run')):
     print "P is C:\n", P[m]
     print "subP is C:\n", subP[m2]
     P[m2] = subP[m2]
+
     #subP[m] = P[m]
     return P
 
