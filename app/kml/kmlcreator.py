@@ -7,9 +7,11 @@ from collections import namedtuple
 from kmlwrapper import KmlWrapper
 from datetime import timedelta
 from sklearn.externals import joblib
+from app import R, T, L
+import numpy as np
 
 def make_kml_with_acts(savename, anime_kml, kml_cnf, features, model,
-                       act_icons=None):
+                       act_icons=None, sample_n=128):
     """アクションを使用したkmlを作成
 
     :param savename : str
@@ -21,10 +23,21 @@ def make_kml_with_acts(savename, anime_kml, kml_cnf, features, model,
     """
 
     acts = make_acts(features, model) # アクションのiterator
+    #acts = make_acts2(features, vs='VS', p=32) # アクションのiterator
     len_, acts = get_iter_len(acts)
-    acts = adjust_acts(acts, len_) # 長さを調整
+    acts = adjust_acts(acts, len_, sample_n) # 長さを調整
 
     # kml作成
+    ak = ActionAnimationKml.from_anime_kml(anime_kml, acts=acts,
+                                           act_icons=act_icons)
+    ak.to_animatable(savename, kml_cnf)
+    print "saved kml at {}".format(savename)
+
+def make_kml_with_acts2(savename, anime_kml, kml_cnf, X, subX, model=None,
+                        submodel=None, act_icons=None, sample_n=128):
+    acts = make_acts3(X, subX, model, submodel)
+    len_, acts = get_iter_len(acts)
+    acts = adjust_acts(acts, len_, sample_n)
     ak = ActionAnimationKml.from_anime_kml(anime_kml, acts=acts,
                                            act_icons=act_icons)
     ak.to_animatable(savename, kml_cnf)
@@ -34,9 +47,56 @@ def make_acts(features, model):
     """特徴ベクトルを訓練されたモデルで予測"""
 
     clf = joblib.load(model) # モデルをロード
-    return clf.predict(features) # 多クラス分類器による識別
+    labels = clf.predict(features) # 多クラス分類器による識別
+    return labels
 
-def adjust_acts(acts, gps_len, sample_num=128, gps_hz=15, acc_hz=100):
+def pred(X, model):
+    clf = joblib.load(model)
+    P = clf.predict(X)
+    return P
+
+def make_acts2(X, vs='VS', p=16):
+    """
+    :param X : 2Dndarray
+        入力ベクトル
+    :param vs : str
+        'VS' or 'Against'
+    """
+
+    mm = {'instantaneous':R('misc/model/Line_Inst_{}_{}p.pkl'.format(vs, p))}
+    print "xshape:", X.shape
+    P = pred(X, mm['instantaneous']) # 瞬間的な動作として予測
+    inst_s = set(P) # 予測された瞬間的な動作のセット
+    print "P-set:", inst_s
+    for s in inst_s:
+        mm[s+'-vs-continuous'] = R('misc/model/Line_{}_{}_Cont_{}p.pkl'
+                                   .format(s.capitalize(), vs, p))
+    for s, m in ((s, mm[s+'-vs-continuous']) for s in inst_s):
+        mask = P==s
+        P[mask] = pred(X[mask], m)
+    return P
+
+def make_acts3(X, subX, model=None, submodel=None, prevail=('walk', 'run')):
+    if model is None:
+        model = R("misc/model/Linear_5class_V_32p.pkl")
+    if submodel is None:
+        submodel = R("misc/model/Linear_5class_V_64p.pkl")
+
+    clf, subclf = joblib.load(model), joblib.load(submodel)
+    P, subP = clf.predict(X), subclf.predict(subX)
+    m = np.any([P == i for i in prevail], axis=0)
+    m2 = np.any([subP == i for i in prevail], axis=0)
+    #print "maskshape:\n", m.shape
+    #print "pred     :\n", P
+    #print "mask     :\n", m
+    print "P is C:\n", P[m]
+    print "subP is C:\n", subP[m2]
+    P[m2] = subP[m2]
+
+    #subP[m] = P[m]
+    return P
+
+def adjust_acts(acts, gps_len, sample_num, gps_hz=15, acc_hz=100):
     """アクションのリストの長さをGPSデータと調整してイテレート
 
     :param acts : iterable
@@ -211,4 +271,4 @@ if __name__ == '__main__':
     def main2():
         pass
         #times, lats, lons =
-    main()
+    #main()

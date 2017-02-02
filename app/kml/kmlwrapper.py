@@ -4,7 +4,7 @@ import simplekml as simk
 
 class KmlWrapper:
     """非推奨 actionkml.AnimeKmlを使ったほうがよい"""
-    
+
     def __init__(self):
         pass
 
@@ -147,9 +147,9 @@ class KmlWrapper:
     def _format_times(self, times):
         """
         タイムスタンプの形式を整える
-        yyyy/m/dirmanager hh:mm:ss.mmm -> yyyy-mm-dd"T"hh:mm:ss.mmm"Z"
-        "%Y-%m-%dirmanager %H:%M:%S.%f" # 元の形式
-        "%Y-%m-%dirmanager %H:%M:%S" # microsecondが0のときの形式
+        yyyy/m/hh:mm:ss.mmm -> yyyy-mm-dd"T"hh:mm:ss.mmm"Z"
+        "%Y-%m-%%H:%M:%S.%f" # 元の形式
+        "%Y-%m-%%H:%M:%S" # microsecondが0のときの形式
         """
         format_new = "%Y-%m-%dT%H:%M:%S.%fZ" # 新しい形式
         return [t.strftime(format_new) for t in times]

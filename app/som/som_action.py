@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 import json
 import numpy as np
 import matplotlib.cm as cm
-from itertools import chain, product, izip
+from itertools import chain, product, izip, islice
 from app.util.jsonio import iter_inputs_json
 
-def som_json(jsons, labels, label_colors=None, train_cnt=50, mapsize=None):
+def som_json(jsons, labels, label_colors=None, train_cnt=50, mapsize=None, s=100):
     """jsonからsom
 
     :param jsons : list of str
@@ -26,7 +26,7 @@ def som_json(jsons, labels, label_colors=None, train_cnt=50, mapsize=None):
     inputs = []
     for j, label in zip(jsons, labels):
         _, f_iter  = iter_inputs_json(j, True)
-        inputs = chain(inputs, product(f_iter, [label]))
+        inputs = chain(inputs, product(islice(f_iter, s), [label]))
 
     if label_colors is None:
         len_ = len(labels)
@@ -47,14 +47,22 @@ def som_json(jsons, labels, label_colors=None, train_cnt=50, mapsize=None):
     for label, coord in zip(labels, coords):
         x, y = coord
         plt.text(x, y, label, color=label_colors[label])
+    plt.axis('off')
     plt.show()
 
 if __name__ == '__main__':
     from app import R
-    som_json([
-        R('data/fft/placekick_acc_128p_101data.json'),
-        R('data/fft/run_acc_128p_132data.json'),
-        R('data/fft/tackle_acc_128p_111data.json'),
-        R('data/fft/pass_acc_128p_131data.json')
-        ],
-        ['PKick', 'Run', 'Tackle', 'Pass'], train_cnt=400)
+    def func1():
+        labels = ['pkick', 'run', 'tackle', 'pass']
+        colors = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 0, 1]]
+        som_json([
+            R('data/fft/placekick_acc_128p_101data_nm-01.json'),
+            R('data/fft/run_acc_128p_132data_nm-01.json'),
+            R('data/fft/tackle_acc_128p_111data_nm-01.json'),
+            R('data/fft/pass_acc_128p_131data_nm-01.json')
+            ],
+            labels,
+            {l: c for l, c in zip(labels, colors)},
+            train_cnt=500, s=10)
+
+    func1()

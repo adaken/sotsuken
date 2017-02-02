@@ -15,6 +15,7 @@ from sklearn.externals import joblib
 from sklearn.grid_search import GridSearchCV
 import numpy as np
 from app import R, T, L
+from app.util.normalize import scale_zero_one
 
 if __name__ == '__main__':
     # 調整パラメータ定義
@@ -33,16 +34,19 @@ if __name__ == '__main__':
          Xl(R(r'data\acc\pass_acc_128p_131data.xlsx'), 'pass',),
          Xl(R(r'data\acc\placekick_acc_128p_101data.xlsx'), 'pk'),
          Xl(R(r'data\acc\run_acc_128p_132data.xlsx'), 'run'),
-         Xl(R(r'data\acc\tackle_acc_128p_111data.xlsx'), 'tackle')
+         Xl(R(r'data\acc\tackle_acc_128p_111data.xlsx'), 'tackle'),
+         Xl(R(r'data/raw/invectest/walk.xlsx'), 'walk')
         )
     tr_vecs = []
     tr_labels = []
+    N = 32
     for xl in xls:
         tr_vec, tr_label = make_input(xlsx=xl.filename, sheetnames=None,col=None,
-                                                min_row=2,fft_N=128, sample_cnt=80,
-                                                label=xl.label,normalizing='01', log=False)
+                                                min_row=2,fft_N=N, sample_cnt=80,
+                                                label=xl.label,normalizing=None, log=False,read_N=N)
         map(tr_vecs.append, tr_vec)
         tr_labels += tr_label
+    scale_zero_one(np.array(tr_vecs))
 
     from app.util.inputmaker import random_input_iter
     tr_vecs_rand, tr_labels_rand = [], []
@@ -57,10 +61,11 @@ if __name__ == '__main__':
     ts_labels = []
     for xl in xls:
         ts_vec, ts_label = make_input(xlsx=xl.filename, sheetnames=None,col=None,
-                                                min_row=128*80+1,fft_N=128, sample_cnt=20,
-                                                label=xl.label,normalizing='01', log=False)
+                                                min_row=128*80+1,fft_N=N, sample_cnt=20,
+                                                label=xl.label,normalizing=None, log=False,read_N=N)
         map(ts_vecs.append, ts_vec)
         ts_labels += ts_label
+    scale_zero_one(np.array(ts_vecs))
 
     ts_vecs_rand, ts_labels_rand = [], []
     for i, j in random_input_iter(ts_vecs, ts_labels):
