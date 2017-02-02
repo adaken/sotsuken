@@ -20,7 +20,14 @@ class Frame(tk.Frame):
         self.create_menu()
         self.create_kml_widgets()
 
-    def create_menu(self):
+    """
+    正直、実用的なのはKMLのGUIくらいなので、
+    SVM・SOMに関してはあまり重要ではないと思われる。
+    そもそもこのTkinterは単純な機能しか作れなさそうなので、
+    もしGUI作成することになったら頑張るか他を検討してみて下さい。。。
+    あと色々中途半端な修正で終わってしまったので無駄が多い。
+    """
+    def create_menu(self): #ウィンドウ上部のメニュー
         self.menu = tk.Menu(root)
         root.configure(menu=self.menu)
         self.menu.add_command(label='KML', command=self.check_frame_kml)
@@ -28,9 +35,14 @@ class Frame(tk.Frame):
         self.menu.add_command(label='SOM', command=self.check_frame_som)
 
     def check_frame_svm(self):
-        if self.f1.winfo_exists() == 1:
-            self.f1.destroy()
-            self.create_svm_widgets()
+        """
+        それぞれの機能のウィジェットをフレーム(self.f1)の中に格納して分けて、
+        メニューでそのフレームを貼り付ける形になってます。
+        フレームを削除してから貼り付けしないと次々と増えてっちゃう。
+        """
+        if self.f1.winfo_exists() == 1: #ウィンドウにフレームが存在しているか確認
+            self.f1.destroy()           #存在していたらフレームを削除
+            self.create_svm_widgets()   #ここではsvmのフレームを貼り付け
         else:
             self.create_svm_widgets()
     def check_frame_kml(self):
@@ -51,16 +63,15 @@ class Frame(tk.Frame):
 
         # フレーム(タイトル)
         self.f1=tk.LabelFrame(root, relief='ridge', width=800, height=300, text='KML', labelanchor=tk.N,
-                           borderwidth=4, font=('times',30), bg='#fffafa')
+                              borderwidth=4, font=('times',30), bg='#fffafa')
         # ラベルフレーム(lf)
         lf_files=tk.LabelFrame(self.f1, text='アニメーションで表示したいファイルを選択', labelanchor=tk.NW, bg='#fffafa')
 
         # ボタン(b)
         b_select_files = tk.Button(self.f1, text='ファイル選択', relief='raised',font=('times',10), bg='#fffafa', fg='#000000', borderwidth=4,
-                            command = self.select_kml_files)
-
+                                   command = self.select_kml_files)
         b_run = tk.Button(self.f1, text = '実行', relief='raised',font=('times',10), bg='#fffafa', fg='#000000', borderwidth=4,
-                            command = self.run_make_kml)
+                          command = self.run_make_kml)
 
         # ラベル(filenames)
         self.filenames_buff = [tk.StringVar() for i in xrange(5)]
@@ -75,10 +86,8 @@ class Frame(tk.Frame):
 
         # ウィジェットの配置
         lf_files.pack()
-        b_select_files.pack(pady=10)
+        b_select_files.pack(pady=10) #.packで配置、padyはウィジェットの上下の余白の値
         b_run.pack(pady=5)
-        #self.select_button.grid(row=6, column=0, pady=5)
-        #self.kml_button.grid(row=7, column=0, pady=5)
 
         self.f1.pack()
     def create_svm_widgets(self):
@@ -135,7 +144,7 @@ class Frame(tk.Frame):
         lf_filename.place(relx=0.1, rely=0.1)
         lf_button.place(relx=0.9, rely=0.16)
         self.f1.pack()
-    def create_som_widgets(self):
+    def create_som_widgets(self): #buffとf1以外self取れる
         """somのウィジェット"""
         #フレーム
         self.f1 = tk.LabelFrame(root, relief = 'ridge', width=800, height=300, text='SOM', labelanchor=tk.N,
@@ -244,7 +253,7 @@ class Frame(tk.Frame):
 
             print "completed!"
 
-            #GoogleEarthで表示
+            #GoogleEarthを起動し、作成されたファイルを表示
             #sb.Popen(["C:\Program Files (x86)\Google\Google Earth\client\googleearth.exe", kml])
 
             self.after(500, self.change_complete)
@@ -252,7 +261,7 @@ class Frame(tk.Frame):
         text1 = ["Completed!"]*5
         for i, filename in zip(xrange(len(self.filenames_buff)), text1):
             self.filenames_buff[i].set(filename)
-    def replace_ext(self, filename, extension):
+    def replace_ext(self, filename, extension): #拡張子変更
         assert filename.find('.') is not -1
         for i in range(len(filename), 0, -1):
             c = filename[i-1]
@@ -267,7 +276,7 @@ class Frame(tk.Frame):
 
 
 
-    def select_svm_fileA(self):
+    def select_svm_fileA(self): #ファイル選択
         filenameA=tkfd.askopenfilename(filetypes=self.fTyp_xlsx, initialdir=self.iDir)
         self.filenameA_buff.set(filenameA)
     def select_svm_fileB(self):
