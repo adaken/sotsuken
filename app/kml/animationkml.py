@@ -24,6 +24,11 @@ class KmlConfig(object):
             False: kmlファイルを作成
             kmzの場合は'icon'に指定したファイルがkmzに埋め込まれる
             kmlの場合は'icon'に指定したパスのみがkmlに埋め込まれる
+
+        :param hotspot : simplekml.HotSpot, default: None
+            アイコンの中心の位置とか
+            Noneの場合はHotSpot(x=0, xunits=sk.Units.fraction,
+                                y=0, yunits=sk.Units.fraction)
         """
 
         self.iconscale = iconscale
@@ -113,7 +118,7 @@ class AnimationKml(object):
     @classmethod
     def _parse_conf(self, kml_cnf):
         if kml_cnf is None:
-            return KmlConfig()
+            return KmlConfig() # デフォルトの設定を返す
         return kml_cnf
 
     @classmethod
@@ -138,10 +143,12 @@ class SimpleAnimationKml(AnimationKml):
 
         See also AnimationKml.__init__()
         """
+
+        # 基底抽象クラスを継承しているので、親クラスのコンストラタでも初期化できる
         super(SimpleAnimationKml, self).__init__(times, lats, lons)
         if icon is None:
             icon = u'http://maps.google.com/mapfiles/kml/shapes/man.png'
-        self._validate_res_available(icon)
+        self._validate_res_available(icon) # アイコンが利用可能かどうかチェック
         self.icon = icon
 
     def to_animatable(self, savename, kml_cnf):
@@ -151,17 +158,18 @@ class SimpleAnimationKml(AnimationKml):
         """
 
         cnf = self._parse_conf(kml_cnf)
-        kml = sk.Kml()
+        kml = sk.Kml() # kmlインスタンス生成
 
         # <IconStyle>
         iconstyle = sk.IconStyle(icon=sk.Icon(href=self.icon),
                                  scale=cnf.iconscale, hotspot=cnf.hotspot)
         sharedstyle = sk.Style(iconstyle=iconstyle) # 共通の<Style>
 
+        # 時間、緯度、経度を返すイテレータ
         iter_ = self._format_times(self.times), self.lats, self.lons
+        # イテレータの範囲を指定(islice()の引数)
         range_ = 0, None, cnf.sampling_step
         for i, (t, lat, lon) in enumerate(islice(zip(*iter_), *range_)):
-
             # <Placemark> <Point> <coordinates>
             pnt = kml.newpoint(coords=[(lon, lat)])
             pnt.timestamp.when = t # <TimeStamp> <when>
@@ -169,7 +177,7 @@ class SimpleAnimationKml(AnimationKml):
         else:
             print "sum length of kml data:", i + 1
 
-        self._save(kml, savename, cnf.kmz)
+        self._save(kml, savename, cnf.kmz) # 保存
 
 class ActionAnimationKml(AnimationKml):
     """アクションによりアニメーションの変化するKmlを作成するクラス"""
@@ -189,10 +197,12 @@ class ActionAnimationKml(AnimationKml):
         See also AnimationKml.__init__()
         """
 
+        # 親クラスのコンストラクタで初期化
         super(ActionAnimationKml, self).__init__(times, lats, lons)
 
         # アイコン初期化
         if act_icons is None:
+            # iteratorだと下記で消費されてしまうためlistに変換
             self.acts = list(acts)
             act_icons = {a: drow_random_color_circle(
                 (16, 16), T('{}.png'.format(a))) for a in set(self.acts)}
@@ -208,7 +218,7 @@ class ActionAnimationKml(AnimationKml):
         """
 
         cnf = self._parse_conf(kml_cnf)
-        kml = sk.Kml()
+        kml = sk.Kml() # kmlインスタンス生成
 
         # <IconStyle>
         sharedstyles = {a:sk.Style(sk.IconStyle(icon=sk.Icon(href=ic),
@@ -216,7 +226,9 @@ class ActionAnimationKml(AnimationKml):
                                                   hotspot=cnf.hotspot))
                         for a, ic in self.act_icons.items()}
 
+        # 時間、緯度、軽度、アクションのイテレータ
         iter_ = self._format_times(self.times), self.lats, self.lons, self.acts
+        # islice()の引数
         range_ = 0, None, cnf.sampling_step
         for i, (t, lat, lon, act) in enumerate(islice(zip(*iter_), *range_)):
             # <Placemark> <Point> <coordinates>
@@ -226,4 +238,4 @@ class ActionAnimationKml(AnimationKml):
         else:
             print "sum length of kml data:", i + 1
 
-        self._save(kml, savename, cnf.kmz)
+        self._save(kml, savename, cnf.kmz) # 保存

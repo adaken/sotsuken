@@ -456,8 +456,7 @@ class Frame(tk.Frame):
         ln3=self.labelname3_buff.get()
         ln4=self.labelname4_buff.get()
         e_tc=self.e_train_cnt_buff.get()
-        som_json([
-            (file1),
+        som_jsoapp.test.som_actionfile1),
             (file2),
             (file3),
             (file4)

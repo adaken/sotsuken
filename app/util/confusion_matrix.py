@@ -5,13 +5,16 @@ class ConfusionMatrix(object):
     """コンフュージョン・マトリクス"""
 
     def __init__(self, n):
-        self.sum_matrix = np.zeros([n]*2, dtype=np.float64)
+        """コンストラクタ"""
+        self.sum_matrix = np.zeros([n]*2, dtype=np.float64) # 零行列で初期化
 
     def __call__(self, conf_matrix):
+        """update()へのアクセサ"""
         return self.update(conf_matrix)
 
     def update(self, conf_matrix):
-        self.matrix = conf_matrix
+        """混同行列を更新"""
+        self.matrix = conf_matrix # 実引数で混同行列を更新
         self.sum_matrix += self.matrix
         self.tp = np.diag(self.matrix) # TP(対角項)
         return self
