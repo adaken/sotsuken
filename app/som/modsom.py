@@ -112,7 +112,7 @@ class SOM:
 
         :param n : int
             学習ループの回数
-            入力データ数とnの差が大きいとオーバーフローする
+            入力データ数と'n'の差が大きいとオーバーフローする
 
         :return map_ : ndarray
             作成されたマップ(2次元配列)
@@ -140,8 +140,8 @@ class SOM:
         for i in xrange(n):
             for j in random_idx_gen(self.input_num):
                 data = self.input_layer[j] # 入力ベクトル
-                win_idx = self._get_winner_node(data)
-                self._update(win_idx, data, i)
+                win_idx = self._get_winner_node(data) # BMUの座標
+                self._update(win_idx, data, i) # 近傍を更新
                 loop_p += 1
                 if loop_p/loop_*100%10==0:
                     print "%d%%"%(loop_p/loop_*100),
@@ -156,9 +156,9 @@ class SOM:
         for i, data in enumerate(self.input_layer):
             label = self.labels[i]
             win_idx = self._get_winner_node(data)
-            x, y = win_idx # 出力画像に合わせるため相対座標に変換
+            y, x = win_idx # 出力画像に合わせるため相対座標に変換
             labels.append(label)
-            coords.append((y, x))
+            coords.append((x, y))
         return labels, coords
 
     def _make_returns(self):
@@ -194,7 +194,7 @@ class SOM:
     def _update(self, bmu, data, i):
         """ノードを更新"""
 
-        dis = np.linalg.norm(self.index_map - bmu, axis=1) # 勝者ノードとの距離
+        dis = np.linalg.norm(self.index_map - bmu, axis=1) # BMUとの距離
         L = self._learning_rate(i)                         # 学習率係数
         S = self._learning_radius(i, dis)                  # 学習半径
         self.output_layer += L * S[:, np.newaxis] * (data - self.output_layer)
@@ -245,7 +245,7 @@ class SOM:
             # 近傍ノードの添字
             n = imap[i_start:i_stop, j_start:j_stop]
             n = n[(n != [i, j]).any(axis=2)] # 自身の添字を除く
-            n_i, n_j = n.T
+            n_i, n_j = n.T # 転置して2つのリストに
 
             # ユークリッド距離の平均
             return np.mean(np.linalg.norm(map_[n_i, n_j] - map_[i, j], axis=1))
