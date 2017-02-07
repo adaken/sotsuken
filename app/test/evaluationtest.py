@@ -3,7 +3,7 @@
 import os
 from app import R, L, T
 from app.util import *
-from app.kml.kmlcreator import make_kml_with_acts, make_kml_with_acts2
+from app.kml.kmlcreator import make_kml_with_acts
 from app.kml.animationkml import AnimationKml, KmlConfig
 
 
@@ -114,7 +114,7 @@ def test2():
         X, subX = acc
         print len(times), len(lats), len(lons), len(X), len(subX)
         anime_kml = AnimationKml(times, lats, lons)
-        make_kml_with_acts2(T('evaltest2/{}_{}-model_{}-vec_{}p-fft_{}-ovlap.kmz'
+        make_kml_with_acts(T('evaltest2/{}_{}-model_{}-vec_{}p-fft_{}-ovlap.kmz'
                              .format(i, modelname, read_N, fft_N, overlap),
                              mkdir=True),
                             anime_kml, kml_cnf=cnf, X=X,subX=subX,
