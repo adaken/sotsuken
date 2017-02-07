@@ -7,6 +7,7 @@ if __name__ == '__main__':
     from chainer import cuda, Variable, FunctionSet, optimizers
     import chainer.functions as F
     import sys
+    # 編集しました
 
     plt.style.use('ggplot')
 
